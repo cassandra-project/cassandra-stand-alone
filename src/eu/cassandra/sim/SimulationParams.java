@@ -78,6 +78,16 @@ public class SimulationParams
 
   }
 
+  public SimulationParams(String responseType, String name, String locationInfo, int duration, int startDateDay,  int startDateMonth, int startDateYear)
+  {
+	  this.responseType = responseType;
+	  this.name = name;
+	  this.locationInfo = locationInfo;
+	  
+	  simCalendar = new SimCalendar(startDateDay, startDateMonth, startDateYear, duration);
+  }
+  
+  
   public SimCalendar getSimCalendar ()
   {
     return simCalendar;

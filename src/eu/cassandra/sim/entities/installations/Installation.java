@@ -50,8 +50,8 @@ public class Installation extends Entity {
 	private ThermalModule tm;
 	
 	public static class Builder {
-    	// Required variables
-    	private final String id;
+	    	// Required variables
+	    	private final String id;
         private final String name;
         private final String description;
         private final String type;
@@ -64,7 +64,7 @@ public class Installation extends Entity {
         private double currentPowerQ = 0.0;
         
         public Builder(String aid, String aname, String adescription, String atype) {
-        	id = aid;
+        		id = aid;
 			name = aname;
 		    description = adescription;
 		    type = atype;
@@ -88,7 +88,7 @@ public class Installation extends Entity {
     }
     
     private Installation(Builder builder) {
-    	id = builder.id;
+    		id = builder.id;
         name = builder.name;
         description = builder.description;
         type = builder.type;

@@ -28,6 +28,7 @@ import com.mongodb.DB;
 import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
+import com.mongodb.util.JSON;
 
 import eu.cassandra.server.mongo.MongoPricingPolicy;
 import eu.cassandra.sim.utilities.Constants;
@@ -121,8 +122,8 @@ public class PricingPolicy {
 				BasicDBList tzs = (BasicDBList)dbo.get("offpeak");
 				DBObject tz;
 				offpeaks = new ArrayList<Offpeak>();
-				for(int i = 0; i < levelsObj2.size(); i++) {
-					levelObj2 =  (DBObject)levelsObj2.get(i);
+				for(int i = 0; i < tzs.size(); i++) {
+					levelObj2 =  (DBObject)tzs.get(i);
 					String from = levelObj2.get("from").toString();
 					String to = levelObj2.get("to").toString();
 					Offpeak o = new Offpeak(from, to);
@@ -302,6 +303,62 @@ public class PricingPolicy {
 		return false;
 	}
 
+	public static PricingPolicy constructPricingPolicy(String pricingType, int billingCycle, double fixedCharge, double offpeakPrice,
+			int contractedCapacity, double energyPrice, double powerPrice, double maximumPower, int fixedCost, double additionalCost, 
+			double contractedEnergy, String[] froms, String[] tos, double[] prices, double[] levels) throws ParseException
+	{
+		String message = "'type':" + "'" + pricingType + "', 'billingCycle':'" + billingCycle + "', 'fixedCharge':'" + fixedCharge + "',";
+		
+		switch(pricingType) {
+		case "TOUPricing":
+			message += "'timezones': [";
+			for(int i = 0; i < froms.length; i++)
+				message += "{'starttime': '" + froms[i] + "', 'endtime': '"  + tos[i] + "', 'price': '" + prices[i] + "'},";
+			if (message.endsWith(",")) 
+				message = message.substring(0,message.length()-1);
+			message += "]";
+			break;
+		case "ScalarEnergyPricing":
+			message += "'levels': [";
+			for(int i = 0; i < levels.length; i++)
+				message += "{'level': '" + levels[i] + "', 'price': '" + prices[i] + "'},";
+			if (message.endsWith(",")) 
+				message = message.substring(0,message.length()-1);
+			message += "]";
+			break;
+		case "ScalarEnergyPricingTimeZones":
+			message += "'levels': [";
+			for(int i = 0; i < levels.length; i++)
+				message += "{'level': '" + levels[i] + "', 'price': '" + prices[i] + "'},";
+			if (message.endsWith(",")) 
+				message = message.substring(0,message.length()-1);
+			message += "],";
+			message += "'offpeak': [";
+			for(int i = 0; i < froms.length; i++)
+				message += "{'from': '" + froms[i] + "', 'to': '"  + tos[i] + "'},";
+			if (message.endsWith(",")) 
+				message = message.substring(0,message.length()-1);
+			message += "], 'offpeakPrice': '" + offpeakPrice + "'";
+			break;
+		case "EnergyPowerPricing":
+			message += "'contractedCapacity':" + "'" + contractedCapacity + "', 'energyPrice':'" + energyPrice + "', 'powerPrice':'" + powerPrice + "'";
+			break;
+		case "MaximumPowerPricing":
+			message += "'maximumPower':" + "'" + maximumPower + "', 'energyPrice':'" + energyPrice + "', 'powerPrice':'" + powerPrice + "'";
+			break;
+		case "AllInclusivePricing":
+			message += "'fixedCost':" + "'" + fixedCost + "', 'additionalCost':'" + additionalCost + "', 'contractedEnergy':'" + contractedEnergy + "'";
+		default:
+			break;
+		}
+  		
+		if (message.endsWith(",")) 
+			message = message.substring(0,message.length()-1);
+  		DBObject lala = (DBObject) JSON.parse("{"+message+"}");
+  		
+  		return new PricingPolicy(lala);
+	}
+	
 	/**
 	 * @param args
 	 * @throws MongoException 

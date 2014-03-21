@@ -77,7 +77,7 @@ public class Simulation implements Runnable {
 	private int tick;
 
 	private int endTick;
-	
+
 	private int mcruns;
 	
 	private double co2;
@@ -87,7 +87,7 @@ public class Simulation implements Runnable {
 	private SimulationParams simulationWorld;
 	
 	private PricingPolicy pricing;
-	
+
 	private PricingPolicy baseline_pricing;
 	
 	private String scenario;
@@ -109,11 +109,31 @@ public class Simulation implements Runnable {
 	public int getCurrentTick () {
 		return tick;
 	}
-
+	
+	public void setEndTick(int endTick) {
+		this.endTick = endTick;
+	}
+	
 	public int getEndTick () {
 		return endTick;
 	}
   
+	public int getMcruns() {
+		return mcruns;
+	}
+
+	public double getCo2() {
+		return co2;
+	}
+
+	public void setMcruns(int mcruns) {
+		this.mcruns = mcruns;
+	}
+
+	public void setCo2(double co2) {
+		this.co2 = co2;
+	}
+
 	public Simulation(String ascenario, String adbname, String aresources_path, int seed) {
 		scenario = ascenario;
 		dbname = adbname;
@@ -128,11 +148,42 @@ public class Simulation implements Runnable {
 		}
   		
 	}
+	
+	public Simulation(String aresources_path, int seed) {
+		resources_path = aresources_path;
+		
+		if(seed > 0) {
+			orng = new ORNG(seed);
+		} else {
+			orng = new ORNG();
+		}
+  		
+	}
   
   	public SimulationParams getSimulationWorld () {
   		return simulationWorld;
   	}
+  	
+  	public void setSimulationWorld (SimulationParams simParams) {
+  		simulationWorld = simParams;
+  	}
+  	
+  	public PricingPolicy getPricing() {
+		return pricing;
+	}
 
+	public PricingPolicy getBaseline_pricing() {
+		return baseline_pricing;
+	}
+
+	public void setPricing(PricingPolicy pricing) {
+		this.pricing = pricing;
+	}
+
+	public void setBaseline_pricing(PricingPolicy baseline_pricing) {
+		this.baseline_pricing = baseline_pricing;
+	}
+	
   	public void run () {
   		DBObject query = new BasicDBObject();
 		query.put("_id", new ObjectId(dbname));
