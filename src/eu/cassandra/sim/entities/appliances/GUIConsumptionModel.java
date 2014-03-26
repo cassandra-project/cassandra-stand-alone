@@ -24,7 +24,7 @@ import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
 import eu.cassandra.server.api.exceptions.BadParameterException;
-import eu.cassandra.sim.entities.appliances.ConsumptionModel.Tripplet;
+import eu.cassandra.sim.entities.appliances.Tripplet;
 import eu.cassandra.sim.utilities.Utils;
 
 public class GUIConsumptionModel {

@@ -21,7 +21,7 @@ import eu.cassandra.server.api.exceptions.BadParameterException;
 import eu.cassandra.server.mongo.MongoAppliances;
 import eu.cassandra.sim.PricingPolicy;
 import eu.cassandra.sim.entities.Entity;
-import eu.cassandra.sim.entities.appliances.ConsumptionModel.Tripplet;
+import eu.cassandra.sim.entities.appliances.Tripplet;
 import eu.cassandra.sim.entities.installations.Installation;
 import eu.cassandra.sim.entities.people.Activity;
 import eu.cassandra.sim.utilities.Constants;

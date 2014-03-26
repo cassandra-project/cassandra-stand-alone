@@ -33,7 +33,7 @@ public class DBConn {
 
 	private static String DB_HOST = "localhost";
 
-	private static DBConn dbConn = new DBConn();
+	private static DBConn dbConn = new DBConn(true);
 
 	private static HashMap<String,DB> dbRuns = new HashMap<String,DB>();
 
@@ -52,6 +52,17 @@ public class DBConn {
 		} catch (MongoException e) {
 			e.printStackTrace();
 		} catch (NamingException e) {
+			e.printStackTrace();
+		}
+		db = m.getDB(DB_NAME);
+	}
+	
+	private DBConn(boolean isStandAlone) {
+		try {
+			m = new Mongo(DB_HOST);
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		} catch (MongoException e) {
 			e.printStackTrace();
 		}
 		db = m.getDB(DB_NAME);

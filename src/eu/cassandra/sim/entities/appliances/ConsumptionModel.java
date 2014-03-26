@@ -18,6 +18,7 @@ package eu.cassandra.sim.entities.appliances;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Vector;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
@@ -53,7 +54,7 @@ public class ConsumptionModel extends Entity {
 	private int[] patternDuration;
 	
 	/** An array storing the consumption patterns */
-	private ArrayList[] patterns;
+	private ArrayList<Tripplet>[] patterns;
 	
 	private String model;
 	
@@ -63,6 +64,24 @@ public class ConsumptionModel extends Entity {
 		model = amodel;
 		DBObject modelObj = (DBObject) JSON.parse(model);
 		init(modelObj, type);
+	}
+	
+	public ConsumptionModel(int outerN, int[] n, ArrayList<Tripplet>[] patterns) {
+		this.outerN = outerN;
+		this.patterns = patterns;
+		this.n = n;
+		this.patterns = patterns;
+		this.patternN = n.length;
+		patternDuration = new int[patternN];
+
+		for(int i = 0; i < patternN; i++) {
+			int tripplets = patterns[i].size();
+			for(int j = 0; j < tripplets; j++) {
+				Tripplet t = patterns[i].get(j);
+				patternDuration[i] += t.d; 
+				totalDuration += (n[i] * t.d);
+			}
+		}
 	}
 	
 	public void init (DBObject modelObj, String type) throws BadParameterException {
@@ -162,15 +181,6 @@ public class ConsumptionModel extends Entity {
 	public int getPatternDuration(int i) { return patternDuration[i]; }
 	
 	public ArrayList<Tripplet> getPattern(int i) { return patterns[i]; }
-	
-	class Tripplet {
-		double v, s;
-		int d;
-		public Tripplet() {
-			v = s = 0;
-			d = 0;
-		}
-	}
 	
 	public static void main(String[] args) throws BadParameterException {
 		String s = "{ \"n\" : 0, \"params\" : [{ \"n\" : 1, \"values\" : [ {\"p\" : 140.0, \"d\" : 20, \"s\": 0.0}, {\"p\" : 117.0, \"d\" : 18, \"s\": 0.0}, {\"p\" : 0.0, \"d\" : 73, \"s\": 0.0}]},{ \"n\" : 1, \"values\" : [ {\"p\" : 14.0, \"d\" : 20, \"s\": 0.0}, {\"p\" : 11.0, \"d\" : 18, \"s\": 0.0}, {\"p\" : 5.0, \"d\" : 73, \"s\": 0.0}]}]}";
