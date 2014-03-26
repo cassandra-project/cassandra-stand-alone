@@ -418,14 +418,6 @@ public class Simulation implements Runnable {
   		
   	}
 	
-	public PricingPolicy getBaseline_pricing() {
-		return baseline_pricing;
-	}
-  
-	public double getCo2() {
-		return co2;
-	}
-
 	public int getCurrentTick () {
 		return tick;
 	}
@@ -438,26 +430,10 @@ public class Simulation implements Runnable {
 		return installations.get(index);
 	}
 
-	public Collection<Installation> getInstallations () {
-		return installations;
-	}
-
-	public int getMcruns() {
-		return mcruns;
-	}
-	
 	public ORNG getOrng() {
 		return orng;
 	}
   
-  	public PricingPolicy getPricing() {
-		return pricing;
-	}
-  	
-  	public PriorityBlockingQueue<Event> getQueue() {
-		return queue;
-	}
-  	
   	public SimulationParams getSimulationWorld () {
   		return simulationWorld;
   	}
@@ -949,42 +925,6 @@ public class Simulation implements Runnable {
 //  				DBConn.getConn().getCollection(MongoRuns.COL_RUNS).update(query, objRun);
 //  			}
   		}
-  	}
-
-	public void setBaseline_pricing(PricingPolicy baseline_pricing) {
-		this.baseline_pricing = baseline_pricing;
-	}
-
-	public void setCo2(double co2) {
-		this.co2 = co2;
-	}
-
-	public void setEndTick(int endTick) {
-		this.endTick = endTick;
-	}
-	
-  	public void setInstallations(Vector<Installation> installations) {
-		this.installations = installations;
-	}
-  	
-  	public void setMcruns(int mcruns) {
-		this.mcruns = mcruns;
-	}
-
-  	public void setOrng(ORNG orng) {
-		this.orng = orng;
-	}
-
-  	public void setPricing(PricingPolicy pricing) {
-		this.pricing = pricing;
-	}
-  	
-  	public void setQueue(PriorityBlockingQueue<Event> queue) {
-		this.queue = queue;
-	}
-  	
-  	public void setSimulationWorld (SimulationParams simParams) {
-  		simulationWorld = simParams;
   	}
 
   	public void setup(boolean jump) throws Exception {
