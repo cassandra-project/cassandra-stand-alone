@@ -143,7 +143,31 @@ public class Installation extends Entity {
     	}
     }
     
-    public void addAppliancesKPIs(MongoResults m, double mcrunsRatio, double co2) {
+//    public void addAppliancesKPIs(MongoResults m, double mcrunsRatio, double co2) {
+//    	for(Appliance appliance : getAppliances()) {
+//    		m.addAppKPIs(appliance.getId(), 
+//    			appliance.getMaxPower() * mcrunsRatio, 
+//    			appliance.getAvgPower() * mcrunsRatio, 
+//    			appliance.getEnergy() * mcrunsRatio, 
+//    			appliance.getCost() * mcrunsRatio,
+//    			appliance.getEnergy() * co2 * mcrunsRatio);
+//    	}
+//    }
+//    
+//    public void addActivitiesKPIs(MongoResults m, double mcrunsRatio, double co2) {
+//    	for(Person person : getPersons()) {
+//    		for(Activity activity: person.getActivities()) {
+//	    		m.addActKPIs(activity.getId(), 
+//	    			activity.getMaxPower() * mcrunsRatio, 
+//	    			activity.getAvgPower() * mcrunsRatio, 
+//	    			activity.getEnergy() * mcrunsRatio, 
+//	    			activity.getCost() * mcrunsRatio,
+//	    			activity.getEnergy() * co2 * mcrunsRatio);
+//    		}
+//    	}
+//    }
+    
+    public void addAppliancesKPIs(eu.cassandra.sim.standalone.DerbyResults m, double mcrunsRatio, double co2) {
     	for(Appliance appliance : getAppliances()) {
     		m.addAppKPIs(appliance.getId(), 
     			appliance.getMaxPower() * mcrunsRatio, 
@@ -154,7 +178,7 @@ public class Installation extends Entity {
     	}
     }
     
-    public void addActivitiesKPIs(MongoResults m, double mcrunsRatio, double co2) {
+    public void addActivitiesKPIs(eu.cassandra.sim.standalone.DerbyResults m, double mcrunsRatio, double co2) {
     	for(Person person : getPersons()) {
     		for(Activity activity: person.getActivities()) {
 	    		m.addActKPIs(activity.getId(), 

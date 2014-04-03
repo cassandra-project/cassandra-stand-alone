@@ -19,8 +19,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.sql.ResultSet;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.Vector;
@@ -34,17 +34,13 @@ import org.bson.types.ObjectId;
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 
 import eu.cassandra.server.mongo.MongoActivityModels;
 import eu.cassandra.server.mongo.MongoDistributions;
-import eu.cassandra.server.mongo.MongoResults;
-import eu.cassandra.server.mongo.MongoRuns;
 import eu.cassandra.server.mongo.util.DBConn;
 import eu.cassandra.sim.entities.Entity;
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
-import eu.cassandra.sim.entities.external.ThermalModule;
 import eu.cassandra.sim.entities.installations.Installation;
 import eu.cassandra.sim.entities.people.Activity;
 import eu.cassandra.sim.entities.people.Person;
@@ -53,6 +49,7 @@ import eu.cassandra.sim.math.GaussianMixtureModels;
 import eu.cassandra.sim.math.Histogram;
 import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.Uniform;
+import eu.cassandra.sim.standalone.DerbyResults;
 import eu.cassandra.sim.utilities.Constants;
 import eu.cassandra.sim.utilities.ORNG;
 import eu.cassandra.sim.utilities.Utils;
@@ -63,7 +60,7 @@ import eu.cassandra.sim.utilities.Utils;
  * @author Kyriakos C. Chatzidimitriou (kyrcha [at] iti [dot] gr)
  * 
  */
-public class Simulation implements Runnable {
+public class Simulation { // implements Runnable {
 	
 	static Logger logger = Logger.getLogger(Simulation.class);
 
@@ -130,7 +127,7 @@ public class Simulation implements Runnable {
 	
 	private Vector<Installation> installations;
   
-	private MongoResults m;
+	private DerbyResults m;
 
 	private int mcruns;
 	
@@ -152,6 +149,7 @@ public class Simulation implements Runnable {
 	
 	private String setup;
 	
+/*	
 	public Simulation(String aresources_path, int seed) {
 		resources_path = aresources_path;
 		
@@ -162,6 +160,7 @@ public class Simulation implements Runnable {
 		}
   		
 	}
+*/	
 	
 	public Simulation(String aresources_path, String adbname, int seed) {
 		
@@ -174,7 +173,7 @@ public class Simulation implements Runnable {
 			orng = new ORNG();
 		}
 		
-		m = new MongoResults(dbname);
+		m = new DerbyResults(dbname);
 		m.createIndexes();
   		
 	}
@@ -183,7 +182,7 @@ public class Simulation implements Runnable {
 		scenario = ascenario;
 		dbname = adbname;
 		resources_path = aresources_path;
-		m = new MongoResults(dbname);
+		m = new DerbyResults(dbname);
 		m.createIndexes();
 		
 		if(seed > 0) {
@@ -211,16 +210,16 @@ public class Simulation implements Runnable {
   				double[] act_exp = activity.calcExpPower();
   				for(int i = 0; i < act_exp.length; i++) {
   	  				inst_exp[i] += act_exp[i];
-  	  				m.addExpectedPowerTick(i, activity.getId(), act_exp[i], 0, MongoResults.COL_ACTRESULTS_EXP);
+  	  				m.addExpectedPowerTick(i, activity.getId(), act_exp[i], 0, DerbyResults.COL_ACTRESULTS_EXP);
   	  			}
   			}
   			for(int i = 0; i < inst_exp.length; i++) {
   				aggr_exp[i] += inst_exp[i];
-  				m.addExpectedPowerTick(i, installation.getId(), inst_exp[i], 0, MongoResults.COL_INSTRESULTS_EXP);
+  				m.addExpectedPowerTick(i, installation.getId(), inst_exp[i], 0, DerbyResults.COL_INSTRESULTS_EXP);
   			}
   		}
   		for(int i = 0; i < aggr_exp.length; i++) {
-  			m.addExpectedPowerTick(i, "aggr", aggr_exp[i], 0, MongoResults.COL_AGGRRESULTS_EXP);
+  			m.addExpectedPowerTick(i, "aggr", aggr_exp[i], 0, DerbyResults.COL_AGGRRESULTS_EXP);
 				System.out.println(aggr_exp[i]);
 			}
   		System.out.println("End exp power calc.");
@@ -438,7 +437,8 @@ public class Simulation implements Runnable {
   		return simulationWorld;
   	}
 
-	public void run () {
+/*	
+ 	public void run () {
   		DBObject query = new BasicDBObject();
 		query.put("_id", new ObjectId(dbname));
 		DBObject objRun = DBConn.getConn().getCollection(MongoRuns.COL_RUNS).findOne(query);
@@ -493,10 +493,9 @@ public class Simulation implements Runnable {
   	  					top = queue.peek();
   	  				}
 
-					/*
-					 *  Calculate the total power for this simulation step for all the
-					 *  installations.
-					 */
+//					 *  Calculate the total power for this simulation step for all the
+//					 *  installations.
+ 
 					float sumP = 0;
 					float sumQ = 0;
 					int counter = 0;
@@ -682,6 +681,7 @@ public class Simulation implements Runnable {
   			}
   		}
   	}
+  	*/
 
 	public void runStandAlone () {
   		try {
@@ -760,7 +760,7 @@ public class Simulation implements Runnable {
 		  						installation.getId(), 
 		  						p * mcrunsRatio, 
 		  						q * mcrunsRatio, 
-		  						MongoResults.COL_INSTRESULTS);
+		  						DerbyResults.COL_INSTRESULTS);
 		  				sumP += p;
 		  				sumQ += q;
 		  				avgPPowerPerHour += p;
@@ -799,17 +799,17 @@ public class Simulation implements Runnable {
 		  			m.addAggregatedTickResult(tick, 
 		  					sumP * mcrunsRatio, 
 		  					sumQ * mcrunsRatio, 
-		  					MongoResults.COL_AGGRRESULTS);
+		  					DerbyResults.COL_AGGRRESULTS);
 		  			tick++;
 		  			if(tick % Constants.MIN_IN_HOUR == 0) {
 		  				m.addAggregatedTickResult((tick/Constants.MIN_IN_HOUR), 
 		  						(avgPPowerPerHour/Constants.MIN_IN_HOUR) * mcrunsRatio, 
 		  						(avgQPowerPerHour/Constants.MIN_IN_HOUR) * mcrunsRatio, 
-		  						MongoResults.COL_AGGRRESULTS_HOURLY);
+		  						DerbyResults.COL_AGGRRESULTS_HOURLY);
 		  				m.addAggregatedTickResult((tick/Constants.MIN_IN_HOUR), 
 		  						(avgPPowerPerHour) * mcrunsRatio, 
 		  						(avgQPowerPerHour) * mcrunsRatio, 
-		  						MongoResults.COL_AGGRRESULTS_HOURLY_EN);
+		  						DerbyResults.COL_AGGRRESULTS_HOURLY_EN);
 		  				avgPPowerPerHour = 0;
 		  				avgQPowerPerHour = 0;
 		  				counter = 0;
@@ -818,12 +818,12 @@ public class Simulation implements Runnable {
 			  						installation.getId(),
 			  						(avgPPowerPerHourPerInst[counter]/Constants.MIN_IN_HOUR) * mcrunsRatio, 
 			  						(avgQPowerPerHourPerInst[counter]/Constants.MIN_IN_HOUR) * mcrunsRatio, 
-			  						MongoResults.COL_INSTRESULTS_HOURLY);
+			  						DerbyResults.COL_INSTRESULTS_HOURLY);
 			  				m.addTickResultForInstallation((tick/Constants.MIN_IN_HOUR), 
 			  						installation.getId(),
 			  						(avgPPowerPerHourPerInst[counter]) * mcrunsRatio, 
 			  						(avgQPowerPerHourPerInst[counter]) * mcrunsRatio, 
-			  						MongoResults.COL_INSTRESULTS_HOURLY_EN);
+			  						DerbyResults.COL_INSTRESULTS_HOURLY_EN);
 			  				avgPPowerPerHourPerInst[counter] = 0;
 			  				avgQPowerPerHourPerInst[counter] = 0;
 			  				counter++;
@@ -851,7 +851,7 @@ public class Simulation implements Runnable {
   						billingCycleEnergyOffpeak,
   						tick,
   						cycleMaxPower);
-  	  			m.addKPIs(MongoResults.AGGR, 
+  	  			m.addKPIs(DerbyResults.AGGR, 
   	  					maxPower * mcrunsRatio, 
   	  					avgPower * mcrunsRatio, 
   	  					energy * mcrunsRatio, 
@@ -874,13 +874,16 @@ public class Simulation implements Runnable {
   			for(int i = 0; i < endTick; i++) {
   				row = String.valueOf(i);
   				for(Installation installation: installations) {
-  					DBObject tickResult = m.getTickResultForInstallation(i, 
+  					ResultSet tickResult = m.getTickResultForInstallation(i, 
   							installation.getId(),  
-  							MongoResults.COL_INSTRESULTS);
-  					double p = ((Double)tickResult.get("p")).doubleValue();
-  					double q = ((Double)tickResult.get("q")).doubleValue();
-  					row += "," + p;
-  	  				row += "," + q;
+  							DerbyResults.COL_INSTRESULTS);
+  					while (tickResult.next())
+  					{
+	  					double p = tickResult.getDouble(3);
+	  					double q = tickResult.getDouble(4);
+	  					row += "," + p;
+	  	  				row += "," + q;
+  					}	
   				}
   				fw.write(row+"\n");
   			}
@@ -927,9 +930,10 @@ public class Simulation implements Runnable {
   		}
   	}
 
-  	public void setup(boolean jump) throws Exception {
+/*  	
+   	public void setup(boolean jump) throws Exception {
   		installations = new Vector<Installation>();
-  		/* TODO  Change the Simulation Calendar initialization */
+  		// TODO  Change the Simulation Calendar initialization 
   		logger.info("Simulation setup started: " + dbname);
   		DBObject jsonScenario = (DBObject) JSON.parse(scenario);
   		DBObject scenarioDoc = (DBObject) jsonScenario.get("scenario");
@@ -963,42 +967,10 @@ public class Simulation implements Runnable {
   		}
   		logger.info("Simulation setup finished: " + dbname);
   	}
-  	
-  	public void setupStandalone(boolean jump, SimulationParams simulationWorld, 
-  			PricingPolicy pricing, PricingPolicy baseline_pricing, 
-  			int numOfDays, int mcruns, double co2, 
-  			String setup, Vector<Installation> installations) throws Exception {
-  		
-  		System.out.println("Simulation setup started");
-  		this.simulationWorld = simulationWorld;
-  		this.mcruns = mcruns;
-  		this.co2 = co2;
-  		this.pricing = pricing;
-  		this.baseline_pricing = baseline_pricing;
-  		this.numOfDays = numOfDays;
-  		this.setup = setup;
-  		
-  		endTick = Constants.MIN_IN_DAY * numOfDays;
-  		
-  		// Check type of setup
-  		if(setup.equalsIgnoreCase("static")) {
-  			staticSetupStandalone(installations);
-  		} else if(setup.equalsIgnoreCase("dynamic")) {
-  			System.err.println("Dynamic setup for scenarios not yet supported");
-//  			dynamicSetup(jsonScenario, jump);
-  		} else {
-  			throw new Exception("Problem with setup property!!!");
-  		}
-  		System.out.println("Simulation setup finished");
-  	}
-  	
-  	public void staticSetupStandalone (Vector<Installation> installations) throws Exception {
-	    int numOfInstallations = installations.size();
-	    queue = new PriorityBlockingQueue<Event>(2 * numOfInstallations);
-	    	this.installations = installations;
-	}
-  
-	public void staticSetup (DBObject jsonScenario) throws Exception {
+*/ 
+
+	/*	
+  	public void staticSetup (DBObject jsonScenario) throws Exception {
 	    int numOfInstallations = ((Integer)jsonScenario.get("instcount")).intValue();
 	    queue = new PriorityBlockingQueue<Event>(2 * numOfInstallations);
 	    for (int i = 1; i <= numOfInstallations; i++) {
@@ -1098,8 +1070,44 @@ public class Simulation implements Runnable {
 	    	}
 	    	installations.add(inst);
 	    }
-  }
-	
+  	}
+*/	
+  	
+	public void setupStandalone(boolean jump, SimulationParams simulationWorld, 
+  			PricingPolicy pricing, PricingPolicy baseline_pricing, 
+  			int numOfDays, int mcruns, double co2, 
+  			String setup, Vector<Installation> installations) throws Exception {
+  		
+  		System.out.println("Simulation setup started");
+  		this.simulationWorld = simulationWorld;
+  		this.mcruns = mcruns;
+  		this.co2 = co2;
+  		this.pricing = pricing;
+  		this.baseline_pricing = baseline_pricing;
+  		this.numOfDays = numOfDays;
+  		this.setup = setup;
+  		
+  		endTick = Constants.MIN_IN_DAY * numOfDays;
+  		
+  		// Check type of setup
+  		if(setup.equalsIgnoreCase("static")) {
+  			staticSetupStandalone(installations);
+  		} else if(setup.equalsIgnoreCase("dynamic")) {
+  			System.err.println("Dynamic setup for scenarios not yet supported");
+//  			dynamicSetup(jsonScenario, jump);
+  		} else {
+  			throw new Exception("Problem with setup property!!!");
+  		}
+  		System.out.println("Simulation setup finished");
+  	}
+  	
+  	public void staticSetupStandalone (Vector<Installation> installations) throws Exception {
+	    int numOfInstallations = installations.size();
+	    queue = new PriorityBlockingQueue<Event>(2 * numOfInstallations);
+	    	this.installations = installations;
+	}
+  
+
 	
 
 }

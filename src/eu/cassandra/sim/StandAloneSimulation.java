@@ -28,7 +28,7 @@ public class StandAloneSimulation {
 //		System.out.println("Simulation setup started");
 		
 		String aresources_path = "/Users/fanitzima";
-		int seed = 0;
+		int seed = 171181;
 		Simulation sim = new  Simulation(aresources_path, "2Persons"+System.currentTimeMillis(), seed);
 //		sim.setInstallations(new Vector<Installation>());
 		
@@ -40,7 +40,7 @@ public class StandAloneSimulation {
   	    int startDateDay = 24;
 	    int startDateMonth = 3;
 	    int startDateYear = 2014;
-	    int mcruns = 2;
+	    int mcruns = 5;
 //		sim.setMcruns(mcruns);
   		double co2 = 2; 
 //  		sim.setCo2(co2);
@@ -142,8 +142,8 @@ public class StandAloneSimulation {
 		String[][] personIDs = {		{"person1"} };	
 		String[][] personDescs = {	{"Person"} };	
 		String[][] personTypes = {	{"Boy"} };	
-		double[][] personAw= {		{0.3} };
-		double[][] personSens= {	{0.8} };
+		double[][] personAw= {		{0.8} };
+		double[][] personSens= {	{0.3} };
 		
 		Vector<Installation> installations = new Vector<Installation>();
 		
@@ -185,8 +185,8 @@ public class StandAloneSimulation {
   				String[] activityDescs = {"Person Cleaning Activity", "Person Lighting Activity"};
   				
   				int[] actModCounts = {1, 1};
-  				String[] actModName = {"Person Cleaning Activity Model", ""};
-  				String[] actmodDayType = {"weekdays", "any"};  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
+  				String[] actModName = {"Person Cleaning Activity Model", "Person Lighting Activity Model"};
+  				String[] actmodDayType = {"any", "any"};  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
 				boolean[] shiftable = {false, false};
 				boolean[] exclusive = {true, true};
 				String[] containsAppliances1 = {"appl1", "appl3", "appl4", "appl5"};
@@ -209,16 +209,16 @@ public class StandAloneSimulation {
 				ProbabilityDistribution startDist1 = new Histogram(DistributionsLibrary.getStartTimeHistForLighting());
 				ProbabilityDistribution startDist2 = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
 				Vector<ProbabilityDistribution> startDist = new Vector<ProbabilityDistribution>();
-				startDist.add(startDist1);
 				startDist.add(startDist2);
+				startDist.add(startDist1);
 				
 				double[] v2 = {0.22222,0.33333,0.44444};
 				ProbabilityDistribution timesDist1 = new Histogram(v2);
 				double[] v4 = {0.25,0.375,0.25,0,0,0,0,0.125};
 				ProbabilityDistribution timesDist2 = new Histogram(v4);
 				Vector<ProbabilityDistribution> timesDist = new Vector<ProbabilityDistribution>();
-				timesDist.add(timesDist1);
 				timesDist.add(timesDist2);
+				timesDist.add(timesDist1);
 				
   				int actcount = activityIDs.length;
   				for (int l = 0; l < actcount; l++) 
