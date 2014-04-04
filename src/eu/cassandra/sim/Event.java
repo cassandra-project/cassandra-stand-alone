@@ -16,14 +16,12 @@
 */
 package eu.cassandra.sim;
 
-import org.apache.log4j.Logger;
 
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.people.Activity;
 
 public class Event implements Comparable<Event> {
 	
-	static Logger logger = Logger.getLogger(Event.class);
 	
 	public String hashcode;
 	
@@ -70,7 +68,7 @@ public class Event implements Comparable<Event> {
 					app.turnOn(tick, hashcode, act);
 					return true;
 				} else {
-					logger.warn("Tried to switch on appliance while on.");
+					System.out.println("WARNING: Tried to switch on appliance while on.");
 					return false;
 				}
 			case SWITCH_OFF:
@@ -79,7 +77,7 @@ public class Event implements Comparable<Event> {
 					app.turnOff();
 					return true;
 				} else if(!app.getWho().equalsIgnoreCase(hashcode)){
-					logger.warn("Someone else tried to switch off " +
+					System.out.println("WARNING: Someone else tried to switch off " +
 							"appliance while off.");
 					return false;
 				}

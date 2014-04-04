@@ -41,9 +41,6 @@ import com.mongodb.util.JSON;
 import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.Gaussian;
 import eu.cassandra.sim.math.GaussianMixtureModels;
-import eu.cassandra.server.mongo.util.DBConn;
-import eu.cassandra.server.mongo.util.JSONtoReturn;
-import eu.cassandra.server.mongo.util.PrettyJSONPrinter;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.digest.DigestUtils;
@@ -347,22 +344,22 @@ public class Utils {
 	  }
   }
   
-  public static Response returnBadRequest(String msg) {
-	  JSONtoReturn jsonMsg = new JSONtoReturn();
-	  String json = PrettyJSONPrinter.prettyPrint(jsonMsg.createJSONError(msg, new Exception(msg)));
-	  Response r = Response.status(Response.Status.BAD_REQUEST).entity(json).build();
-	  return r; 
-  }
-  
-  public static Response returnResponseWithAppend(String json, String key, Integer value) {
-	  DBObject jsonResponse = (DBObject) JSON.parse(json);
-	  if(Boolean.parseBoolean(jsonResponse.get("success").toString())) {
-		  jsonResponse.put(key, value);
-		  return Response.ok(PrettyJSONPrinter.prettyPrint(jsonResponse.toString()), MediaType.APPLICATION_JSON).build();
-	  } else {
-		  return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
-	  }
-  }
+//  public static Response returnBadRequest(String msg) {
+//	  JSONtoReturn jsonMsg = new JSONtoReturn();
+//	  String json = PrettyJSONPrinter.prettyPrint(jsonMsg.createJSONError(msg, new Exception(msg)));
+//	  Response r = Response.status(Response.Status.BAD_REQUEST).entity(json).build();
+//	  return r; 
+//  }
+//  
+//  public static Response returnResponseWithAppend(String json, String key, Integer value) {
+//	  DBObject jsonResponse = (DBObject) JSON.parse(json);
+//	  if(Boolean.parseBoolean(jsonResponse.get("success").toString())) {
+//		  jsonResponse.put(key, value);
+//		  return Response.ok(PrettyJSONPrinter.prettyPrint(jsonResponse.toString()), MediaType.APPLICATION_JSON).build();
+//	  } else {
+//		  return Response.status(Response.Status.BAD_REQUEST).entity(json).build();
+//	  }
+//  }
   
   public static boolean failed(String json) {
 	  DBObject jsonResponse = (DBObject) JSON.parse(json);

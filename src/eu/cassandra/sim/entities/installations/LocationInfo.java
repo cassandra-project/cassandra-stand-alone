@@ -16,13 +16,11 @@ limitations under the License.
 */
 package eu.cassandra.sim.entities.installations;
 
-import org.apache.log4j.Logger;
 
 public class LocationInfo
 {
 
-  static Logger logger = Logger.getLogger(LocationInfo.class);
-
+ 
   private final String id;
   private final String name;
   private GeoLocation location;

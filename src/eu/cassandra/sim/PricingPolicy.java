@@ -30,7 +30,6 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
-import eu.cassandra.server.mongo.MongoPricingPolicy;
 import eu.cassandra.sim.utilities.Constants;
 
 public class PricingPolicy {
@@ -357,26 +356,6 @@ public class PricingPolicy {
   		DBObject lala = (DBObject) JSON.parse("{"+message+"}");
   		
   		return new PricingPolicy(lala);
-	}
-	
-	/**
-	 * @param args
-	 * @throws MongoException 
-	 * @throws UnknownHostException 
-	 * @throws ParseException 
-	 */
-	public static void main(String[] args) throws UnknownHostException, MongoException, ParseException {
-		// TODO Auto-generated method stub
-		String prc_id = "51778737e4b02bc3aca36960";
-		DBObject query = new BasicDBObject(); // A query
-		query.put("_id", new ObjectId(prc_id));
-		Mongo m = new Mongo("localhost");
-		DB db = m.getDB("test");
-		DBObject pricingPolicy = db.getCollection(MongoPricingPolicy.COL_PRICING).findOne(query);
-		PricingPolicy pp = new PricingPolicy(pricingPolicy);
-		System.out.println(pp.getType());
-		System.out.println(pp.getFixedCharge());
-		System.out.println(pp.calculateCost(1500, 0, 0, 0, 1, 10));
 	}
 
 }

@@ -22,12 +22,9 @@ import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.PriorityBlockingQueue;
 
-import org.apache.log4j.Logger;
-
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import eu.cassandra.server.mongo.MongoActivities;
 import eu.cassandra.sim.Event;
 import eu.cassandra.sim.PricingPolicy;
 import eu.cassandra.sim.SimulationParams;
@@ -41,7 +38,6 @@ import eu.cassandra.sim.utilities.RNG;
 import eu.cassandra.sim.utilities.Utils;
 
 public class Activity extends Entity {
-	static Logger logger = Logger.getLogger(Activity.class);
 	
 	private final static String WEEKDAYS = "weekdays";
 	private final static String WEEKENDS = "weekends";
@@ -488,7 +484,7 @@ public class Activity extends Entity {
 			try {
 				numOfTimes = responseNumOfTimesProb.getPrecomputedBin(orng.nextDouble());
 			} catch (Exception e) {
-				logger.error(Utils.stackTraceToString(e.getStackTrace()));
+				System.err.println(Utils.stackTraceToString(e.getStackTrace()));
 				e.printStackTrace();
 			}
 			
@@ -550,7 +546,7 @@ public class Activity extends Entity {
 
 	@Override
 	public String getCollection() {
-		return MongoActivities.COL_ACTIVITIES;
+		return "activities";
 	}
 	
     public void updateMaxPower(double power) {

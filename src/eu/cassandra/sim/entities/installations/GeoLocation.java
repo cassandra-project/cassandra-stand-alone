@@ -16,11 +16,9 @@
 */
 package eu.cassandra.sim.entities.installations;
 
-import org.apache.log4j.Logger;
 
 public class GeoLocation
 {
-  static Logger logger = Logger.getLogger(GeoLocation.class);
 
   private double latitude;
   private double longitude;

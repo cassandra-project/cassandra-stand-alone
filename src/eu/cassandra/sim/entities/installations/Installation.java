@@ -20,8 +20,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import com.mongodb.BasicDBObject;
 
-import eu.cassandra.server.mongo.MongoInstallations;
-import eu.cassandra.server.mongo.MongoResults;
 import eu.cassandra.sim.Event;
 import eu.cassandra.sim.PricingPolicy;
 import eu.cassandra.sim.entities.Entity;
@@ -303,7 +301,7 @@ public class Installation extends Entity {
     }
     
     public String getCollection() {
-    	return MongoInstallations.COL_INSTALLATIONS;
+    	return "installations";
     }
 
 }

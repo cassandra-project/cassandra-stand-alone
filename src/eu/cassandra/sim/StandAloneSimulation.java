@@ -20,9 +20,7 @@ import eu.cassandra.sim.standalone.DistributionsLibrary;
 import eu.cassandra.sim.utilities.Constants;
 
 public class StandAloneSimulation {
-	
-//	static Logger logger = Logger.getLogger(Simulation.class);
-	
+		
 	public static void main(String[] args)
 	{	
 //		System.out.println("Simulation setup started");

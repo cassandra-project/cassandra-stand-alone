@@ -17,7 +17,6 @@ import com.mongodb.DBObject;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
-import eu.cassandra.server.mongo.MongoPricingPolicy;
 import eu.cassandra.sim.PricingPolicy;
 import eu.cassandra.sim.math.Gaussian;
 import eu.cassandra.sim.math.Histogram;
@@ -625,30 +624,7 @@ public class Response {
 	    return Arrays.copyOf(result, result.length);
 	  }
 	 
-	 public static void main(String[] args) throws UnknownHostException, MongoException, ParseException {
-		    Gaussian g = new Gaussian(840, 100);
-		    g.precompute(0, 1439, 1440);
-		    System.out.println(Arrays.toString(g.getHistogram()));
-		    String prc_id = "52aa0f7f712edbccc313a1b3";
-			DBObject query = new BasicDBObject(); // A query
-			query.put("_id", new ObjectId(prc_id));
-			Mongo m = new Mongo("cassandra.iti.gr");
-			DB db = m.getDB("test");
-			DBObject pricingPolicy = db.getCollection(MongoPricingPolicy.COL_PRICING).findOne(query);
-			PricingPolicy pp1 = new PricingPolicy(pricingPolicy);
-			System.out.println(pp1.getTOUArray().length);
-			System.out.println(Arrays.toString(pp1.getTOUArray()));
-			prc_id = "52aa161b712edbccc31438f2";
-			query = new BasicDBObject(); // A query
-			query.put("_id", new ObjectId(prc_id));
-			m = new Mongo("cassandra.iti.gr");
-			db = m.getDB("test");
-			pricingPolicy = db.getCollection(MongoPricingPolicy.COL_PRICING).findOne(query);
-			PricingPolicy pp2 = new PricingPolicy(pricingPolicy);
-			System.out.println(Arrays.toString(pp2.getTOUArray()));
-			System.out.println(pp2.getTOUArray().length);
-			System.out.println(Arrays.toString(respond(g, pp2, pp1, 1, 1, "Normal").getHistogram()));
-	 }
+
 	 
 	 
 

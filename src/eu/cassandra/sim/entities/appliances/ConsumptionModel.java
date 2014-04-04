@@ -26,7 +26,6 @@ import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
 import eu.cassandra.server.api.exceptions.BadParameterException;
-import eu.cassandra.server.mongo.MongoConsumptionModels;
 import eu.cassandra.sim.entities.Entity;
 
 /**
@@ -182,12 +181,6 @@ public class ConsumptionModel extends Entity {
 	
 	public ArrayList<Tripplet> getPattern(int i) { return patterns[i]; }
 	
-	public static void main(String[] args) throws BadParameterException {
-		String s = "{ \"n\" : 0, \"params\" : [{ \"n\" : 1, \"values\" : [ {\"p\" : 140.0, \"d\" : 20, \"s\": 0.0}, {\"p\" : 117.0, \"d\" : 18, \"s\": 0.0}, {\"p\" : 0.0, \"d\" : 73, \"s\": 0.0}]},{ \"n\" : 1, \"values\" : [ {\"p\" : 14.0, \"d\" : 20, \"s\": 0.0}, {\"p\" : 11.0, \"d\" : 18, \"s\": 0.0}, {\"p\" : 5.0, \"d\" : 73, \"s\": 0.0}]}]}";
-		ConsumptionModel cm = new ConsumptionModel(s, "p");
-		// TODO [TEST] check is parsing is done correctly
-		
-	}
 	
 	public boolean checkStatic()
 	  {
@@ -309,7 +302,7 @@ public class ConsumptionModel extends Entity {
 
 	@Override
 	public String getCollection() {
-		return MongoConsumptionModels.COL_CONSMODELS;
+		return "cons_models";
 	}
 	
 }

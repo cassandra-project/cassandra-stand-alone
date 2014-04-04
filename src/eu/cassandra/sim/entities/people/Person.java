@@ -20,7 +20,6 @@ import java.util.concurrent.PriorityBlockingQueue;
 
 import com.mongodb.BasicDBObject;
 
-import eu.cassandra.server.mongo.MongoPersons;
 import eu.cassandra.sim.Event;
 import eu.cassandra.sim.PricingPolicy;
 import eu.cassandra.sim.entities.Entity;
@@ -113,6 +112,6 @@ public class Person extends Entity {
 
 	@Override
 	public String getCollection() {
-		return MongoPersons.COL_PERSONS;
+		return "persons";
 	}
 }

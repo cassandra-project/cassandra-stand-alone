@@ -90,7 +90,7 @@ public class DerbyResults {
 			tick_tableName = COL_INSTRESULTS;
 		}
 				
-		double[] data = getKPIData(tableName, "inst_id", id, true);
+		double[] data = getKPIData(tableName, "inst_id", id);
 		
 		double newMaxPower = maxPower;
 		double newAvgPower = avgPower;
@@ -109,14 +109,14 @@ public class DerbyResults {
 		
 		double maxavgValue = newAvgPower;
 		
-		String maxQuery = "SELECT MAX(P) FROM " + tick_tableName;
+		String maxQuery = "SELECT MAX(P) AS maxp FROM " + tick_tableName;
 		if(!inst_id.equalsIgnoreCase(AGGR))
-			maxQuery += " GROUP BY inst_id";
+			maxQuery += " WHERE inst_id='" + inst_id +"'";
 		ResultSet maxavg = executeSelectQuery(maxQuery);
 		if(maxavg != null)
 			try {
 				while (maxavg.next())
-					maxavgValue = maxavg.getDouble(1);
+					maxavgValue = maxavg.getDouble("maxp");
 			} catch (SQLException e) {
 				System.out.println(" . . . exception thrown:");
 				errorPrint(e);
@@ -135,7 +135,7 @@ public class DerbyResults {
 	public void addAppKPIs(String app_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		String psQuery = "";
 		String tableName = COL_APPKPIS;
-		double[] data = getKPIData(tableName, "app_id", app_id, false);
+		double[] data = getKPIData(tableName, "app_id", app_id);
 		
 		double newMaxPower = maxPower;
 		double newAvgPower = avgPower;
@@ -160,7 +160,7 @@ public class DerbyResults {
 	public void addActKPIs(String act_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		String psQuery = "";
 		String tableName = COL_ACTKPIS;
-		double[] data = getKPIData(tableName, "act_id", act_id, false);
+		double[] data = getKPIData(tableName, "act_id", act_id);
 		
 		double newMaxPower = maxPower;
 		double newAvgPower = avgPower;
@@ -202,7 +202,7 @@ public class DerbyResults {
 		else {
 			newp += data[0];
 			newq += data[1];
-			psQuery = "update " + tableName + " set p=" + newp + ", q=" + newq + " where inst_id='" + inst_id + "' and tick=" + tick;
+			psQuery = "update " + tableName + " set P=" + newp + ", Q=" + newq + " where inst_id='" + inst_id + "' and tick=" + tick;
 		}
 		executeUpdateQuery(psQuery);
 	}
@@ -235,7 +235,7 @@ public class DerbyResults {
 		else {
 			newp += data[0];
 			newq += data[1];
-			psQuery = "update " + tableName + " set p=" + newp + ", q=" + newq + " where tick=" + tick;
+			psQuery = "update " + tableName + " set P=" + newp + ", Q=" + newq + " where tick=" + tick;
 		}
 		executeUpdateQuery(psQuery);
 	}
@@ -413,16 +413,12 @@ public class DerbyResults {
 			sQuery = "select * from " + tableName + " where tick=" + tick;
 		
 		ResultSet temp = executeSelectQuery(sQuery);
-		int startIndex = 2;
-		if (idColName != null)
-			startIndex = 3;
 		try {
 			while (temp.next()) {
 				pqData = new double[2];
-				pqData[0] = temp.getDouble(startIndex);
-				pqData[1] = temp.getDouble(startIndex+1);
+				pqData[0] = temp.getDouble("P");
+				pqData[1] = temp.getDouble("Q");
 			}
-//			temp.close();
 			temp.getStatement().close();
 		} catch (SQLException e) {
 			System.out.println(" . . . exception thrown:");
@@ -432,23 +428,21 @@ public class DerbyResults {
 		return pqData;
 	}
 	
-	private double[] getKPIData(String tableName, String idColName, String idValue, boolean includesAvgPeak)
+	private double[] getKPIData(String tableName, String idColName, String idValue)
 	{
 		double[] pqData = null; 
 		String sQuery = "select * from " + tableName + " where "+ idColName + "='" + idValue + "'";
 		ResultSet temp = executeSelectQuery(sQuery);
 		try {
-			int startIndex = 2;
-			if (includesAvgPeak)
-				 startIndex = 3;
 			while (temp.next()) {
 				pqData = new double[5];
-				pqData[0] = temp.getDouble(startIndex);
-				pqData[1] = temp.getDouble(startIndex+1);
-				pqData[2] = temp.getDouble(startIndex+2);
-				pqData[3] = temp.getDouble(startIndex+3);
-				pqData[4] = temp.getDouble(startIndex+4);
+				pqData[0] = temp.getDouble("MAXPOWER");
+				pqData[1] = temp.getDouble("AVGPOWER");
+				pqData[2] = temp.getDouble("ENERGY");
+				pqData[3] = temp.getDouble("COST");
+				pqData[4] = temp.getDouble("CO2");
 			}
+
 		} catch (SQLException e) {
 			System.out.println(" . . . exception thrown:");
 			errorPrint(e);

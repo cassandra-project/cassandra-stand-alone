@@ -28,16 +28,12 @@ import java.util.concurrent.PriorityBlockingQueue;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-import org.apache.log4j.Logger;
 import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBList;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import eu.cassandra.server.mongo.MongoActivityModels;
-import eu.cassandra.server.mongo.MongoDistributions;
-import eu.cassandra.server.mongo.util.DBConn;
 import eu.cassandra.sim.entities.Entity;
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
@@ -51,6 +47,7 @@ import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.Uniform;
 import eu.cassandra.sim.standalone.DerbyResults;
 import eu.cassandra.sim.utilities.Constants;
+import eu.cassandra.sim.utilities.DBConn;
 import eu.cassandra.sim.utilities.ORNG;
 import eu.cassandra.sim.utilities.Utils;
 
@@ -61,8 +58,7 @@ import eu.cassandra.sim.utilities.Utils;
  * 
  */
 public class Simulation { // implements Runnable {
-	
-	static Logger logger = Logger.getLogger(Simulation.class);
+
 
 	public static ProbabilityDistribution json2dist(DBObject distribution, String flag) throws Exception {
   		String distType = (String)distribution.get("distrType");
@@ -228,6 +224,7 @@ public class Simulation { // implements Runnable {
   					}
   				}
   			}
+  			
   			for(int i = 0; i < inst_exp.length; i++) {
   				aggr_exp[i] += inst_exp[i];
   				m.addExpectedPowerTick(i, installation.getId(), inst_exp[i], 0, DerbyResults.COL_INSTRESULTS_EXP);
@@ -235,7 +232,7 @@ public class Simulation { // implements Runnable {
   		}
   		for(int i = 0; i < aggr_exp.length; i++) {
   			m.addExpectedPowerTick(i, "aggr", aggr_exp[i], 0, DerbyResults.COL_AGGRRESULTS_EXP);
-				System.out.println(aggr_exp[i]);
+//				System.out.println(aggr_exp[i]);
 			}
   		System.out.println("End exp power calc.");
   	}
@@ -408,18 +405,18 @@ public class Simulation { // implements Runnable {
 	    					for(int l = 0; l < models.size();  l++ ) {
 	    						DBObject m = models.get(l);
 	    						m.put("act_id", act_id);
-	    						if(!jump)DBConn.getConn(dbname).getCollection(MongoActivityModels.COL_ACTMODELS).insert(m);
+	    						if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(m);
 	    				  		ObjectId objId = (ObjectId)m.get("_id");
 	    				  		String actmod_id = objId.toString();
 	    				  		DBObject s = starts.get(l);
 	    				  		s.put("actmod_id", actmod_id);
-	    				  		if(!jump)DBConn.getConn(dbname).getCollection(MongoDistributions.COL_DISTRIBUTIONS).insert(s);
+	    				  		if(!jump)DBConn.getConn(dbname).getCollection("distributions").insert(s);
 	    				  		DBObject d = durations.get(l);
 	    				  		d.put("actmod_id", actmod_id);
-	    				  		if(!jump)DBConn.getConn(dbname).getCollection(MongoActivityModels.COL_ACTMODELS).insert(d);
+	    				  		if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(d);
 	    				  		DBObject t = times.get(l);
 	    				  		t.put("actmod_id", actmod_id);
-	    				  		if(!jump)DBConn.getConn(dbname).getCollection(MongoActivityModels.COL_ACTMODELS).insert(t);
+	    				  		if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(t);
 	    					}
 	    				}
 	    				break;
@@ -539,8 +536,7 @@ public class Simulation { // implements Runnable {
 		  				avgPPowerPerHourPerInst[counter] += p;
 		  				avgQPowerPerHourPerInst[counter] += q;
 		  				String name = installation.getName();
-		//  				logger.info("Tick: " + tick + " \t " + "Name: " + name + " \t " 
-		//  				+ "Power: " + power);
+
 		  				System.out.println("Tick: " + tick + " \t " + "Name: " + name + " \t " 
 		  		  				+ "Power: " + p);
 		  				if((tick + 1) % (Constants.MIN_IN_DAY *  pricing.getBillingCycle()) == 0 || pricing.getType().equalsIgnoreCase("TOUPricing")) {
@@ -683,8 +679,8 @@ public class Simulation { // implements Runnable {
 	  		System.out.println("Updating DB...");
 	  		DBConn.getConn().getCollection(MongoRuns.COL_RUNS).update(query, objRun);
 	  		System.out.println("End of Updating DB...");
-	  		logger.info("Time elapsed for Run " + dbname + ": " + ((endTime - startTime)/(1000.0 * 60)) + " mins");
-	  		logger.info("Run " + dbname + " ended @ " + Calendar.getInstance().toString());
+	  		System.out.println("INFO: Time elapsed for Run " + dbname + ": " + ((endTime - startTime)/(1000.0 * 60)) + " mins");
+	  		System.out.println("INFO: Run " + dbname + " ended @ " + Calendar.getInstance().toString());
   		} catch(Exception e) {
   			e.printStackTrace();
   			System.out.println(Utils.stackTraceToString(e.getStackTrace()));
@@ -783,10 +779,8 @@ public class Simulation { // implements Runnable {
 		  				avgPPowerPerHourPerInst[counter] += p;
 		  				avgQPowerPerHourPerInst[counter] += q;
 		  				String name = installation.getName();
-		//  				logger.info("Tick: " + tick + " \t " + "Name: " + name + " \t " 
-		//  				+ "Power: " + power);
-		  				System.out.println("Tick: " + tick + " \t " + "Name: " + name + " \t " 
-		  		  				+ "Power: " + p);
+//		  				System.out.println("INFO: Tick: " + tick + " \t " + "Name: " + name + " \t " 
+//		  		  				+ "Power: " + p);
 		  				if((tick + 1) % (Constants.MIN_IN_DAY *  pricing.getBillingCycle()) == 0 || pricing.getType().equalsIgnoreCase("TOUPricing")) {
 		  					installation.updateCost(pricing, tick);
 		  				}
@@ -949,7 +943,7 @@ public class Simulation { // implements Runnable {
    	public void setup(boolean jump) throws Exception {
   		installations = new Vector<Installation>();
   		// TODO  Change the Simulation Calendar initialization 
-  		logger.info("Simulation setup started: " + dbname);
+  		System.out.println("INFO: Simulation setup started: " + dbname);
   		DBObject jsonScenario = (DBObject) JSON.parse(scenario);
   		DBObject scenarioDoc = (DBObject) jsonScenario.get("scenario");
   		DBObject simParamsDoc = (DBObject) jsonScenario.get("sim_params");
@@ -980,7 +974,7 @@ public class Simulation { // implements Runnable {
   		} else {
   			throw new Exception("Problem with setup property!!!");
   		}
-  		logger.info("Simulation setup finished: " + dbname);
+  		System.out.println("INFO: Simulation setup finished: " + dbname);
   	}
 */ 
 
