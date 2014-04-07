@@ -124,9 +124,9 @@ public class DerbyResults implements DBResults{
 		
 		String psQuery = "";
 		if(first) 
-			psQuery = "insert into " + tableName + " values('" + id + "'," + newMaxPower + ", " + maxavgValue + ", " + newAvgPower + ", " + newEnergy + ", " + newCost + ", " + newCo2+ ")";
+			psQuery = "insert into " + tableName + " values('" + id + "'," + maxavgValue + ", " + newMaxPower + ", " + newAvgPower + ", " + newEnergy + ", " + newCost + ", " + newCo2+ ")";
 		else 
-			psQuery = "update " + tableName + " set AVGPEAK=" + newMaxPower +", MAXPOWER=" + maxavgValue + ", AVGPOWER=" + newAvgPower 
+			psQuery = "update " + tableName + " set AVGPEAK=" + maxavgValue +", MAXPOWER=" + newMaxPower + ", AVGPOWER=" + newAvgPower 
 					+ ", ENERGY=" + newEnergy + ", COST=" + newCost + ", CO2=" + newCo2 + " where inst_id='" + id + "'";
 		executeUpdateQuery(psQuery);
 	
