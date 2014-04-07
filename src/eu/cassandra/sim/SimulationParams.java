@@ -108,22 +108,22 @@ public class SimulationParams
     return locationInfo;
   }
 
-  /**
-   * @param args
-   * @throws IOException
-   * @throws ParseException
-   */
-  public static void main (String[] args) throws IOException, ParseException
-  {
-    String s = Utils.readFile("simparam.json");
-
-    DBObject obj = (DBObject) JSON.parse(s);
-
-    SimulationParams sp = new SimulationParams(obj);
-
-    System.out.println("Name:" + sp.getName());
-    System.out.println("Location Info:" + sp.getLocationInfo());
-    System.out.println("SimCalendar:" + sp.getSimCalendar().toString());
-  }
+//  /**
+//   * @param args
+//   * @throws IOException
+//   * @throws ParseException
+//   */
+//  public static void main (String[] args) throws IOException, ParseException
+//  {
+//    String s = Utils.readFile("simparam.json");
+//
+//    DBObject obj = (DBObject) JSON.parse(s);
+//
+//    SimulationParams sp = new SimulationParams(obj);
+//
+//    System.out.println("Name:" + sp.getName());
+//    System.out.println("Location Info:" + sp.getLocationInfo());
+//    System.out.println("SimCalendar:" + sp.getSimCalendar().toString());
+//  }
 
 }

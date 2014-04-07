@@ -32,19 +32,26 @@ public class StandAloneSimulation {
   		String responseType = "None"; 		// "None", "Optimal", "Normal", "Discrete", "Daily"
   	    String locationInfo ="Katerini";
   	    int numOfDays = 3; 						// duration
-  	    int startDateDay = 24;
-	    int startDateMonth = 3;
+  	    int startDateDay = 7;
+	    int startDateMonth = 4;
 	    int startDateYear = 2014;
 	    SimulationParams simParams = new SimulationParams(responseType, scenarioName, locationInfo, numOfDays, startDateDay,  startDateMonth, startDateYear);
 	    
 	    
-  		String pricingType = "ScalarEnergyPricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
+//  		String pricingType = "ScalarEnergyPricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
+//  		int billingCycle = 120;  					// all cases
+//  		double fixedCharge = 15;				// all cases
+//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
+//		double[] prices = {0.06, 0.07, 0.07, 0.10};		
+//		double[] levels = {500, 400, 400, 0};				
+//		builderPP.scalarEnergyPricing(prices, levels);
+//		PricingPolicy pricPolicy = builderPP.build();
+		
+ 		String pricingType = "AllInclusivePricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
   		int billingCycle = 120;  					// all cases
   		double fixedCharge = 15;				// all cases
-  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-		double[] prices = {0.06, 0.07, 0.07, 0.10};		
-		double[] levels = {500, 400, 400, 0};				
-		builderPP.scalarEnergyPricing(prices, levels);
+  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);			
+		builderPP.allInclusivePricing(100, 50, 100);
 		PricingPolicy pricPolicy = builderPP.build();
 		
 		String pricingTypeB = "None"; 		// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
@@ -96,44 +103,44 @@ public class StandAloneSimulation {
 		existing.put(appliID, app2);
 		inst.addAppliance(app2);
 		
-		applName ="Cleaning Vacuum Cleaner 0";
-		appliID = "appl3";
-		applDescription = "Description of Cleaning Vacuum Cleaner 0";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner1("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner1("q");
-		Appliance app3 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(sim.getOrng());
-		existing.put(appliID, app3);
-		inst.addAppliance(app3);
-		
-		applName ="Cleaning Water Heater";
-		appliID = "appl4";
-		applDescription = "Description of Cleaning Water Heater";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForWaterHeater("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForWaterHeater("q");
-		Appliance app4 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(sim.getOrng());
-		existing.put(appliID, app4);
-		inst.addAppliance(app4);
-
-		applName ="Cleaning Vacuum Cleaner 1";
-		appliID = "appl5";
-		applDescription = "Description of Cleaning Vacuum Cleaner 1";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner2("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner2("q");
-		Appliance app5 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(sim.getOrng());
-		existing.put(appliID, app5);
-		inst.addAppliance(app5);
+//		applName ="Cleaning Vacuum Cleaner 0";
+//		appliID = "appl3";
+//		applDescription = "Description of Cleaning Vacuum Cleaner 0";
+//		applType = "Cleaning";
+//		applStandByCons = 0;
+//		applIsBase = false;
+//		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner1("p");
+//		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner1("q");
+//		Appliance app3 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
+//				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(sim.getOrng());
+//		existing.put(appliID, app3);
+//		inst.addAppliance(app3);
+//		
+//		applName ="Cleaning Water Heater";
+//		appliID = "appl4";
+//		applDescription = "Description of Cleaning Water Heater";
+//		applType = "Cleaning";
+//		applStandByCons = 0;
+//		applIsBase = false;
+//		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForWaterHeater("p");
+//		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForWaterHeater("q");
+//		Appliance app4 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
+//				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(sim.getOrng());
+//		existing.put(appliID, app4);
+//		inst.addAppliance(app4);
+//
+//		applName ="Cleaning Vacuum Cleaner 1";
+//		appliID = "appl5";
+//		applDescription = "Description of Cleaning Vacuum Cleaner 1";
+//		applType = "Cleaning";
+//		applStandByCons = 0;
+//		applIsBase = false;
+//		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner2("p");
+//		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner2("q");
+//		Appliance app5 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
+//				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(sim.getOrng());
+//		existing.put(appliID, app5);
+//		inst.addAppliance(app5);
 		
 		
 		// Create the people
@@ -162,8 +169,8 @@ public class StandAloneSimulation {
 		ProbabilityDistribution startDist = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
 		act1.addStartTime(actmodDayType, startDist);
 		
-		double[] v2 = {0.22222,0.33333,0.44444};
-		ProbabilityDistribution timesDist = new Histogram(v2);
+		double[] v4 = {0.25,0.375,0.25,0,0,0,0,0.125};
+		ProbabilityDistribution timesDist = new Histogram(v4);
 		act1.addTimes(actmodDayType, timesDist);
 		
 		boolean shiftable = false;
@@ -171,7 +178,8 @@ public class StandAloneSimulation {
 		boolean exclusive = true;
 		act1.addConfig(actmodDayType, exclusive);
 		
-		String[] containsAppliances = {"appl1", "appl3", "appl4", "appl5"};
+//		String[] containsAppliances = {"appl1", "appl3", "appl4", "appl5"};
+		String[] containsAppliances = {"appl1"};
 		// add appliances
 		for(int m = 0; m < containsAppliances.length; m++) {
 			String containAppId = containsAppliances[m];
@@ -196,8 +204,8 @@ public class StandAloneSimulation {
 		startDist = new Histogram(DistributionsLibrary.getStartTimeHistForLighting());
 		actBuilder.startTime(actmodDayType, startDist);
 		
-		double[] v4 = {0.25,0.375,0.25,0,0,0,0,0.125};
-		timesDist = new Histogram(v4);
+		double[] v2 = {0.22222,0.33333,0.44444};
+		timesDist = new Histogram(v2);
 		actBuilder.times(actmodDayType, timesDist);
 		
 		shiftable = false;

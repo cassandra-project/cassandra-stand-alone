@@ -18,24 +18,47 @@ public class ConsumptionModelsLibrary {
 			System.err.println("non-existent consumption model");
 			System.exit(15);
 		}
-		int outerN = 0;
-		int numberOfPatters = 1;
-		int[] n =new int[numberOfPatters];
-		n[0] = 1;
-		ArrayList[] patterns = new ArrayList[numberOfPatters];
-		// create patterns
-		Tripplet t = new Tripplet();
-		if (type.equals("p"))
-			t.setV(107.74000000000001);
-		else if (type.equals("q"))
-			t.setV(107.74000000000001);
-		t.setD(10);
-		t.setS(0);
-		ArrayList tripplets1 = new ArrayList();
-		tripplets1.add(t);
-		patterns[0] = tripplets1;
+//		int outerN = 0;
+//		int numberOfPatters = 1;
+//		int[] n =new int[numberOfPatters];
+//		n[0] = 1;
+//		ArrayList[] patterns = new ArrayList[numberOfPatters];
+//		// create patterns
+//		Tripplet t = new Tripplet();
+//		if (type.equals("p"))
+//			t.setV(107.74000000000001);
+//		else if (type.equals("q"))
+//			t.setV(107.74000000000001);
+//		t.setD(10);
+//		t.setS(0);
+//		ArrayList tripplets1 = new ArrayList();
+//		tripplets1.add(t);
+//		patterns[0] = tripplets1;
+//		
+//		return new ConsumptionModel(outerN, n, patterns);
 		
-		return new ConsumptionModel(outerN, n, patterns);
+		if (type.equals("p"))
+		{
+			String message = "{\"n\":0,\"params\":[{\"n\":1,\"values\":[{\"p\":107.74000000000001,\"d\":10,\"s\":0}]}]}";
+			try {
+				return new ConsumptionModel(message, "p");
+			} catch (BadParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+		else if (type.equals("q"))
+		{
+			String message = "{\"n\":0,\"params\":[{\"n\":1,\"values\":[{\"q\":107.74000000000001,\"d\":10,\"s\":0}]}]}";
+			try {
+				return new ConsumptionModel(message, "q");
+			} catch (BadParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
 	}
 	
 	public static ConsumptionModel getConsumptionModelForLighting(String type)
@@ -45,24 +68,47 @@ public class ConsumptionModelsLibrary {
 			System.err.println("non-existent consumption model");
 			System.exit(15);
 		}
-		int outerN = 0;
-		int numberOfPatters = 1;
-		int[] n =new int[numberOfPatters];
-		n[0] = 1;
-		ArrayList[] patterns = new ArrayList[numberOfPatters];
-		// create patterns
-		Tripplet t = new Tripplet();
-		if (type.equals("p"))
-			t.setV(18.16818181818182);
-		else if (type.equals("q"))
-			t.setV(-6.6377272727272745);
-		t.setD(10);
-		t.setS(0);
-		ArrayList tripplets1 = new ArrayList();
-		tripplets1.add(t);
-		patterns[0] = tripplets1;
+//		int outerN = 0;
+//		int numberOfPatters = 1;
+//		int[] n =new int[numberOfPatters];
+//		n[0] = 1;
+//		ArrayList[] patterns = new ArrayList[numberOfPatters];
+//		// create patterns
+//		Tripplet t = new Tripplet();
+//		if (type.equals("p"))
+//			t.setV(18.16818181818182);
+//		else if (type.equals("q"))
+//			t.setV(-6.6377272727272745);
+//		t.setD(10);
+//		t.setS(0);
+//		ArrayList tripplets1 = new ArrayList();
+//		tripplets1.add(t);
+//		patterns[0] = tripplets1;
+//		
+//		return new ConsumptionModel(outerN,n, patterns);
 		
-		return new ConsumptionModel(outerN,n, patterns);
+		if (type.equals("p"))
+		{
+			String message = "{\"n\":0,\"params\":[{\"n\":1,\"values\":[{\"p\":18.16818181818182,\"d\":10,\"s\":0}]}]}";
+			try {
+				return new ConsumptionModel(message, "p");
+			} catch (BadParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}	
+		else if (type.equals("q"))
+		{
+			String message = "{\"n\":0,\"params\":[{\"n\":1,\"values\":[{\"q\":-6.6377272727272745,\"d\":10,\"s\":0}]}]}";
+			try {
+				return new ConsumptionModel(message, "q");
+			} catch (BadParameterException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		
+		return null;
 	}
 	
 	public static ConsumptionModel getConsumptionModelForVacuumCleaner1(String type)
