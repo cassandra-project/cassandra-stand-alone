@@ -15,27 +15,13 @@
 */
 package eu.cassandra.sim;
 
-import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.Vector;
-
-import org.bson.types.ObjectId;
 
 import com.mongodb.BasicDBList;
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
 import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-import com.mongodb.util.JSON;
 
-import eu.cassandra.sim.entities.appliances.Appliance;
-import eu.cassandra.sim.entities.people.Activity;
-import eu.cassandra.sim.entities.people.Activity.Builder;
-import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.utilities.Constants;
 
 public class PricingPolicy {
@@ -183,14 +169,14 @@ public class PricingPolicy {
 			type = atype;
 			billingCycle = abillingCycle;
 			fixedCharge = afixedCharge;
-			contractedCapacity = Double.MIN_VALUE;
-			contractedEnergy = Double.MIN_VALUE;
-			energyPricing = Double.MIN_VALUE;	
-			powerPricing = Double.MIN_VALUE;
-			fixedCost = Double.MIN_VALUE;
-			additionalCost = Double.MIN_VALUE;
-			maximumPower = Double.MIN_VALUE;
-			offpeakPrice = Double.MIN_VALUE;
+			contractedCapacity = 0;
+			contractedEnergy = 0;
+			energyPricing = 0;	
+			powerPricing = 0;
+			fixedCost = 0;
+			additionalCost = 0;
+			maximumPower = 0;
+			offpeakPrice = 0;
 			levels = new ArrayList<Level>();
 			periods = new ArrayList<Period>();
 			offpeaks = new ArrayList<Offpeak>();
@@ -228,6 +214,7 @@ public class PricingPolicy {
 			}
 			contractedEnergy = acontractedEnergy;
 			fixedCost = afixedCost;
+			additionalCost = aadditionalCost;
 			return this;
 		}
 
@@ -317,7 +304,7 @@ public class PricingPolicy {
 		contractedEnergy = builder.contractedEnergy;
 		energyPricing = builder.energyPricing;
 		powerPricing = builder.powerPricing;
-		fixedCost = builder.powerPricing;
+		fixedCost = builder.fixedCost;
 		additionalCost = builder.additionalCost;
 		maximumPower = builder.maximumPower;
 		offpeakPrice = builder.offpeakPrice;

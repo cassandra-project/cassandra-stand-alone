@@ -202,7 +202,7 @@ public class StandAloneSimulationFromFile {
 		}
 	  
   		try {
-			sim.setupStandalone(false, simParams, pricPolicy, pricPolicyB, numOfDays, mcruns, co2, setup, installations);
+			sim.setupStandalone(false);
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

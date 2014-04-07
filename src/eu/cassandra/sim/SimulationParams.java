@@ -49,32 +49,30 @@ public class SimulationParams
 
   public SimulationParams (DBObject dbo) throws ParseException
   {
-
 	  responseType = dbo.get("responseType").toString();
 	  
-    int day;
-    int month;
-    int year;
+	  int day;
+	  int month;
+	  int year;
 
-    name = dbo.get("name").toString();
-    locationInfo = dbo.get("locationInfo").toString();
-    int duration = Integer.parseInt(dbo.get("numberOfDays").toString());
+	  name = dbo.get("name").toString();
+	  locationInfo = dbo.get("locationInfo").toString();
+	  int duration = Integer.parseInt(dbo.get("numberOfDays").toString());
 
-    DBObject tempList = (DBObject) dbo.get("calendar");
+	  DBObject tempList = (DBObject) dbo.get("calendar");
 
-    if (tempList == null) {
-      simCalendar = new SimCalendar();
-      day = simCalendar.getMyCalendar().get(Calendar.DAY_OF_MONTH);
-      month = simCalendar.getMyCalendar().get(Calendar.MONTH);
-      year = simCalendar.getMyCalendar().get(Calendar.YEAR);
-
-    }
-    else {
-      day = ((Integer)tempList.get("dayOfMonth")).intValue();
-      month = ((Integer)tempList.get("month")).intValue();
-      year = ((Integer)tempList.get("year")).intValue();
-    }
-    simCalendar = new SimCalendar(day, month, year, duration);
+	  if (tempList == null) {
+		  simCalendar = new SimCalendar();
+		  day = simCalendar.getMyCalendar().get(Calendar.DAY_OF_MONTH);
+		  month = simCalendar.getMyCalendar().get(Calendar.MONTH);
+		  year = simCalendar.getMyCalendar().get(Calendar.YEAR);
+	  }
+	  else {
+		  day = ((Integer)tempList.get("dayOfMonth")).intValue();
+		  month = ((Integer)tempList.get("month")).intValue();
+		  year = ((Integer)tempList.get("year")).intValue();
+	  }
+	  simCalendar = new SimCalendar(day, month, year, duration);
 
   }
 
