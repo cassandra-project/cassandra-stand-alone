@@ -23,7 +23,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
-public class DerbyResults {
+public class DerbyResults implements DBResults{
 	public final static String COL_ACTRESULTS_EXP = "act_expected";
 	public final static String COL_INSTRESULTS = "inst_results";
 	public final static String COL_INSTRESULTS_EXP = "inst_expected";
@@ -320,7 +320,7 @@ public class DerbyResults {
 			s = conn.createStatement();	
 			// Call utility method to check if table exists & create the table if needed
 			if (!checkIfTableExists(conn, tableName)) {
-				System.out.println(" Creating table " + tableName);
+				System.out.println("Creating table " + tableName);
 				s.execute(createString);
 				s.execute(createStringPK);
 			}

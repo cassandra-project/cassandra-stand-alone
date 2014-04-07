@@ -181,6 +181,8 @@ public class ConsumptionModel extends Entity {
 	
 	public ArrayList<Tripplet> getPattern(int i) { return patterns[i]; }
 	
+	public ArrayList<Tripplet>[] getPatterns() { return patterns; }
+	
 	
 	public boolean checkStatic()
 	  {

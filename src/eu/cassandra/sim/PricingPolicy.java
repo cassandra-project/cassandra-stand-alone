@@ -18,7 +18,9 @@ package eu.cassandra.sim;
 import java.net.UnknownHostException;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Vector;
 
 import org.bson.types.ObjectId;
 
@@ -30,6 +32,10 @@ import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 import com.mongodb.util.JSON;
 
+import eu.cassandra.sim.entities.appliances.Appliance;
+import eu.cassandra.sim.entities.people.Activity;
+import eu.cassandra.sim.entities.people.Activity.Builder;
+import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.utilities.Constants;
 
 public class PricingPolicy {
@@ -153,6 +159,174 @@ public class PricingPolicy {
 				break;
 		}
 	}
+	
+	
+	public static class Builder {
+		// Required parameters
+		private final String type;
+		private final double fixedCharge;
+		private final int billingCycle;
+		// Optional parameters: different per pricing type
+		private double contractedCapacity;	
+		private double contractedEnergy;	
+		private double energyPricing;	
+		private double powerPricing;
+		private double fixedCost;
+		private double additionalCost;
+		private double maximumPower;
+		private double offpeakPrice;
+		private ArrayList<Level> levels;
+		private ArrayList<Offpeak> offpeaks;
+		private ArrayList<Period> periods;
+		
+		public Builder(String atype, double afixedCharge, int abillingCycle) {
+			type = atype;
+			billingCycle = abillingCycle;
+			fixedCharge = afixedCharge;
+			contractedCapacity = Double.MIN_VALUE;
+			contractedEnergy = Double.MIN_VALUE;
+			energyPricing = Double.MIN_VALUE;	
+			powerPricing = Double.MIN_VALUE;
+			fixedCost = Double.MIN_VALUE;
+			additionalCost = Double.MIN_VALUE;
+			maximumPower = Double.MIN_VALUE;
+			offpeakPrice = Double.MIN_VALUE;
+			levels = new ArrayList<Level>();
+			periods = new ArrayList<Period>();
+			offpeaks = new ArrayList<Offpeak>();
+		}	
+
+		public Builder energyPowerPricing(double acontractedCapacity, double aenergyPricing, double apowerPricing) {
+			if (!type.equals("EnergyPowerPricing"))
+			{
+				System.err.println("PricingPolicy type mismatch: method only applicable to the EnergyPowerPricing scheme");
+				return this;
+			}
+			contractedCapacity = acontractedCapacity;
+			energyPricing = aenergyPricing;
+			powerPricing = apowerPricing;
+			return this;
+		}	
+		
+		public Builder maximumPowerPricing(double aenergyPricing, double apowerPricing, double amaximumPower) {
+			if (!type.equals("MaximumPowerPricing"))
+			{
+				System.err.println("PricingPolicy type mismatch: method only applicable to the MaximumPowerPricing scheme");
+				return this;
+			}
+			energyPricing = aenergyPricing;
+			powerPricing = apowerPricing;
+			maximumPower = amaximumPower;
+			return this;	
+		}
+
+		public Builder allInclusivePricing(double afixedCost, double aadditionalCost, double acontractedEnergy) {
+			if (!type.equals("AllInclusivePricing"))
+			{
+				System.err.println("PricingPolicy type mismatch: method only applicable to the AllInclusivePricing scheme");
+				return this;
+			}
+			contractedEnergy = acontractedEnergy;
+			fixedCost = afixedCost;
+			return this;
+		}
+
+		public Builder touPricing(String[] froms, String[] tos, double[] prices) {
+			if (!type.equals("TOUPricing"))
+			{
+				System.err.println("PricingPolicy type mismatch: method only applicable to the TOUPricing scheme");
+				return this;
+			}
+			if (! (froms.length == tos.length && tos.length == prices.length))
+			{
+				System.err.println("PricingPolicy initialization error: all input tables must have the same length");
+				return this;
+			}
+			
+			for(int i = 0; i < froms.length; i++) {
+				String from = froms[i];
+				String to = tos[i];
+				double price = prices[i];
+				Period p = new Period(from, to, price);
+				periods.add(p);
+			}
+			return this;
+		}
+		
+		public Builder scalarEnergyPricing(double[] prices, double[] alevels) {
+			if (!type.equals("ScalarEnergyPricing"))
+			{
+				System.err.println("PricingPolicy type mismatch: method only applicable to the ScalarEnergyPricing scheme");
+				return this;
+			}
+			if (! (alevels.length == prices.length))
+			{
+				System.err.println("PricingPolicy initialization error: all input tables must have the same length");
+				return this;
+			}
+			
+			for(int i = 0; i < prices.length; i++) {
+				double price = prices[i];
+				double level = alevels[i];
+				Level l = new Level(price, level);
+				levels.add(l);
+			}
+			return this;
+		}
+		
+		public Builder scalarEnergyPricingTimeZones(double aoffpeakPrice, double[] prices, double[] alevels, String[] froms, String[] tos) {
+			if (!type.equals("ScalarEnergyPricingTimeZones"))
+			{
+				System.err.println("PricingPolicy type mismatch: method only applicable to the ScalarEnergyPricingTimeZones scheme");
+				return this;
+			}
+			if (! (alevels.length == prices.length && froms.length == tos.length))
+			{
+				System.err.println("PricingPolicy initialization error: all input tables must have the same length");
+				return this;
+			}
+			offpeakPrice = aoffpeakPrice;
+			
+			for(int i = 0; i < prices.length; i++) {
+				double price = prices[i];
+				double level = alevels[i];
+				Level l = new Level(price, level);
+				levels.add(l);
+			}
+		
+			for(int i = 0; i < froms.length; i++) {
+				String from = froms[i];
+				String to = tos[i];
+				Offpeak o = new Offpeak(from, to);
+				offpeaks.add(o);
+			}
+			
+			return this;
+		}
+		
+		public PricingPolicy build () {
+			return new PricingPolicy(this);
+		}
+	}
+	
+	private PricingPolicy (Builder builder) {
+		type = builder.type;
+		billingCycle = builder.billingCycle;
+		fixedCharge = builder.fixedCharge;
+		contractedCapacity = builder.contractedCapacity;
+		contractedEnergy = builder.contractedEnergy;
+		energyPricing = builder.energyPricing;
+		powerPricing = builder.powerPricing;
+		fixedCost = builder.powerPricing;
+		additionalCost = builder.additionalCost;
+		maximumPower = builder.maximumPower;
+		offpeakPrice = builder.offpeakPrice;
+		levels = builder.levels;
+		periods = builder.periods;
+		offpeaks = builder.offpeaks;
+	}
+	
+	
 	
 	public int getBillingCycle() {
 		return billingCycle;
@@ -300,62 +474,6 @@ public class PricingPolicy {
 			}
 		}
 		return false;
-	}
-
-	public static PricingPolicy constructPricingPolicy(String pricingType, int billingCycle, double fixedCharge, double offpeakPrice,
-			int contractedCapacity, double energyPrice, double powerPrice, double maximumPower, int fixedCost, double additionalCost, 
-			double contractedEnergy, String[] froms, String[] tos, double[] prices, double[] levels) throws ParseException
-	{
-		String message = "'type':" + "'" + pricingType + "', 'billingCycle':'" + billingCycle + "', 'fixedCharge':'" + fixedCharge + "',";
-		
-		switch(pricingType) {
-		case "TOUPricing":
-			message += "'timezones': [";
-			for(int i = 0; i < froms.length; i++)
-				message += "{'starttime': '" + froms[i] + "', 'endtime': '"  + tos[i] + "', 'price': '" + prices[i] + "'},";
-			if (message.endsWith(",")) 
-				message = message.substring(0,message.length()-1);
-			message += "]";
-			break;
-		case "ScalarEnergyPricing":
-			message += "'levels': [";
-			for(int i = 0; i < levels.length; i++)
-				message += "{'level': '" + levels[i] + "', 'price': '" + prices[i] + "'},";
-			if (message.endsWith(",")) 
-				message = message.substring(0,message.length()-1);
-			message += "]";
-			break;
-		case "ScalarEnergyPricingTimeZones":
-			message += "'levels': [";
-			for(int i = 0; i < levels.length; i++)
-				message += "{'level': '" + levels[i] + "', 'price': '" + prices[i] + "'},";
-			if (message.endsWith(",")) 
-				message = message.substring(0,message.length()-1);
-			message += "],";
-			message += "'offpeak': [";
-			for(int i = 0; i < froms.length; i++)
-				message += "{'from': '" + froms[i] + "', 'to': '"  + tos[i] + "'},";
-			if (message.endsWith(",")) 
-				message = message.substring(0,message.length()-1);
-			message += "], 'offpeakPrice': '" + offpeakPrice + "'";
-			break;
-		case "EnergyPowerPricing":
-			message += "'contractedCapacity':" + "'" + contractedCapacity + "', 'energyPrice':'" + energyPrice + "', 'powerPrice':'" + powerPrice + "'";
-			break;
-		case "MaximumPowerPricing":
-			message += "'maximumPower':" + "'" + maximumPower + "', 'energyPrice':'" + energyPrice + "', 'powerPrice':'" + powerPrice + "'";
-			break;
-		case "AllInclusivePricing":
-			message += "'fixedCost':" + "'" + fixedCost + "', 'additionalCost':'" + additionalCost + "', 'contractedEnergy':'" + contractedEnergy + "'";
-		default:
-			break;
-		}
-  		
-		if (message.endsWith(",")) 
-			message = message.substring(0,message.length()-1);
-  		DBObject lala = (DBObject) JSON.parse("{"+message+"}");
-  		
-  		return new PricingPolicy(lala);
 	}
 
 }

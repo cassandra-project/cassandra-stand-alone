@@ -27,6 +27,7 @@ import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.external.ThermalModule;
 import eu.cassandra.sim.entities.people.Activity;
 import eu.cassandra.sim.entities.people.Person;
+import eu.cassandra.sim.standalone.DBResults;
 import eu.cassandra.sim.utilities.Constants;
 import eu.cassandra.sim.utilities.ORNG;
 
@@ -165,7 +166,7 @@ public class Installation extends Entity {
 //    	}
 //    }
     
-    public void addAppliancesKPIs(eu.cassandra.sim.standalone.DerbyResults m, double mcrunsRatio, double co2) {
+    public void addAppliancesKPIs(DBResults m, double mcrunsRatio, double co2) {
     	for(Appliance appliance : getAppliances()) {
     		m.addAppKPIs(appliance.getId(), 
     			appliance.getMaxPower() * mcrunsRatio, 
@@ -176,7 +177,7 @@ public class Installation extends Entity {
     	}
     }
     
-    public void addActivitiesKPIs(eu.cassandra.sim.standalone.DerbyResults m, double mcrunsRatio, double co2) {
+    public void addActivitiesKPIs(DBResults m, double mcrunsRatio, double co2) {
     	for(Person person : getPersons()) {
     		for(Activity activity: person.getActivities()) {
 	    		m.addActKPIs(activity.getId(), 
