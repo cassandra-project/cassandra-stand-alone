@@ -63,17 +63,17 @@ public class Simulation { // implements Runnable {
 
 	private int endTick;
 
-	private int mcruns;
+	protected int mcruns;
 
-	private double co2;
+	protected double co2;
 
 	private DBResults m;
 
-	private SimulationParams simulationWorld;
+	protected SimulationParams simulationWorld;
 
-	private PricingPolicy pricing;
+	protected PricingPolicy pricing;
 
-	private PricingPolicy baseline_pricing;
+	protected PricingPolicy baseline_pricing;
 	
 	private String scenario;
 
@@ -83,12 +83,11 @@ public class Simulation { // implements Runnable {
 
 	private ORNG orng;
 
-	private int numOfDays;
+	protected int numOfDays;
 
+	protected String setup;
 	
-	private String setup;
-	
-	private static boolean useDerby = false;
+	private static boolean useDerby = true;
 
 	public Collection<Installation> getInstallations () {
 		return installations;
@@ -141,23 +140,6 @@ public class Simulation { // implements Runnable {
 		m.createIndexes();
   		
 	}
-
-	/*
-	public Simulation(String ascenario, String adbname, String aresources_path, int seed) {
-		scenario = ascenario;
-		dbname = adbname;
-		resources_path = aresources_path;
-		m = new DerbyResults(dbname);
-		m.createIndexes();
-		
-		if(seed > 0) {
-			orng = new ORNG(seed);
-		} else {
-			orng = new ORNG();
-		}
-  		
-	}
-	*/
 
   	public SimulationParams getSimulationWorld () {
   		return simulationWorld;
@@ -424,7 +406,25 @@ public class Simulation { // implements Runnable {
   		
   		System.out.println("Simulation setup started");
   		
-  		// ------------------------------------------------------------------------------------//
+  		installations = setupScenario();
+  		
+  		endTick = Constants.MIN_IN_DAY * numOfDays;
+  		
+  		// Check type of setup
+  		if(setup.equalsIgnoreCase("static")) {
+  			staticSetupStandalone(installations);
+  		} else if(setup.equalsIgnoreCase("dynamic")) {
+  			System.err.println("Dynamic setup for scenarios not yet supported");
+//  			dynamicSetup(jsonScenario, jump);
+  		} else {
+  			throw new Exception("Problem with setup property!!!");
+  		}
+  		
+  		System.out.println("Simulation setup finished");
+  	}
+	
+	public Vector<Installation> setupScenario()
+	{
   	    String scenarioName = "Scenario1";
   		String responseType = "None"; 		// "None", "Optimal", "Normal", "Discrete", "Daily"
   	    String locationInfo ="Katerini";
@@ -623,9 +623,7 @@ public class Simulation { // implements Runnable {
 		inst.addPerson(person);	
 		installations.add(inst);
 		
-		// ------------------------------------------------------------------------------------//
-		
-  		this.simulationWorld = simParams;
+		this.simulationWorld = simParams;
   		this.mcruns = mcruns;
   		this.co2 = co2;
   		this.pricing = pricPolicy;
@@ -633,19 +631,8 @@ public class Simulation { // implements Runnable {
   		this.numOfDays = numOfDays;
   		this.setup = setup;
   		
-  		endTick = Constants.MIN_IN_DAY * numOfDays;
-  		
-  		// Check type of setup
-  		if(setup.equalsIgnoreCase("static")) {
-  			staticSetupStandalone(installations);
-  		} else if(setup.equalsIgnoreCase("dynamic")) {
-  			System.err.println("Dynamic setup for scenarios not yet supported");
-//  			dynamicSetup(jsonScenario, jump);
-  		} else {
-  			throw new Exception("Problem with setup property!!!");
-  		}
-  		System.out.println("Simulation setup finished");
-  	}
+  		return installations;
+	}
   	
   	public void staticSetupStandalone (Vector<Installation> installations) throws Exception {
 	    int numOfInstallations = installations.size();
@@ -704,7 +691,7 @@ public class Simulation { // implements Runnable {
 //
 //
 //
-//	public void dynamicSetup(DBObject jsonScenario, boolean jump) throws Exception {
+//	public void dynamicSetupStandalone(DBObject jsonScenario, boolean jump) throws Exception {
 //  		DBObject scenario = (DBObject)jsonScenario.get("scenario");
 //  		String scenario_id =  ((ObjectId)scenario.get("_id")).toString();
 //  		DBObject demog = (DBObject)jsonScenario.get("demog");
@@ -896,63 +883,7 @@ public class Simulation { // implements Runnable {
 //  		
 //  	}
   
-//  	public static ProbabilityDistribution json2dist(DBObject distribution, String flag) throws Exception {
-//  		String distType = (String)distribution.get("distrType");
-//  		switch (distType) {
-//  		case ("Normal Distribution"):
-//  			BasicDBList normalList = (BasicDBList)distribution.get("parameters");
-//  			DBObject normalDoc = (DBObject)normalList.get(0);
-//  			double mean = Double.parseDouble(normalDoc.get("mean").toString());
-//  			double std = Double.parseDouble(normalDoc.get("std").toString());
-//  			Gaussian normal = new Gaussian(mean, std);
-//  			normal.precompute(0, 1439, 1440);
-//  			return normal;
-//        case ("Uniform Distribution"):
-//   			BasicDBList unifList = (BasicDBList)distribution.get("parameters");
-//   			DBObject unifDoc = (DBObject)unifList.get(0);
-//   			double from = Double.parseDouble(unifDoc.get("start").toString()); 
-//   			double to = Double.parseDouble(unifDoc.get("end").toString()); 
-//   			System.out.println(from + " " + to);
-//   			Uniform uniform = null;
-//   			if(flag.equalsIgnoreCase("start")) {
-//   				uniform = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
-//   			} else {
-//   				uniform = new Uniform(from, to, false);
-//   			}
-//   			return uniform;
-//   		case ("Gaussian Mixture Models"):
-//        	BasicDBList mixList = (BasicDBList)distribution.get("parameters");
-//   			int length = mixList.size();
-//   			double[] w = new double[length];
-//         	double[] means = new double[length];
-//         	double[] stds = new double[length];
-//         	for(int i = 0; i < mixList.size(); i++) {
-//         		DBObject tuple = (DBObject)mixList.get(i);
-//         		w[i] = Double.parseDouble(tuple.get("w").toString()); 
-//         		means[i] = Double.parseDouble(tuple.get("mean").toString()); 
-//         		stds[i] = Double.parseDouble(tuple.get("std").toString()); 
-//    		} 
-//         	GaussianMixtureModels gmm = new GaussianMixtureModels(length, w, means, stds);
-//         	gmm.precompute(0, 1439, 1440);
-//         	return gmm;
-//   		case ("Histogram"):
-//   			BasicDBList hList = (BasicDBList)distribution.get("values");
-//   			int l = hList.size();
-//			double[] v = new double[l];
-//			for(int i = 0; i < l; i++) {
-//				v[i] = Double.parseDouble(hList.get(i).toString());
-//			}
-//			Histogram h = new Histogram(v);
-//   			return h;
-//        default:
-//        	throw new Exception("Non existing distribution type. Problem in setting up the simulation.");
-//        }
-//  	}
 
-	
-//  	public void setSimulationWorld(SimulationParams simParams) {
-//		this.simulationWorld = simParams;
-//	}
 
 
 
