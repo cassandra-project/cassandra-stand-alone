@@ -87,7 +87,7 @@ public class Simulation { // implements Runnable {
 
 	protected String setup;
 	
-	private static boolean useDerby = true;
+	private static boolean useDerby = false;
 
 	public Collection<Installation> getInstallations () {
 		return installations;
@@ -486,18 +486,18 @@ public class Simulation { // implements Runnable {
 		existing.put(appliID, app1);
 		inst.addAppliance(app1);
 		
-		applName ="Lighting Lighting 0";
-		appliID = "appl2";
-		applDescription = "Description of Lighting Lighting 0";
-		applType = "Lighting";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForLighting("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForLighting("q");
-		Appliance app2 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app2);
-		inst.addAppliance(app2);
+//		applName ="Lighting Lighting 0";
+//		appliID = "appl2";
+//		applDescription = "Description of Lighting Lighting 0";
+//		applType = "Lighting";
+//		applStandByCons = 0;
+//		applIsBase = false;
+//		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForLighting("p");
+//		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForLighting("q");
+//		Appliance app2 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
+//				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
+//		existing.put(appliID, app2);
+//		inst.addAppliance(app2);
 		
 //		applName ="Cleaning Vacuum Cleaner 0";
 //		appliID = "appl3";
@@ -585,40 +585,40 @@ public class Simulation { // implements Runnable {
 		person.addActivity(act1);
 		
 		
-		activityName = "Lighting";
-		activityID = "act2";
-		activityDesc = "Person Lighting Activity";
-		Activity.Builder actBuilder = new Activity.Builder(activityID, activityName, activityDesc, "", simParams);
-		
-		actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
-		
-		durDist = new Gaussian(1, 1); 				
-		durDist.precompute(0, 1439, 1440);
-		actBuilder.duration(actmodDayType, durDist);
-		
-		startDist = new Histogram(DistributionsLibrary.getStartTimeHistForLighting());
-		actBuilder.startTime(actmodDayType, startDist);
-		
-		double[] v2 = {0.22222,0.33333,0.44444};
-		timesDist = new Histogram(v2);
-		actBuilder.times(actmodDayType, timesDist);
-		
-		shiftable = false;
-		actBuilder.shiftable(actmodDayType, shiftable);
-		
-		Activity act2 = actBuilder.build();
-		exclusive = true;
-		act2.addConfig(actmodDayType, exclusive);
-		
-		String[] containsAppliances2 = {"appl2"};
-		// add appliances
-		for(int m = 0; m < containsAppliances2.length; m++) {
-			String containAppId = containsAppliances2[m];
-			Appliance app  = existing.get(containAppId);
-			act2.addAppliance(actmodDayType,app,1.0/containsAppliances2.length);
-		}
-		
-		person.addActivity(act2);
+//		activityName = "Lighting";
+//		activityID = "act2";
+//		activityDesc = "Person Lighting Activity";
+//		Activity.Builder actBuilder = new Activity.Builder(activityID, activityName, activityDesc, "", simParams);
+//		
+//		actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
+//		
+//		durDist = new Gaussian(1, 1); 				
+//		durDist.precompute(0, 1439, 1440);
+//		actBuilder.duration(actmodDayType, durDist);
+//		
+//		startDist = new Histogram(DistributionsLibrary.getStartTimeHistForLighting());
+//		actBuilder.startTime(actmodDayType, startDist);
+//		
+//		double[] v2 = {0.22222,0.33333,0.44444};
+//		timesDist = new Histogram(v2);
+//		actBuilder.times(actmodDayType, timesDist);
+//		
+//		shiftable = false;
+//		actBuilder.shiftable(actmodDayType, shiftable);
+//		
+//		Activity act2 = actBuilder.build();
+//		exclusive = true;
+//		act2.addConfig(actmodDayType, exclusive);
+//		
+//		String[] containsAppliances2 = {"appl2"};
+//		// add appliances
+//		for(int m = 0; m < containsAppliances2.length; m++) {
+//			String containAppId = containsAppliances2[m];
+//			Appliance app  = existing.get(containAppId);
+//			act2.addAppliance(actmodDayType,app,1.0/containsAppliances2.length);
+//		}
+//		
+//		person.addActivity(act2);
 		
 		inst.addPerson(person);	
 		installations.add(inst);

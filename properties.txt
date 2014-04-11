@@ -5,13 +5,10 @@ locationInfo = Katerini
 mcruns = 5 
 name = TestPricing
 numberOfDays = 3
-start_year = 2014
-start_month = 4
 start_dayOfMonth = 7
-base_prc_id = ??? 
-prc_id = ??? 
+start_month = 4
+start_year = 2014
 response_type = None
-scn_id = ???
 seed = 171181
 
 --> scenario
@@ -26,8 +23,6 @@ location =
 name = Milioudis Base 
 trans_id =  
 type = lala1 
-x = 0
-y = 0
 
 --> person
 id = person1
@@ -35,17 +30,8 @@ name = Nikos
 description = person description
 installation = inst1
 awareness = 0.8
-sensitivity" : 0.3 , 
+sensitivity = 0.3
 type = Boy
-
---> person
-id = person2
-name = Fani
-description = person description
-installation = inst1
-awareness = 0.5
-sensitivity" : 0.5 , 
-type = Girl
 
 --> whatever
 name = test unknown segment
@@ -72,28 +58,29 @@ consumption_model = consModel1
 
 --> activity_model
 id = actModel1
-config = exclusive
-containsAppliances = appl1, appl2
+activity = act1
+exclusive = true
+containsAppliances = appl1
 day_type = any
 name = Person Cleaning Activity Model
-shiftable = false , 
+shiftable = false 
 type = 
 description = Person Cleaning Activity Model 	
 duration_distrType = Normal Distribution	
 duration_values = [ ]
 duration_parameters = [ { "mean" : 1 , "std" : 1}]
 start_distrType = Histogram
-start_values =  [ 0 , 1 , 0 , 0 , 0 , 0] , 
+start_values =  [ 0 , 1 , 0 , 0 , 0 , 0] 
 start_parameters = [ ]
 repetitions_distrType = Histogram
-repetitions_values =  [ 0.25 , 0.375 , 0.25 , 0 , 0 , 0 , 0 , 0.125] , 
+repetitions_values =  [ 0.25 , 0.375 , 0.25 , 0 , 0 , 0 , 0 , 0.125] 
 repetitions_parameters = [ ]
 
 --> activity
+id = act1
 description = Person Cleaning Activity 
 name = Cleaning
 person = person1 
-type = 
-activity_model = actModel1 
+type = lala
 
  

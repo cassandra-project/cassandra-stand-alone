@@ -20,8 +20,8 @@ public class StandAloneSimulation extends Simulation{
 		super(aresources_path, adbname, seed);
 	}
 	
-	@Override
-	public Vector<Installation> setupScenario()
+//	@Override
+	public Vector<Installation> setupScenario2()
 	{
   	    String scenarioName = "Scenario1";
   		String responseType = "None"; 		// "None", "Optimal", "Normal", "Discrete", "Daily"
