@@ -6,7 +6,13 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.*;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.DBObject;
+
 import eu.cassandra.server.api.exceptions.BadParameterException;
+import eu.cassandra.sim.Level;
+import eu.cassandra.sim.Offpeak;
+import eu.cassandra.sim.Period;
 import eu.cassandra.sim.PricingPolicy;
 import eu.cassandra.sim.Simulation;
 import eu.cassandra.sim.SimulationParams;
@@ -37,6 +43,11 @@ public class SetupFileParser extends Simulation{
 	
 	Hashtable<String, String[]> propRequired = new Hashtable<String, String[]>();
 	
+	boolean foundSimulationSegment = false;
+	boolean foundScenarioSegment = false;
+	boolean foundPricingSegment = false;
+	boolean foundPricingBaselineSegment = false;
+	
 	public SetupFileParser(String aresources_path, String adbname, int seed) {
 		super(aresources_path, adbname, seed);
 		
@@ -46,11 +57,27 @@ public class SetupFileParser extends Simulation{
 		String[] requiredPropertiesSimulation = { "name", "response_type"};
 		propRequired.put("simulation", requiredPropertiesSimulation);
 		
-		String[] requiredPropertiesPricing = { "id", "name", "type"};
+		String[] requiredPropertiesPricing = { "name", "type", "billingCycle", "fixedCharge"};
 		propRequired.put("pricing_policy", requiredPropertiesPricing);
 		propRequired.put("pricing_policy_baseline", requiredPropertiesPricing);
 		
-		//additional required properties per pricing policy type!!!
+		String[] requiredPropertiesPricingTOU = { "timezones", "prices"};
+		propRequired.put("TOUPricing", requiredPropertiesPricingTOU);
+		
+		String[] requiredPropertiesPricingSEP = { "levels", "prices"};
+		propRequired.put("ScalarEnergyPricing", requiredPropertiesPricingSEP);
+		
+		String[] requiredPropertiesPricingSEPTZ = { "offpeakPrice", "offpeak_timezones", "levels", "prices"};
+		propRequired.put("ScalarEnergyPricingTimeZones", requiredPropertiesPricingSEPTZ);
+		
+		String[] requiredPropertiesPricingEPP = { "contractedCapacity", "energyPrice", "powerPrice"};
+		propRequired.put("EnergyPowerPricing", requiredPropertiesPricingEPP);
+
+		String[] requiredPropertiesPricingMPP = { "maximumPower", "energyPrice", "powerPrice"};
+		propRequired.put("MaximumPowerPricing", requiredPropertiesPricingMPP);
+		
+		String[] requiredPropertiesPricingAIP = { "fixedCost", "additionalCost", "contractedEnergy"};
+		propRequired.put("AllInclusivePricing", requiredPropertiesPricingAIP);
 		
 		String[] requiredPropertiesInstallation = { "id", "name"};
 		propRequired.put("installation", requiredPropertiesInstallation);
@@ -67,11 +94,8 @@ public class SetupFileParser extends Simulation{
 		String[] requiredPropertiesActivity = {"name", "person", "id"};
 		propRequired.put("activity", requiredPropertiesActivity);
 		
-		String[] requiredPropertiesActModel = {"id", "name", "activity", "containsAppliances", "day_type", "duration_distrType", "duration_values", "duration_parameters", 
-				"start_distrType", "start_values", "start_parameters", "repetitions_distrType", "repetitions_values", "repetitions_parameters"};
+		String[] requiredPropertiesActModel = {"id", "name", "activity", "containsAppliances", "day_type", "duration_distrType", "start_distrType", "repetitions_distrType"};
 		propRequired.put("activity_model", requiredPropertiesActModel);
-		
-		//additional required properties per distribution type
 		
 	}
 	
@@ -269,7 +293,8 @@ public class SetupFileParser extends Simulation{
 			ex.printStackTrace();
 		}
 		catch (Exception ex) {
-			ex.printStackTrace();
+			System.err.println(ex.getMessage());
+			System.exit(0);
 		}
 	}
 	
@@ -278,9 +303,15 @@ public class SetupFileParser extends Simulation{
 		Properties prop = new Properties();
 		switch(segmentTitle) {
 		case "simulation":
+			if (foundSimulationSegment)
+				throw new Exception("ERROR: only one \"simulation\" segment allowed per setup file");
+			foundSimulationSegment = true;
 			prop = this.propSimulation;
 			break;
 		case "scenario" :
+			if (foundScenarioSegment)
+				throw new Exception("ERROR: only one \"scenario\" segment allowed per setup file");
+			foundScenarioSegment = true;
 			prop = this.propScenario;
 			break;
 		case "installation" :
@@ -302,10 +333,16 @@ public class SetupFileParser extends Simulation{
 			this.propActModels.add(prop);
 			break;
 		case "pricing_policy" :
+			if (foundPricingSegment)
+				throw new Exception("ERROR: only one \"pricing_policy\" segment allowed per setup file");
 			prop = this.propPricing;
+			foundPricingSegment = true;
 			break;
 		case "pricing_policy_baseline" :
+			if (foundPricingBaselineSegment)
+				throw new Exception("ERROR: only one \"pricing_policy_baseline\" segment allowed per setup file");
 			prop = this.propPricingBaseline;
+			foundPricingBaselineSegment = true;
 			break;
 		default:
 			System.out.println("INFO: Unknown segment \"" + segmentTitle + "\" ignored." + "\n");
@@ -319,10 +356,46 @@ public class SetupFileParser extends Simulation{
 		String[] requiredProperties = propRequired.get(segmentTitle);
 		for(String property : requiredProperties) {
 		   if (prop.get(property) == null)
-		   {
 			   throw new Exception("ERROR: required property \"" + property + "\" missing for segment \"" + segmentTitle + "\"");
-		   }	
 		}
+		
+		if (segmentTitle.equals("pricing_policy") || segmentTitle.equals("pricing_policy_baseline"))
+		{
+			String type = prop.getProperty("type");
+			String[] requiredProperties2 = propRequired.get(type); 
+			if (requiredProperties2 == null)
+				 throw new Exception("ERROR: unkown pricing policy type \"" + type + "\" employed");
+			for(String property : requiredProperties2) {
+			   if (prop.get(property) == null)
+				   throw new Exception("ERROR: required property \"" + property + "\" missing for pricing policy of type \"" + type + "\"");
+			}
+		}
+		
+		if (segmentTitle.equals("activity_model"))
+		{
+			String duration_distrType = prop.getProperty("duration_distrType").trim();
+			checkDistribution(duration_distrType, prop, "duration");
+			String start_distrType = prop.getProperty("start_distrType");
+			checkDistribution(start_distrType, prop, "start");
+			String repetitions_distrType = prop.getProperty("repetitions_distrType");
+			checkDistribution(repetitions_distrType, prop, "repetitions");
+		}
+	}
+	
+	private void checkDistribution(String distrType, Properties prop, String distrCase) throws Exception
+	{
+		if (distrType.equals("Normal Distribution") || distrType.equals("Uniform Distribution") || distrType.equals("Gaussian Mixture Models")) 
+		{
+			if (prop.get(distrCase + "_parameters") == null)
+				   throw new Exception("ERROR: required property \"" + distrCase + "_parameters\" missing for distribution of type \"" + distrType + "\"");
+		}
+		else if (distrType.equals("Histogram")) 
+		{
+			if (prop.get(distrCase + "_values") == null)
+				   throw new Exception("ERROR: required property \"" + distrCase + "_values\" missing for distribution of type \"" + distrType + "\"");
+		}
+		else
+			throw new Exception("ERROR: unkown distribution type \"" + distrType + "\" employed");
 	}
 	
 	
