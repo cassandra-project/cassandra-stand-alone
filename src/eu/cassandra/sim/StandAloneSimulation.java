@@ -42,7 +42,7 @@ public class StandAloneSimulation extends Simulation{
 	}
 	
 //	@Override
-	public Vector<Installation> setupScenario2()
+	public Vector<Installation> setupScenario()
 	{
   	    String scenarioName = "Scenario1";
   		String responseType = "None"; 		// "None", "Optimal", "Normal", "Discrete", "Daily"
@@ -54,21 +54,21 @@ public class StandAloneSimulation extends Simulation{
 	    SimulationParams simParams = new SimulationParams(responseType, scenarioName, locationInfo, numOfDays, startDateDay,  startDateMonth, startDateYear);
 	    
 	    
-//  		String pricingType = "ScalarEnergyPricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
-//  		int billingCycle = 120;  					// all cases
-//  		double fixedCharge = 15;				// all cases
-//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-//		double[] prices = {0.06, 0.07, 0.07, 0.10};		
-//		double[] levels = {500, 400, 400, 0};				
-//		builderPP.scalarEnergyPricing(prices, levels);
-//		PricingPolicy pricPolicy = builderPP.build();
-		
- 		String pricingType = "AllInclusivePricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
+  		String pricingType = "ScalarEnergyPricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
   		int billingCycle = 120;  					// all cases
   		double fixedCharge = 15;				// all cases
-  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);			
-		builderPP.allInclusivePricing(100, 50, 100);
+  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
+		double[] prices = {0.06, 0.07, 0.07, 0.10};		
+		double[] levels = {500, 400, 400, 0};				
+		builderPP.scalarEnergyPricing(prices, levels);
 		PricingPolicy pricPolicy = builderPP.build();
+		
+// 		String pricingType = "AllInclusivePricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
+//  		int billingCycle = 120;  					// all cases
+//  		double fixedCharge = 15;				// all cases
+//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);			
+//		builderPP.allInclusivePricing(100, 50, 100);
+//		PricingPolicy pricPolicy = builderPP.build();
 		
 		String pricingTypeB = "None"; 		// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
 		PricingPolicy pricPolicyB = new PricingPolicy();

@@ -1,0 +1,8 @@
+--> pricing_policy
+name = TestAIP
+type = AllInclusivePricing
+billingCycle = 120
+fixedCharge = 15
+fixedCost = 100
+additionalCost = 50
+contractedEnergy = 100

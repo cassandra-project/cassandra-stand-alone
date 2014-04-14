@@ -199,7 +199,7 @@ public class StandAloneSimulationFromFile2 extends Simulation {
 				e.printStackTrace();
 			}
 
-			distrType = prop.getProperty("duration_distrType");
+			distrType = prop.getProperty("duration_distrType").trim();
   			ProbabilityDistribution actModelDuration;
   			try {
   				actModelDuration = constructDistribution(distrType, prop, "duration");
@@ -243,8 +243,8 @@ public class StandAloneSimulationFromFile2 extends Simulation {
 		String regexp = "[0-2]\\d:[0-5]\\d";
 		switch(pricingType) {
   		case "TOUPricing":
-  			String[] timezones = sfp.propPricing.getProperty("timezones").split(",");
-  			String[] pricesS = sfp.propPricing.getProperty("prices").split(","); 
+  			String[] timezones = sfp.propPricing.getProperty("timezones").replace("[", "").replace("]", "").split(",");
+  			String[] pricesS = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
   			if (timezones.length != pricesS.length)
   				throw new Exception("ERROR: timezones and prices lists must have the same length");
   			String[] froms = new String[timezones.length];
@@ -262,8 +262,8 @@ public class StandAloneSimulationFromFile2 extends Simulation {
   			builderPP.touPricing(froms, tos, prices);
   			break;
   		case "ScalarEnergyPricing":
-  			String[] levelsLS = sfp.propPricing.getProperty("levels").split(",");
-  			String[] pricesLS = sfp.propPricing.getProperty("prices").split(","); 
+  			String[] levelsLS = sfp.propPricing.getProperty("levels").replace("[", "").replace("]", "").split(",");
+  			String[] pricesLS = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
   			if (levelsLS.length != pricesLS.length)
   				throw new Exception("ERROR: levels and prices lists must have the same length");
   			double[] levelsL = new double[levelsLS.length];
@@ -276,8 +276,8 @@ public class StandAloneSimulationFromFile2 extends Simulation {
   			break;
   		case "ScalarEnergyPricingTimeZones":
   			double offpeakPrice = Integer.parseInt((sfp.propPricing.getProperty("offpeakPrice") != null ? sfp.propPricing.getProperty("offpeakPrice").trim() : "0"));
-  			String[] levelsAS = sfp.propPricing.getProperty("levels").split(",");
-  			String[] pricesAS = sfp.propPricing.getProperty("prices").split(","); 
+  			String[] levelsAS = sfp.propPricing.getProperty("levels").replace("[", "").replace("]", "").split(",");
+  			String[] pricesAS = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
   			if (levelsAS.length != pricesAS.length)
   				throw new Exception("ERROR: levels and prices lists must have the same length");
   			double[] levelsA = new double[levelsAS.length];
@@ -286,8 +286,8 @@ public class StandAloneSimulationFromFile2 extends Simulation {
   				levelsA[i] = Double.parseDouble(levelsAS[i]);
   				pricesA[i] = Double.parseDouble(pricesAS[i]);
   			}
-  			String[] timezonesAS = sfp.propPricing.getProperty("timezones").split(",");
-  			String[] pricesAS2 = sfp.propPricing.getProperty("prices").split(","); 
+  			String[] timezonesAS = sfp.propPricing.getProperty("timezones").replace("[", "").replace("]", "").split(",");
+  			String[] pricesAS2 = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
   			if (timezonesAS.length != pricesAS2.length)
   				throw new Exception("ERROR: timezones and prices lists must have the same length");
   			String[] fromsA = new String[timezonesAS.length];
@@ -414,8 +414,10 @@ public class StandAloneSimulationFromFile2 extends Simulation {
 			gmm.precompute(0, 1439, 1440);
 			return gmm;
 		case ("Histogram"):
-			String tempH = prop.getProperty(caseD + "_values").replace("[", "").replace("]", "").replace("\"", "");
+			String tempH = prop.getProperty(caseD + "_values").replace("[", "").replace("]", "").replace("\"", "").trim();
 			String[] values = tempH.split(",");
+			if (values.length == 1 && values[0].equals(""))
+				values = new String[0];
 			double[] v = new double[values.length];
 			for (int i=0; i<values.length; i++)
 				try {
