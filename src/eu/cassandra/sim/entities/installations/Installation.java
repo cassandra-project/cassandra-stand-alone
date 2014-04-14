@@ -24,11 +24,11 @@ import eu.cassandra.sim.Event;
 import eu.cassandra.sim.PricingPolicy;
 import eu.cassandra.sim.entities.Entity;
 import eu.cassandra.sim.entities.appliances.Appliance;
-import eu.cassandra.sim.entities.external.ThermalModule;
+//import eu.cassandra.sim.entities.external.ThermalModule;
 import eu.cassandra.sim.entities.people.Activity;
 import eu.cassandra.sim.entities.people.Person;
-import eu.cassandra.sim.standalone.DBResults;
 import eu.cassandra.sim.utilities.Constants;
+import eu.cassandra.sim.utilities.DBResults;
 import eu.cassandra.sim.utilities.ORNG;
 
 public class Installation extends Entity {
@@ -46,7 +46,7 @@ public class Installation extends Entity {
 	private double energyOffpeak = 0;
 	private double previousEnergyOffpeak = 0;
 	private double cost = 0;
-	private ThermalModule tm;
+//	private ThermalModule tm;
 	
 	public static class Builder {
 	    	// Required variables
@@ -102,9 +102,9 @@ public class Installation extends Entity {
     	for(Person person : getPersons()) {
     		person.updateDailySchedule(tick, queue, pricing, baseline, responseType, orng);
 		}
-    	if(tm != null) {
-    		tm.nextStep();
-    	}
+//    	if(tm != null) {
+//    		tm.nextStep();
+//    	}
     }
     
     public void updateMaxPower(double power) {
@@ -232,9 +232,9 @@ public class Installation extends Entity {
 			p += appliance.getPower(tick, "p");
 			q += appliance.getPower(tick, "q");
 		}
-		if(tm != null) {
-			p += tm.getPower(tick);
-		}
+//		if(tm != null) {
+//			p += tm.getPower(tick);
+//		}
 		currentPowerP = p;
 		currentPowerQ = q;
 	}
@@ -255,9 +255,9 @@ public class Installation extends Entity {
     	persons.add(person);
     }
     
-    public void setThermalModule (ThermalModule atm) {
-    	tm = atm;
-    }
+//    public void setThermalModule (ThermalModule atm) {
+//    	tm = atm;
+//    }
 
     public Vector<Appliance> getAppliances () {
     	return appliances;

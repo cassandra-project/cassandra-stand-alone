@@ -17,7 +17,6 @@ package eu.cassandra.sim.entities.appliances;
 
 import com.mongodb.BasicDBObject;
 
-import eu.cassandra.server.api.exceptions.BadParameterException;
 import eu.cassandra.sim.PricingPolicy;
 import eu.cassandra.sim.entities.Entity;
 import eu.cassandra.sim.entities.appliances.Tripplet;

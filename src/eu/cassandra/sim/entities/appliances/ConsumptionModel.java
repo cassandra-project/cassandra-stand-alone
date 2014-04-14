@@ -25,7 +25,6 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
-import eu.cassandra.server.api.exceptions.BadParameterException;
 import eu.cassandra.sim.entities.Entity;
 
 /**
@@ -59,7 +58,7 @@ public class ConsumptionModel extends Entity {
 	
 	public ConsumptionModel() {}
 	
-	public ConsumptionModel(String amodel, String type) throws BadParameterException {
+	public ConsumptionModel(String amodel, String type) throws Exception {
 		model = amodel;
 		DBObject modelObj = (DBObject) JSON.parse(model);
 		init(modelObj, type);
@@ -83,7 +82,7 @@ public class ConsumptionModel extends Entity {
 		}
 	}
 	
-	public void init (DBObject modelObj, String type) throws BadParameterException {
+	public void init (DBObject modelObj, String type) throws Exception {
 		
 		try {
 
@@ -96,8 +95,7 @@ public class ConsumptionModel extends Entity {
 					outerN = ((Double)modelObj.get("n")).intValue();
 				}
 			} catch(NullPointerException npe) {
-				throw 
-				new BadParameterException("Bad parameter: outer iterations parameter name should be n");
+				throw new Exception("Bad Parameter Exception: outer iterations parameter name should be n");
 			}
 			BasicDBList patternsObj = (BasicDBList)modelObj.get("params");
 			patternN = patternsObj.size();
@@ -115,7 +113,7 @@ public class ConsumptionModel extends Entity {
 					}
 				} catch(NullPointerException npe) {
 					throw 
-					new BadParameterException("Bad parameter: inner iterations parameter name should be n");
+					new Exception("Bad Parameter Exception: inner iterations parameter name should be n");
 				}
 				BasicDBList values = ((BasicDBList)((DBObject)patternsObj.get(i)).get("values"));
 				int tripplets = values.size();
@@ -132,7 +130,7 @@ public class ConsumptionModel extends Entity {
 						}
 					} catch(NullPointerException npe) {
 						throw 
-						new BadParameterException("Bad parameter: power parameter name should be " + type);
+						new Exception("Bad Parameter Exception: power parameter name should be " + type);
 					}
 					try {
 						t.d = ((Integer)((DBObject)values.get(j)).get("d")).intValue();
@@ -144,7 +142,7 @@ public class ConsumptionModel extends Entity {
 						}
 					} catch(NullPointerException npe) {
 						throw 
-						new BadParameterException("Bad parameter: duration parameter name should be d");
+						new Exception("Bad Parameter Exception: duration parameter name should be d");
 					}
 					patternDuration[i] += t.d; 
 					totalDuration += (n[i] * t.d);
@@ -158,12 +156,12 @@ public class ConsumptionModel extends Entity {
 						}
 					} catch(NullPointerException npe) {
 						throw 
-						new BadParameterException("Bad parameter: slope parameter name should be s");
+						new Exception("Bad Parameter Exception: slope parameter name should be s");
 					}
 					patterns[i].add(t);
 				}
 			}
-		} catch(BadParameterException bpe) {
+		} catch(Exception bpe) {
 			throw bpe;
 		}
 

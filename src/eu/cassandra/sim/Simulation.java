@@ -38,11 +38,11 @@ import eu.cassandra.sim.entities.people.Person;
 import eu.cassandra.sim.math.Gaussian;
 import eu.cassandra.sim.math.Histogram;
 import eu.cassandra.sim.math.ProbabilityDistribution;
-import eu.cassandra.sim.standalone.ConsumptionModelsLibrary;
-import eu.cassandra.sim.standalone.DBResults;
-import eu.cassandra.sim.standalone.DerbyResults;
-import eu.cassandra.sim.standalone.DistributionsLibrary;
 import eu.cassandra.sim.utilities.Constants;
+import eu.cassandra.sim.utilities.ConsumptionModelsLibrary;
+import eu.cassandra.sim.utilities.DBResults;
+import eu.cassandra.sim.utilities.DerbyResults;
+import eu.cassandra.sim.utilities.DistributionsLibrary;
 import eu.cassandra.sim.utilities.MongoResults;
 import eu.cassandra.sim.utilities.ORNG;
 import eu.cassandra.sim.utilities.Utils;
@@ -51,6 +51,7 @@ import eu.cassandra.sim.utilities.Utils;
  * The Simulation class can simulate up to 4085 years of simulation.
  * 
  * @author Kyriakos C. Chatzidimitriou (kyrcha [at] iti [dot] gr)
+ * @author Fani A. Tzima (fani [at] iti [dot] gr)
  * 
  */
 public class Simulation { // implements Runnable {

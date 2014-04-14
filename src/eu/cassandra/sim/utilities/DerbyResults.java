@@ -14,7 +14,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package eu.cassandra.sim.standalone;
+package eu.cassandra.sim.utilities;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
@@ -23,6 +23,12 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
+/**
+ * 
+ * 
+ * @author Fani A. Tzima (fani [at] iti [dot] gr)
+ * 
+ */
 public class DerbyResults implements DBResults{
 	public final static String COL_ACTRESULTS_EXP = "act_expected";
 	public final static String COL_INSTRESULTS = "inst_results";

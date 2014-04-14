@@ -3,8 +3,6 @@ package eu.cassandra.sim.utilities;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-import eu.cassandra.sim.standalone.DBResults;
-
 
 public class MongoResults implements DBResults{
 

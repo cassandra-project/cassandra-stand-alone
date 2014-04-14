@@ -1,14 +1,34 @@
-package eu.cassandra.sim.standalone;
+/*   
+   Copyright 2011-2013 The Cassandra Consortium (cassandra-fp7.eu)
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+package eu.cassandra.sim.utilities;
 
 import java.util.ArrayList;
 
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
 
-import eu.cassandra.server.api.exceptions.BadParameterException;
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
 import eu.cassandra.sim.entities.appliances.Tripplet;
 
+/**
+ * 
+ * 
+ * @author Fani A. Tzima (fani [at] iti [dot] gr)
+ * 
+ */
 public class ConsumptionModelsLibrary {
 	
 	public static ConsumptionModel getConsumptionModelForWashingMachine(String type)
@@ -42,8 +62,7 @@ public class ConsumptionModelsLibrary {
 			String message = "{\"n\":0,\"params\":[{\"n\":1,\"values\":[{\"p\":107.74000000000001,\"d\":10,\"s\":0}]}]}";
 			try {
 				return new ConsumptionModel(message, "p");
-			} catch (BadParameterException e) {
-				// TODO Auto-generated catch block
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}	
@@ -52,8 +71,7 @@ public class ConsumptionModelsLibrary {
 			String message = "{\"n\":0,\"params\":[{\"n\":1,\"values\":[{\"q\":107.74000000000001,\"d\":10,\"s\":0}]}]}";
 			try {
 				return new ConsumptionModel(message, "q");
-			} catch (BadParameterException e) {
-				// TODO Auto-generated catch block
+			} catch (Exception e) {
 				e.printStackTrace();
 			}
 		}
@@ -92,7 +110,7 @@ public class ConsumptionModelsLibrary {
 			String message = "{\"n\":0,\"params\":[{\"n\":1,\"values\":[{\"p\":18.16818181818182,\"d\":10,\"s\":0}]}]}";
 			try {
 				return new ConsumptionModel(message, "p");
-			} catch (BadParameterException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -102,7 +120,7 @@ public class ConsumptionModelsLibrary {
 			String message = "{\"n\":0,\"params\":[{\"n\":1,\"values\":[{\"q\":-6.6377272727272745,\"d\":10,\"s\":0}]}]}";
 			try {
 				return new ConsumptionModel(message, "q");
-			} catch (BadParameterException e) {
+			} catch (Exception e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
@@ -229,7 +247,7 @@ public class ConsumptionModelsLibrary {
 			test2 = new ConsumptionModel(message, "p");
 			System.out.println("Compared patters are the same: " + compareConsumptionModels(test, test2));
 			 
-		} catch (BadParameterException e) {
+		} catch (Exception e) {
 			e.printStackTrace();
 		}	
 	}
