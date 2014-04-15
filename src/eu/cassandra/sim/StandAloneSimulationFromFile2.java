@@ -275,7 +275,7 @@ public class StandAloneSimulationFromFile2 extends Simulation {
   			builderPP.scalarEnergyPricing(pricesL, levelsL);
   			break;
   		case "ScalarEnergyPricingTimeZones":
-  			double offpeakPrice = Integer.parseInt((sfp.propPricing.getProperty("offpeakPrice") != null ? sfp.propPricing.getProperty("offpeakPrice").trim() : "0"));
+  			double offpeakPrice = Double.parseDouble((sfp.propPricing.getProperty("offpeakPrice") != null ? sfp.propPricing.getProperty("offpeakPrice").trim() : "0"));
   			String[] levelsAS = sfp.propPricing.getProperty("levels").replace("[", "").replace("]", "").split(",");
   			String[] pricesAS = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
   			if (levelsAS.length != pricesAS.length)
@@ -286,34 +286,29 @@ public class StandAloneSimulationFromFile2 extends Simulation {
   				levelsA[i] = Double.parseDouble(levelsAS[i]);
   				pricesA[i] = Double.parseDouble(pricesAS[i]);
   			}
-  			String[] timezonesAS = sfp.propPricing.getProperty("timezones").replace("[", "").replace("]", "").split(",");
-  			String[] pricesAS2 = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
-  			if (timezonesAS.length != pricesAS2.length)
-  				throw new Exception("ERROR: timezones and prices lists must have the same length");
-  			String[] fromsA = new String[timezonesAS.length];
-  			String[] tosA = new String[timezonesAS.length];
-  			double[] pricesA2 = new double[timezonesAS.length];
-  			for(int i = 0; i < timezonesAS.length; i++) {
-  				String from = timezonesAS[i].split("-")[0].trim();
-  				String to = timezonesAS[i].split("-")[1].trim();
-  				if (!from.matches(regexp) || !to.matches(regexp))
-  					throw new Exception("ERROR: unrecognized time format in timezones (should be of the form hh:mm eg. 23:58)");  				
+  			String[] offpeakHours = sfp.propPricing.getProperty("offpeakHours").replace("[", "").replace("]", "").split(",");
+  			if (offpeakHours.length == 1 && offpeakHours[0].equals(""))
+  				offpeakHours = new String[0];
+  			String[] fromsA = new String[offpeakHours.length];
+  			String[] tosA = new String[offpeakHours.length];
+  			for(int i = 0; i < offpeakHours.length; i++) {
+  				String from = offpeakHours[i].split("-")[0].trim();
+  				String to = offpeakHours[i].split("-")[1].trim();
   				fromsA[i] = from;
   				tosA[i] = to;
-  				pricesA2[i] = Double.parseDouble(pricesAS2[i]);
   			}
   			builderPP.scalarEnergyPricingTimeZones(offpeakPrice, pricesA, levelsA, fromsA, tosA);
   			break;
   		case "EnergyPowerPricing":
   			double contractedCapacity = Integer.parseInt((sfp.propPricing.getProperty("contractedCapacity") != null ? sfp.propPricing.getProperty("contractedCapacity").trim() : "0"));
-  			double energyPricing = Double.parseDouble((sfp.propPricing.getProperty("energyPricing") != null ? sfp.propPricing.getProperty("energyPricing").trim() : "0.0"));
-  			double powerPricing = Double.parseDouble((sfp.propPricing.getProperty("powerPricing") != null ? sfp.propPricing.getProperty("powerPricing").trim() : "0.0"));
+  			double energyPricing = Double.parseDouble((sfp.propPricing.getProperty("energyPrice") != null ? sfp.propPricing.getProperty("energyPrice").trim() : "0.0"));
+  			double powerPricing = Double.parseDouble((sfp.propPricing.getProperty("powerPrice") != null ? sfp.propPricing.getProperty("powerPrice").trim() : "0.0"));
   			builderPP.energyPowerPricing(contractedCapacity, energyPricing, powerPricing);
   			break;
   		case "MaximumPowerPricing":
   			double maximumPower = Double.parseDouble((sfp.propPricing.getProperty("maximumPower") != null ? sfp.propPricing.getProperty("maximumPower").trim() : "0.0"));
-  			double energyPricing2 = Double.parseDouble((sfp.propPricing.getProperty("energyPricing") != null ? sfp.propPricing.getProperty("energyPricing").trim() : "0.0"));
-  			double powerPricing2 =Double.parseDouble((sfp.propPricing.getProperty("powerPricing") != null ? sfp.propPricing.getProperty("powerPricing").trim() : "0.0"));
+  			double energyPricing2 = Double.parseDouble((sfp.propPricing.getProperty("energyPrice") != null ? sfp.propPricing.getProperty("energyPrice").trim() : "0.0"));
+  			double powerPricing2 =Double.parseDouble((sfp.propPricing.getProperty("powerPrice") != null ? sfp.propPricing.getProperty("powerPrice").trim() : "0.0"));
   			builderPP.maximumPowerPricing(energyPricing2, powerPricing2, maximumPower);
   			break;
   		case "AllInclusivePricing":
@@ -379,18 +374,18 @@ public class StandAloneSimulationFromFile2 extends Simulation {
 		case ("Gaussian Mixture Models"):
 			String tempM = prop.getProperty(caseD + "_parameters").replace("[", "").replace("]", "").replace("\"", "");
 			String[] paramsM = tempM.split("}");
-			int length = paramsM.length;
+			int length = paramsM.length-1;
 			double[] means = new double[length];
 			double[] stds = new double[length];
 			double[] w = new double[length];
 			double sumW = 0;
-			for (int i=0; i<paramsM.length; i++)
+			for (int i=0; i<length; i++)
 			{
 				String tempS = paramsM[i].replace("{", "").trim();
 				if (tempS.startsWith(","))
 					tempS = tempS.substring(1);
 				String[] paramsMM = tempS.split(",");
-				if (paramsMM.length != 2 || !(paramsMM[0].contains("mean") || paramsMM[1].contains("mean") || paramsMM[2].contains("mean")) 
+				if (paramsMM.length != 3 || !(paramsMM[0].contains("mean") || paramsMM[1].contains("mean") || paramsMM[2].contains("mean")) 
 						|| !(paramsMM[0].contains("std") || paramsMM[1].contains("std") || paramsMM[2].contains("std")) 
 						|| !(paramsMM[0].contains("w") || paramsMM[1].contains("w") || paramsMM[2].contains("w")) )
 					throw new Exception("ERROR: Gaussian Mixture Models require exaclty 3 parameters for each tuple, named \"mean\", \"std\" and \"w\". "+

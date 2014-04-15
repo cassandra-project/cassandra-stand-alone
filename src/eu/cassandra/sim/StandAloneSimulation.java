@@ -18,14 +18,19 @@ package eu.cassandra.sim;
 import java.util.HashMap;
 import java.util.Vector;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.DBObject;
+
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
 import eu.cassandra.sim.entities.installations.Installation;
 import eu.cassandra.sim.entities.people.Activity;
 import eu.cassandra.sim.entities.people.Person;
 import eu.cassandra.sim.math.Gaussian;
+import eu.cassandra.sim.math.GaussianMixtureModels;
 import eu.cassandra.sim.math.Histogram;
 import eu.cassandra.sim.math.ProbabilityDistribution;
+import eu.cassandra.sim.math.Uniform;
 import eu.cassandra.sim.utilities.ConsumptionModelsLibrary;
 import eu.cassandra.sim.utilities.DistributionsLibrary;
 
@@ -53,24 +58,66 @@ public class StandAloneSimulation extends Simulation{
 	    int startDateYear = 2014;
 	    SimulationParams simParams = new SimulationParams(responseType, scenarioName, locationInfo, numOfDays, startDateDay,  startDateMonth, startDateYear);
 	    
+	    // TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
 	    
-  		String pricingType = "ScalarEnergyPricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
-  		int billingCycle = 120;  					// all cases
-  		double fixedCharge = 15;				// all cases
-  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-		double[] prices = {0.06, 0.07, 0.07, 0.10};		
-		double[] levels = {500, 400, 400, 0};				
-		builderPP.scalarEnergyPricing(prices, levels);
-		PricingPolicy pricPolicy = builderPP.build();
-		
-// 		String pricingType = "AllInclusivePricing"; 			// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
+//  		String pricingType = "ScalarEnergyPricing"; 			
 //  		int billingCycle = 120;  					// all cases
 //  		double fixedCharge = 15;				// all cases
-//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);			
-//		builderPP.allInclusivePricing(100, 50, 100);
+//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
+//		double[] prices = {0.10, 0.07, 0.07, 0.06};		
+//		double[] levels = {0, 400, 400, 500};				
+//		builderPP.scalarEnergyPricing(prices, levels);
 //		PricingPolicy pricPolicy = builderPP.build();
 		
-		String pricingTypeB = "None"; 		// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
+ 		String pricingType = "AllInclusivePricing"; 			
+  		int billingCycle = 120;  					// all cases
+  		double fixedCharge = 15;				// all cases
+  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);			
+		builderPP.allInclusivePricing(100, 50, 100);
+		PricingPolicy pricPolicy = builderPP.build();
+		
+//		String pricingType = "EnergyPowerPricing"; 			
+//  		int billingCycle = 30;  					// all cases
+//  		double fixedCharge = 2;				// all cases
+//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
+//		double contractedCapacity = 10;
+//		double energyPricing = 0.08;
+//		double powerPricing = 2.5;
+//		builderPP.energyPowerPricing(contractedCapacity, energyPricing, powerPricing);
+//		PricingPolicy pricPolicy = builderPP.build();
+	    
+//		String pricingType = "MaximumPowerPricing"; 			
+//  		int billingCycle = 30;  					// all cases
+//  		double fixedCharge = 0;				// all cases
+//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
+//		double energyPricing = 0.08;
+//		double powerPricing = 2.5;
+//		builderPP.maximumPowerPricing(energyPricing, powerPricing, 0.0);
+//		PricingPolicy pricPolicy = builderPP.build();
+	    
+//	    String pricingType = "TOUPricing"; 			
+//	    int billingCycle = 90;  					// all cases
+//	    double fixedCharge = 10;				// all cases
+//	    PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
+//	    double[] prices = {0.5, 0.01, 0.10};		
+//	    String[] froms = {"14:00", "00:00", "19:45"};
+//	    String[] tos = {"19:45", "14:00", "23:45"};
+//	    builderPP.touPricing(froms, tos, prices);
+//	    PricingPolicy pricPolicy = builderPP.build();
+	    
+//	    String pricingType = "ScalarEnergyPricingTimeZones"; 			
+//	    int billingCycle = 120;  					// all cases
+//	    double fixedCharge = 10;				// all cases
+//	    PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
+//	    double[] prices = {0.10, 0.08, 0.07, 0.06};		
+//	    double[] levels = {0, 400, 400, 500};	
+//	    double offpeakPrice = 0.05;
+//	    	String[] froms = new String[0];
+//	    String[] tos  = new String[0];
+//	    builderPP.scalarEnergyPricingTimeZones(offpeakPrice, prices, levels, froms, tos);
+//	    PricingPolicy pricPolicy = builderPP.build();
+		
+		String pricingTypeB = "None"; 		
 		PricingPolicy pricPolicyB = new PricingPolicy();
 		
 		
@@ -285,7 +332,10 @@ public class StandAloneSimulation extends Simulation{
 		String[] containsAppliances21 = {"appl21"};
 		
 		actmodDayType = "weekends";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 	
-		ProbabilityDistribution durDist3 = new Gaussian(1, 1); 			// Normal Distribution: mean = 1, std = 1
+		double[] w = {0.7, 0.3};
+     	double[] means = {480, 1200};
+     	double[] stds = {40, 60};
+		ProbabilityDistribution durDist3 = new GaussianMixtureModels(w.length, w, means, stds);
 		durDist3.precompute(0, 1439, 1440);
 		act21.addDuration(actmodDayType, durDist3);
 		ProbabilityDistribution startDist3 = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
@@ -302,11 +352,19 @@ public class StandAloneSimulation extends Simulation{
 		}
 		
 		actmodDayType = "weekdays";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
-		ProbabilityDistribution durDist4 = new Histogram(new double[0]);
+		double[] durDist4V = {100.0, 50.0, 200.0};
+		ProbabilityDistribution durDist4 = new Histogram(durDist4V);
 		act21.addDuration(actmodDayType, durDist4);
-		ProbabilityDistribution startDist4 = new Histogram(new double[0]);
+		ProbabilityDistribution startDist4 = null;
+		double from = 100;
+		double to = 400;
+		if ("startDist4".contains("start")) 
+			startDist4 = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
+		else 
+			startDist4 = new Uniform(from, to, false);	
 		act21.addStartTime(actmodDayType, startDist4);
-		ProbabilityDistribution timesDist4 = new Histogram(new double[0]);
+		double[] timesDist4V = {0.2, 0.3, 0.5, 0.4};
+		ProbabilityDistribution timesDist4 = new Histogram(timesDist4V);
 		act21.addTimes(actmodDayType, timesDist4);
 		act21.addShiftable(actmodDayType, shiftable);
 		act21.addConfig(actmodDayType, exclusive);

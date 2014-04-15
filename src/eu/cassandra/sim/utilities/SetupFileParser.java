@@ -67,13 +67,13 @@ public class SetupFileParser {
 		String[] requiredPropertiesPricingSEP = { "levels", "prices"};
 		propRequired.put("ScalarEnergyPricing", requiredPropertiesPricingSEP);
 		
-		String[] requiredPropertiesPricingSEPTZ = { "offpeakPrice", "offpeak_timezones", "levels", "prices"};
+		String[] requiredPropertiesPricingSEPTZ = { "offpeakPrice", "offpeakHours", "levels", "prices"};
 		propRequired.put("ScalarEnergyPricingTimeZones", requiredPropertiesPricingSEPTZ);
 		
 		String[] requiredPropertiesPricingEPP = { "contractedCapacity", "energyPrice", "powerPrice"};
 		propRequired.put("EnergyPowerPricing", requiredPropertiesPricingEPP);
 
-		String[] requiredPropertiesPricingMPP = { "maximumPower", "energyPrice", "powerPrice"};
+		String[] requiredPropertiesPricingMPP = { "energyPrice", "powerPrice"};
 		propRequired.put("MaximumPowerPricing", requiredPropertiesPricingMPP);
 		
 		String[] requiredPropertiesPricingAIP = { "fixedCost", "additionalCost", "contractedEnergy"};

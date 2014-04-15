@@ -34,7 +34,6 @@ import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.response.Response;
 import eu.cassandra.sim.utilities.Constants;
 import eu.cassandra.sim.utilities.ORNG;
-import eu.cassandra.sim.utilities.RNG;
 import eu.cassandra.sim.utilities.Utils;
 
 public class Activity extends Entity {

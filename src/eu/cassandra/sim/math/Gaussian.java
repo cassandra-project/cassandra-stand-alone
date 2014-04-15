@@ -16,8 +16,6 @@
 
 package eu.cassandra.sim.math;
 
-import eu.cassandra.sim.utilities.RNG;
-
 /**
  * @author Christos Diou <diou remove this at iti dot gr>
  * @version prelim
@@ -254,59 +252,6 @@ public class Gaussian implements ProbabilityDistribution
       prob += histogram[i];
 
     return prob;
-  }
-
-  public static void main (String[] args)
-  {
-    System.out.println("Testing num of time per day.");
-    Gaussian g = new Gaussian(30, 53);
-    g.precompute(0, 1439, 1440);
-    double l[] = g.getHistogram();
-    for(int i =0; i < l.length; i++) {
-    	//System.out.println(i + " " + l[i]);
-    }
-    g.status();
-    double sum = 0;
-    for (int i = 0; i <= 3; i++) {
-      sum += g.getPrecomputedProbability(i);
-//      System.out.println(g.getPrecomputedProbability(i));
-    }
-    System.out.println("Sum = " + sum);
-    RNG.init();
-    int temp = g.getPrecomputedBin(RNG.nextDouble());
-    System.out.println(temp + " " + g.getPrecomputedProbability(temp));
-    temp = g.getPrecomputedBin(RNG.nextDouble());
-    System.out.println(temp + " " + g.getPrecomputedProbability(temp));
-    temp = g.getPrecomputedBin(RNG.nextDouble());
-    System.out.println(temp + " " + g.getPrecomputedProbability(temp));
-    temp = g.getPrecomputedBin(RNG.nextDouble());
-    System.out.println(temp + " " + g.getPrecomputedProbability(temp));
-    temp = g.getPrecomputedBin(RNG.nextDouble());
-    System.out.println(temp + " " + g.getPrecomputedProbability(temp));
-    System.out.println("Testing start time.");
-    g = new Gaussian(30, 50);
-    g.precompute(0, 1439, 1440);
-    for(int i = 0; i < 1440; i++) {
-    	//System.out.println(i + " " + g.getPrecomputedProbability(i));
-    }
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println("Testing duration.");
-//    g = new Gaussian(240, 90);
-//    g.precompute(1, 1440, 1440);
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
-////    System.out.println(g.getPrecomputedBin());
   }
 
 }

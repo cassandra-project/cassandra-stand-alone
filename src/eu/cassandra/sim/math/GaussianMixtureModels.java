@@ -16,7 +16,6 @@
 
 package eu.cassandra.sim.math;
 
-import eu.cassandra.sim.utilities.RNG;
 
 /**
  * @author Antonios Chrysopoulos
@@ -235,63 +234,6 @@ public class GaussianMixtureModels implements ProbabilityDistribution
       prob += histogram[i];
 
     return prob;
-  }
-
-  public static void main (String[] args)
-  {
-    System.out.println("Testing Mixture Creation.");
-
-    int num = (int) (10 * Math.random());
-    double[] pi = new double[num];
-    double[] means = new double[num];
-    double[] sigmas = new double[num];
-
-    for (int i = 0; i < num; i++) {
-      pi[i] = 1.0 / (double) num;
-      means[i] = 1440 * Math.random();
-      sigmas[i] = 144 * Math.random();
-    }
-
-    GaussianMixtureModels g = new GaussianMixtureModels(num, pi, means, sigmas);
-    g.precompute(0, 1439, 1440);
-
-    g.status();
-
-//    Charts.createHistogram("TestHist", "minute", "Possibility", g.histogram);
-//    Charts.createMixtureDistribution("TestMix", "minute", "Possibility",
-//                                     g.histogram);
-
-    RNG.init();
-    System.out.println("Testing Random Bins");
-    for (int i = 0; i < num; i++) {
-      int temp = g.getPrecomputedBin(RNG.nextDouble());
-      System.out.println("Random Bin: " + temp + " Possibility Value: "
-                         + g.getPrecomputedProbability(temp));
-    }
-    
-    System.out.println("======Test 2======");
-
-    double[] pi2 = {0.5, 0.5};
-    double[] means2 = {1382.81587, 444.884615};
-    double[] sigmas2 = {7.46468, 66.580967};
-    
-    
-    GaussianMixtureModels g2 = new GaussianMixtureModels(pi2.length, pi2, means2, sigmas2);
-    g2.precompute(0, 1439, 1440);
-    g2.status();
-    RNG.init();
-    for (int i = 0; i < 10; i++) {
-    	int temp = g2.getPrecomputedBin(RNG.nextDouble());
-    	System.out.println(temp + " " + g2.getPrecomputedProbability(temp));
-    }
-    double[] h = g2.getHistogram();
-    double sum = 0;
-    for (int i = 0; i < h.length; i++) {
-    	//System.out.println(i + " " + h[i]);
-    	sum += h[i];
-    }
-    System.out.println("Sum: " + sum);
-    
   }
 
   public double getParameter (int index)

@@ -24,7 +24,6 @@ import eu.cassandra.sim.entities.installations.Installation;
 import eu.cassandra.sim.entities.people.Activity;
 import eu.cassandra.sim.utilities.Constants;
 import eu.cassandra.sim.utilities.ORNG;
-import eu.cassandra.sim.utilities.RNG;
 
 /**
  * Class modeling an electric appliance. The appliance has a stand by

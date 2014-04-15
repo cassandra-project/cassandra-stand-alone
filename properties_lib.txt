@@ -6,3 +6,40 @@ fixedCharge = 15
 fixedCost = 100
 additionalCost = 50
 contractedEnergy = 100
+
+
+--> pricing_policy
+name = TestSEP
+type = ScalarEnergyPricing
+billingCycle = 120
+fixedCharge = 15
+prices = [0.10, 0.07, 0.07, 0.06]		
+levels = [0, 400, 400, 500]	
+
+
+--> pricing_policy
+name = TestSEP
+type = EnergyPowerPricing
+billingCycle = 30
+fixedCharge = 2
+contractedCapacity = 10
+energyPrice = 0.08
+powerPrice = 2.5
+
+
+--> pricing_policy
+name = TestSEP
+type = MaximumPowerPricing
+billingCycle = 30
+fixedCharge = 0
+energyPrice = 0.08
+powerPrice = 2.5
+
+
+--> pricing_policy
+name = TestSEP
+type = TOUPricing
+billingCycle = 90
+fixedCharge = 10
+timezones = [14:00-19:45, 00:00-14:00, 19:45-23:45]
+prices = [0.5, 0.01, 0.10]

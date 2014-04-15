@@ -16,7 +16,6 @@
 
 package eu.cassandra.sim.math;
 
-import eu.cassandra.sim.utilities.RNG;
 
 /**
  * @author Antonios Chrysopoulos
@@ -225,45 +224,6 @@ public class Uniform implements ProbabilityDistribution {
 	      System.out.println(" Ending Point: " + precomputeTo);
 	    }
 	    System.out.println();
-
-	  }
-
-	  public static void main (String[] args)
-	  {
-	    System.out.println("Testing Start Time Uniform Distribution Creation.");
-
-	    int start = (int) (1440 * Math.random());
-	    int end = (int) (start + (1440 - start) * Math.random());
-
-	    Uniform u = new Uniform(start, end);
-	    u.precompute(start, end, 1440);
-
-	    u.status();
-	    RNG.init();
-
-	    System.out.println("Testing Random Bins");
-	    for (int i = 0; i < 10; i++) {
-	      int temp = u.getPrecomputedBin(RNG.nextDouble());
-	      System.out.println("Random Bin: " + temp + " Possibility Value: "
-	                         + u.getPrecomputedProbability(temp));
-	    }
-
-	    System.out.println("Testing Duration Uniform Distribution Creation.");
-
-	    start = 10;
-	    end = 12;
-
-	    u = new Uniform(start, end);
-	    u.precompute(start, end, (int) end + 1);
-
-	    u.status();
-
-	    System.out.println("Testing Random Bins");
-	    for (int i = 0; i < 10; i++) {
-	      int temp = u.getPrecomputedBin(RNG.nextDouble());
-	      System.out.println("Random Bin: " + temp + " Possibility Value: "
-	                         + u.getPrecomputedProbability(temp));
-	    }
 
 	  }
 
