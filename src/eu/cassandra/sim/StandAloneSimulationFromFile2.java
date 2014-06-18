@@ -105,7 +105,7 @@ public class StandAloneSimulationFromFile2 extends Simulation {
 			String instID= prop.getProperty("id").trim();
 			String instDescription = prop.getProperty("description") != null ? prop.getProperty("description") : "";
 			String instType = prop.getProperty("type") != null ? prop.getProperty("type") : "";
-			Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription).build();
+			Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, null, null).build();
 			installations.add(inst);
 			instIndexes.put(instID, index);
 			index++;

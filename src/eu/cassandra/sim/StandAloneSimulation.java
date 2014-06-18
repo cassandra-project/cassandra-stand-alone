@@ -134,7 +134,7 @@ public class StandAloneSimulation extends Simulation{
 		String instID= "inst1";								// installation ids
 		String instDescription = "Milioudis Base";	// installation descriptions
 		String instType = "lala1";							// installation types
-		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription).build();
+		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, null, null).build();
 		
 		// Create the appliances
 		HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
@@ -295,7 +295,7 @@ public class StandAloneSimulation extends Simulation{
 		instID= "inst2";								// installation ids
 		instDescription = "Fani's house";	// installation descriptions
 		instType = "lala1";							// installation types
-		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription).build();
+		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription, null, null, null).build();
 		
 		// Create the appliances
 		existing = new HashMap<String,Appliance>();
