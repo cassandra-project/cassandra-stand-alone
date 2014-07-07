@@ -18,50 +18,118 @@ package eu.cassandra.sim.entities;
 
 import com.mongodb.BasicDBObject;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class Entity.
+ */
 public abstract class Entity {
 	
+	/** The id. */
 	protected String id;
+	
+	/** The name. */
 	protected String name;
+	
+	/** The description. */
 	protected String description;
+	
+	/** The type. */
 	protected String type;
+	
+	/** The parent id. */
 	protected String parentId;
 	
+	/**
+	 * To db object.
+	 *
+	 * @return the basic db object
+	 */
 	public abstract BasicDBObject toDBObject();
 	
+	/**
+	 * Gets the collection.
+	 *
+	 * @return the collection
+	 */
 	public abstract String getCollection();
 	
+	/**
+	 * Sets the parent id.
+	 *
+	 * @param aparent the new parent id
+	 */
 	public void setParentId(String aparent) {
 		parentId = aparent;
 	}
 	
+	/**
+	 * Sets the id.
+	 *
+	 * @param aid the new id
+	 */
 	public void setId(String aid) {
 		id = aid;
 	}
 	
+	/**
+	 * Gets the id.
+	 *
+	 * @return the id
+	 */
 	public String getId() {
 		return id;
 	}
 	
+	/**
+	 * Sets the name.
+	 *
+	 * @param aname the new name
+	 */
 	public void setName(String aname) {
 		name = aname;
 	}
 	
+	/**
+	 * Gets the name.
+	 *
+	 * @return the name
+	 */
 	public String getName() {
 		return name;
 	}
 	
+	/**
+	 * Sets the type.
+	 *
+	 * @param atype the new type
+	 */
 	public void setType(String atype) {
 		type = atype;
 	}
 	
+	/**
+	 * Gets the type.
+	 *
+	 * @return the type
+	 */
 	public String getType() {
 		return type;
 	}
 	
+	/**
+	 * Sets the description.
+	 *
+	 * @param adescription the new description
+	 */
 	public void setDescription(String adescription) {
 		description = adescription;
 	}
 	
+	/**
+	 * Gets the description.
+	 *
+	 * @return the description
+	 */
 	public String getDescription() {
 		return description;
 	}

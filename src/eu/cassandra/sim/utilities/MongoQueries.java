@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 import org.bson.types.ObjectId;
 
@@ -37,7 +39,6 @@ public class MongoQueries {
 			results.put(key, results.get(key)/sum*100);
 		return results;
 	}
-	
 	
 	/** 	Returns energy sums (based on the simulation experiment's KPI calculations) per appliance/activity type 
 	 * 		and, if required, per installation. 
@@ -125,18 +126,268 @@ public class MongoQueries {
 		return results;
 	}
 	
-	
-	public static void main(String args[])
+	private static HashMap<String, Double[]> getEnergyLimitsPerType(DBCollection collection)
 	{
+		if (!collection.getName().equals("appliances") && ! collection.getName().equals("activities"))
+		{
+			System.err.println("Method only applicable to collections 'appliances' and 'activities'");
+			System.exit(5);
+		}
+		
+		HashMap<String, Double[]> limitsPerType = new HashMap<String, Double[]>();
+		
+		List<String> applTypes = collection.distinct("type");
+		for (String type: applTypes)
+		{
+			Double[] lala = {Double.MIN_VALUE, Double.MAX_VALUE};
+			limitsPerType.put(type.equals("")?"other":type, lala);
+		}
+		
+		DBCollection installations = collection.getDB().getCollection("installations");
+		List<ObjectId> inst_ids = installations.distinct("_id");
+		
+		double maxWholeHouse = Double.MIN_VALUE;
+		double minWholeHouse = Double.MAX_VALUE;
+		
+		for (ObjectId inst_id : inst_ids)
+		{
+			HashMap<String, Double> resultsPerInst;
+			if (collection.getName().equals("appliances") )
+					resultsPerInst = getEnergySumsPerApplianceType(collection.getDB().getName(), inst_id+"");
+			else
+				resultsPerInst = getEnergySumsPerActivityType(collection.getDB().getName(), inst_id+"");
+			double wholeHouse = sum(resultsPerInst);
+			if (wholeHouse > maxWholeHouse)
+				maxWholeHouse = wholeHouse;
+			if (wholeHouse < minWholeHouse)
+				minWholeHouse = wholeHouse;
+			for (String key : resultsPerInst.keySet())
+			{
+//				if (key.equals(""))
+//					key = "other";
+				double value = Double.parseDouble(resultsPerInst.get(key).toString());  
+				Double[] limits = limitsPerType.get(key);
+				if (value > limits[0])
+					limits[0] = value;
+					limitsPerType.put(key, limits);
+				if (value < limits[1])
+					limits[1] = value;
+					limitsPerType.put(key, limits);
+			}
+		}
+		
+		Double[] temp = new Double[2];
+		temp[0] = maxWholeHouse;
+		temp[1] = minWholeHouse;
+		limitsPerType.put("Whole house", temp);
+		return limitsPerType;
+	}
+	
+	private static HashMap<String, Double[]> getEnergyLimitsPerActivityType(String dbname)
+	{
+		
 		Mongo m;
 		try {
 			m = new Mongo();
-			DB db = m.getDB("534d2fd530043658c9a0ee94");
-			DecimalFormat df = new DecimalFormat("#0.000"); 
-			
-			System.out.println("Energy sum per appliance type");
+			DB db = m.getDB(dbname);
+			DBCollection activities = db.getCollection("activities");
+			return getEnergyLimitsPerType(activities);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	private static HashMap<String, Double[]> getEnergyLimitsPerApplianceType(String dbname)
+	{
+		
+		Mongo m;
+		try {
+			m = new Mongo();
+			DB db = m.getDB(dbname);
 			DBCollection appliances = db.getCollection("appliances");
-			HashMap<String, Double> results = getEnergySumsPerType(appliances, null);
+			return getEnergyLimitsPerType(appliances);
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+	}
+	
+	
+	/** 	Get energy sums (based on the simulation experiment's KPI calculations) per appliance type 
+	 * 		and, if required, per installation. 
+	 * @param collection	The name of the database, where the target simulation is stored.
+	 * @param inst_id		The id of the target installation. If null computations are about the whole simulation.
+	 * @return
+	 */
+	public static HashMap<String, Double> getEnergySumsPerApplianceType(String dbname, String inst_id)
+	{
+		Mongo m;
+		HashMap<String, Double> temp = new HashMap<String, Double>();
+		try {
+			m = new Mongo();
+			DB db = m.getDB(dbname);
+			DBCollection appliances = db.getCollection("appliances");
+			temp =  getEnergySumsPerType(appliances, inst_id);
+			m.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return temp;	
+	}
+	
+	/** 	Get energy sums (based on the simulation experiment's KPI calculations) per activity type 
+	 * 		and, if required, per installation. 
+	 * @param collection	The name of the database, where the target simulation is stored.
+	 * @param inst_id		The id of the target installation. If null computations are about the whole simulation.
+	 * @return
+	 */
+	public static HashMap<String, Double> getEnergySumsPerActivityType(String dbname, String inst_id)
+	{
+		Mongo m;
+		HashMap<String, Double> temp = new HashMap<String, Double>();
+		try {
+			m = new Mongo();
+			DB db = m.getDB(dbname);
+			DBCollection activities = db.getCollection("activities");
+			temp = getEnergySumsPerType(activities, inst_id);
+			m.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return temp;	
+	}
+	
+	/** 	Get energy percentages (based on the simulation experiment's KPI calculations) per appliance type 
+	 * 		and, if required, per installation. 
+	 * @param dbname	The name of the database, where the target simulation is stored.
+	 * @param inst_id		The id of the target installation. If null computations are about the whole simulation.
+	 * @return
+	 */
+	public static HashMap<String, Double> getEnergyPercentagesPerApplianceType(String dbname, String inst_id)
+	{
+		HashMap<String, Double> temp = new HashMap<String, Double>();
+		Mongo m;
+		try {
+			m = new Mongo();
+			DB db = m.getDB(dbname);
+			DBCollection appliances = db.getCollection("appliances");
+			temp = getEnergyPercentagesPerType(appliances, inst_id);
+			m.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return temp;	
+	}
+	
+	/** 	Get energy percentages (based on the simulation experiment's KPI calculations) per activity type 
+	 * 		and, if required, per installation. 
+	 * @param dbname	The name of the database, where the target simulation is stored.
+	 * @param inst_id		The id of the target installation. If null computations are about the whole simulation.
+	 * @return
+	 */
+	public static HashMap<String, Double> getEnergyPercentagesPerActivityType(String dbname, String inst_id)
+	{
+		HashMap<String, Double> temp = new HashMap<String, Double>();
+		Mongo m;
+		try {
+			m = new Mongo();
+			DB db = m.getDB(dbname);
+			DBCollection activities = db.getCollection("activities");
+			temp =  getEnergyPercentagesPerType(activities, inst_id);
+			m.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return temp;	
+	}
+	
+	/** 	Get energy sums (based on the simulation experiment's KPI calculations) per appliance type and installation,
+	 * 		along with the corresponding limits for defining the "efficient", "average" and "inefficient" ranges (per appliance type).
+	 * @param dbname	The name of the database, where the target simulation is stored.
+	 * @param inst_id		The id of the target installation. Cannot be null.
+	 * @return
+	 */
+	public static HashMap<String, Double[]> getEnergySumsWithLimitsPerApplianceType(String dbname, String inst_id)
+	{
+		if (inst_id == null)
+		{
+			System.err.println("The id of the target installation cannot be null.");
+			System.exit(2);
+		}
+		
+		HashMap<String, Double[]> results = new HashMap<String, Double[]>();
+		HashMap<String, Double[]> limits = getEnergyLimitsPerApplianceType(dbname);
+		HashMap<String, Double> values = getEnergySumsPerApplianceType(dbname, inst_id);
+		values.put("Whole house",  sum(values));
+		for (String key : values.keySet())
+		{	
+			Double[] temp = new Double[4];
+			temp[0] = values.get(key);
+			double dist = Double.parseDouble(limits.get(key)[0].toString()) - Double.parseDouble(limits.get(key)[1].toString());
+			temp[1] = Double.parseDouble(limits.get(key)[1].toString()) + dist*.2;  
+			temp[2] = Double.parseDouble(limits.get(key)[1].toString()) + dist*.5;
+			temp[3] = Double.parseDouble(limits.get(key)[0].toString());
+			results.put(key, temp);
+		}
+		return results;
+	}
+	
+	/** 	Get energy sums (based on the simulation experiment's KPI calculations) per activity type and installation,
+	 * 		along with the corresponding limits for defining the "efficient", "average" and "inefficient" ranges (per activity type).
+	 * @param dbname	The name of the database, where the target simulation is stored.
+	 * @param inst_id		The id of the target installation. Cannot be null.
+	 * @return
+	 */
+	public static HashMap<String, Double[]> getEnergySumsWithLimitsPerActivityType(String dbname, String inst_id)
+	{
+		if (inst_id == null)
+		{
+			System.err.println("The id of the target installation cannot be null.");
+			System.exit(2);
+		}
+		
+		HashMap<String, Double[]> results = new HashMap<String, Double[]>();
+		HashMap<String, Double[]> limits = getEnergyLimitsPerActivityType(dbname);
+		HashMap<String, Double> values = getEnergySumsPerActivityType(dbname, inst_id);
+		values.put("Whole house",  sum(values));
+		for (String key : values.keySet())
+		{	
+			Double[] temp = new Double[4];
+			temp[0] = values.get(key);
+			double dist = Double.parseDouble(limits.get(key)[0].toString()) - Double.parseDouble(limits.get(key)[1].toString());
+			temp[1] = Double.parseDouble(limits.get(key)[1].toString()) + dist*.2;  
+			temp[2] = Double.parseDouble(limits.get(key)[1].toString()) + dist*.5;
+			temp[3] = Double.parseDouble(limits.get(key)[0].toString());
+			results.put(key, temp);
+		}
+		return results;
+	}
+	
+	private static double sum(Map<String, Double> m) {
+	    double sum = 0;
+	    for (String key : m.keySet()) {
+	        sum += m.get(key);
+	    }
+	    return sum;
+	}
+	
+	public static void main(String args[])
+	{
+		DecimalFormat df = new DecimalFormat("#0.000"); 
+		Mongo m;
+		try {
+			
+			String dbname = "53b27869300460bd8c6825ea";
+
+			System.out.println("Energy sum per appliance type for simulation");
+			HashMap<String, Double> results = getEnergySumsPerApplianceType(dbname, null);
 			for (String key : results.keySet())
 			{
 	            double value = Double.parseDouble(results.get(key).toString());  
@@ -145,9 +396,8 @@ public class MongoQueries {
 			
 			System.out.println();
 			
-			System.out.println("Energy sum per activity type");
-			DBCollection activities = db.getCollection("activities");
-			HashMap<String, Double> results2 = getEnergySumsPerType(activities, null);
+			System.out.println("Energy sum per activity type for simulation");
+			HashMap<String, Double> results2 = getEnergySumsPerActivityType(dbname, null);
 			for (String key : results2.keySet())
 			{
 				double value = Double.parseDouble(results2.get(key).toString());  
@@ -156,31 +406,61 @@ public class MongoQueries {
 			
 			System.out.println();
 			
+			
+			m = new Mongo();
+			DB db = m.getDB(dbname);
 			DBCollection installations = db.getCollection("installations");
 			List<ObjectId> inst_ids = installations.distinct("_id");
 			
 			for (ObjectId inst_id : inst_ids)
 			{
 				System.out.println("Energy sum per appliance type for installation " + inst_id);
-				HashMap<String, Double> resultsPerInst = getEnergyPercentagesPerType(appliances, inst_id+"");
+				HashMap<String, Double> resultsPerInst = getEnergySumsPerApplianceType(dbname, inst_id+"");
 				for (String key : resultsPerInst.keySet())
 				{
 					double value = Double.parseDouble(resultsPerInst.get(key).toString());  
-		            System.out.println(key + ": \t" + df.format(value) + "%");  
+		            System.out.println(key + ": \t" + df.format(value));  
 				}	 
 				
 				System.out.println();
 				
 				System.out.println("Energy sum per activity type for installation " + inst_id);
-				HashMap<String, Double> resultsPerInst2 = getEnergyPercentagesPerType(activities, inst_id+"");
+				HashMap<String, Double> resultsPerInst2 = getEnergySumsPerActivityType(dbname, inst_id+"");
 				for (String key : resultsPerInst2.keySet())
 				{
 					double value = Double.parseDouble(resultsPerInst2.get(key).toString());  
-		            System.out.println(key + ": \t" + df.format(value) + "%"); 
+		            System.out.println(key + ": \t" + df.format(value)); 
 				}	
 				
 				System.out.println();
 			}
+			
+			for (ObjectId inst_id : inst_ids)
+			{
+				System.out.println("Energy sum and limits per appliance type for installation " + inst_id);
+				HashMap<String, Double[]> resultsPerInst = getEnergySumsWithLimitsPerApplianceType(dbname, inst_id+"");
+				for (String key : resultsPerInst.keySet())
+				{
+					Double[] values = resultsPerInst.get(key);  
+		            System.out.println(key + ": \t" + df.format(values[0]) + ", \tefficient<=" + df.format(values[1]) + ", \taverage<=" + df.format(values[2]) + ", \tinefficient<=" + df.format(values[3]) );  
+				}	 
+				
+				System.out.println();
+				
+				System.out.println("Energy sum and limits per activity type for installation " + inst_id);
+				HashMap<String, Double[]> resultsPerInst2 = getEnergySumsWithLimitsPerActivityType(dbname, inst_id+"");
+				for (String key : resultsPerInst2.keySet())
+				{
+					Double[] values = resultsPerInst2.get(key);  
+		            System.out.println(key + ": \t" + df.format(values[0]) + ", \tefficient<=" + df.format(values[1]) + ", \taverage<=" + df.format(values[2]) + ", \tinefficient<=" + df.format(values[3]) );  
+				}	
+				
+				System.out.println();
+			}
+			
+			
+			
+			
 			
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block

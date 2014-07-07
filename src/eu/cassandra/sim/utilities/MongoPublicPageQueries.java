@@ -11,6 +11,7 @@ import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.List;
+import java.util.TreeMap;
 
 import org.bson.types.ObjectId;
 
@@ -27,8 +28,9 @@ import com.mongodb.MongoException;
 public class MongoPublicPageQueries {
 	
 	private static SimpleDateFormat sdf = new SimpleDateFormat("yyyy/MM/dd");
+	private static SimpleDateFormat sdf2 = new SimpleDateFormat("yyyy MM");
 	private static Calendar c1 = Calendar.getInstance();
-
+	
 	private static double getBarGraphValuesWithIndices(DBCollection collection, String aggregateBy, boolean resultsAreEnergy, String inst_id, Date[] dates, int startIndex, int numOfRecords)
 	{
 //		DBObject skip = new BasicDBObject("$skip", recordsToSkip);
@@ -43,6 +45,8 @@ public class MongoPublicPageQueries {
 			groupFields.put("aggrValue", new BasicDBObject( "$sum", "$p"));
 		else	
 			groupFields.put("aggrValue", new BasicDBObject( "$avg", "$p"));
+//		groupFields.put("cnt", new BasicDBObject("$sum", 1));
+		
 		DBObject group = new BasicDBObject("$group", groupFields);
 		
 		List<DBObject> pipeline; 
@@ -65,6 +69,7 @@ public class MongoPublicPageQueries {
 			value = Double.parseDouble(""+result.get("aggrValue"));
 			if (resultsAreEnergy)
 				value /= 60.0;
+//			System.out.println(value + " " +  Double.parseDouble(""+result.get("cnt")));
 		}
 		return value;
 	}
@@ -81,7 +86,7 @@ public class MongoPublicPageQueries {
 			divideBy = 60 * 24 * 7;
 			break;
 		case "month":
-			divideBy = 60 * 24 * 30;	//28, 30, 31 depending on the simulation dates!!!
+			divideBy = Double.NaN;
 			break;
 		default:
 			break;
@@ -90,8 +95,7 @@ public class MongoPublicPageQueries {
 		int block_size = 24;
 		switch(aggregateBy) {
 		case "day":
-			c1.setTime(dates[0]);
-			block_size = c1.get(Calendar.DAY_OF_MONTH);	 // X, when on the X-th day of the month
+			block_size = 15;
 			break;
 		case "week":
 			block_size = 12;
@@ -139,14 +143,13 @@ public class MongoPublicPageQueries {
 			
 		double[] results = new double[block_size];
 		int index = 0;
+		if (numOfResults<block_size)
+			index = block_size-numOfResults;
 		for (int i=numOfResults<block_size?0:(numOfResults-block_size); i<numOfResults; i++)
 		{
 			int recordsToSkip = (int) (aggregateBy.equals("month") ? divideBys[i] : divideBy*i);
 			int recordsToAggregate = (int)(aggregateBy.equals("month") ? divideBys[i+1] : divideBy);
-//			long startTime = System.currentTimeMillis();
 			results[index] = getBarGraphValuesWithIndices(collection, aggregateBy, resultsAreEnergy, inst_id, dates, recordsToSkip, recordsToAggregate);
-//			long stopTime = System.currentTimeMillis();
-//		    System.out.println(stopTime - startTime);
 			index++;
 		}
 		return results;
@@ -178,113 +181,239 @@ public class MongoPublicPageQueries {
 		return dates;
 	}
 
-	private static double mean(double[] m) {
+	private static double mean(TreeMap<String, Double> m) {
 	    double sum = 0;
-	    for (int i = 0; i < m.length; i++) {
-	        sum += m[i];
+	    for (String key : m.keySet()) {
+	        sum += m.get(key);
 	    }
-	    return sum / m.length;
+	    return sum / m.size();
 	}
 	
-	private static double sum(double[] m) {
+	private static double sum(TreeMap<String, Double> m) {
 	    double sum = 0;
-	    for (int i = 0; i < m.length; i++) {
-	        sum += m[i];
+	    for (String key : m.keySet()) {
+	        sum += m.get(key);
 	    }
 	    return sum;
 	}
 	
-	public static void main(String[] args) {
+	
+	/** Get the most recent "block" of values for the consumption plot. Returned values may refer to power or energy consumption.
+	 *   They are aggregated by the selected unit (hour, day, week or month) and, if required, by installation.
+	 *   "Block" length is 24 when aggregating by hour, 15 when aggregating by day and 12 when aggregating by week or month.
+	 * @param dbname				The name of the database, where the target simulation is stored.
+	 * @param aggregateBy			The aggregation unit. Possible values are: hour, day, week and month.
+	 * @param resultsAreEnergy	Whether returned values refer to power or energy consumption.
+	 * @param inst_id					The id of the target installation. If null computations are about the whole simulation.
+	 * @return
+	 */
+	public static TreeMap<String, Double> getConsumptionPlotData(String dbname, String aggregateBy, boolean resultsAreEnergy, String inst_id)
+	{
+		TreeMap<String, Double> results = new TreeMap<String, Double>();
 		Mongo m;
 		try {
 			m = new Mongo();
-			DB db = m.getDB("53b27869300460bd8c6825ea");
-			DecimalFormat df = new DecimalFormat("#0.000"); 
-			
+			DB db = m.getDB(dbname);
 			Date[] dates  = getSimulationDates(db);
-			
-			DBCollection collection = db.getCollection("aggr_results");
-			String aggregateBy = "hour";						
+			DBCollection collection;
+			if (inst_id!=null)
+				collection = db.getCollection("inst_results");
+			else
+				collection = db.getCollection("aggr_results");
+								
 			if ( !aggregateBy.equals("hour") && !aggregateBy.equals("day") && !aggregateBy.equals("week") && !aggregateBy.equals("month") )
 			{
 				System.err.println("ERROR: Possible values for the aggregation unit are: hour, day, week and month.");
 				System.exit(1);
 			}
-			boolean resultsAreEnergy = false;
 			
-			String aggrValueName = "avgActivePower";
-			if (resultsAreEnergy)
-				aggrValueName = "sumEnergy";
-			
-			System.out.println("\"Block\" length is 24 when aggregating by hour, X when aggregating by day on the X-th day of the month, "
-					+ "and 12 when aggregating by week or month.");
-			System.out.println();
+			double[] results2 = getMostRecentBlockOfBarGraphValues(collection, aggregateBy, resultsAreEnergy, inst_id, dates);
 			
 			int block_size = 24;
+			String dt;
 			switch(aggregateBy) {
 			case "day":
-				c1.setTime(dates[0]);
-				block_size = c1.get(Calendar.DAY_OF_MONTH);	 // X, when on the X-th day of the month
+				block_size = 15;
+				dt = sdf.format(dates[1]);
+				try {
+					c1.setTime(sdf.parse(dt));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				for (int i=block_size-1; i>=0; i--)
+				{
+					c1.add(Calendar.DAY_OF_MONTH, -1);  // number of days to add
+					results.put(sdf.format(c1.getTime()), results2[i]);
+				}
 				break;
 			case "week":
 				block_size = 12;
+				dt = sdf.format(dates[1]);
+				try {
+					c1.setTime(sdf.parse(dt));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				for (int i=block_size-1; i>=0; i--)
+				{
+					c1.add(Calendar.DAY_OF_MONTH, -7);  // number of days to add
+					results.put(sdf.format(c1.getTime()), results2[i]);
+				}
 				break;
 			case "month":
 				block_size = 12;	
+				dt = sdf.format(dates[1]);
+				try {
+					c1.setTime(sdf.parse(dt));
+				} catch (ParseException e) {
+					e.printStackTrace();
+				}
+				results.put(sdf2.format(c1.getTime()), results2[block_size-1]);
+				for (int i=block_size-2; i>=0; i--)
+				{
+					c1.add(Calendar.MONTH, -1);  // number of days to add
+					results.put(sdf2.format(c1.getTime()), results2[i]);
+				}
 				break;
 			default:
+				DecimalFormat df = new DecimalFormat("00"); 
+				for (int i=0; i<24; i++)
+					results.put(df.format(i) + ":00", results2[i]);
 				break;
 			}
 			
-//			System.out.println("Results per " + aggregateBy + " for all installations in the simulation (showing the most recent \"block\" of values - with size " + block_size + ")");		     
-////		    long startTime = System.currentTimeMillis();
-//			double[] results2 = getMostRecentBlockOfBarGraphValues(collection, aggregateBy, resultsAreEnergy, null, dates);
-//			for (int i=0; i<results2.length; i++)
-//				System.out.println(aggregateBy + ": " + i + "\t" + aggrValueName + ": " + results2[i]);
-////			long stopTime = System.currentTimeMillis();
-////		    System.out.println(stopTime - startTime);
-//		     
-//			System.out.println();
+			m.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MongoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return results;
+	}
+	
+	/** Get the values for the comparison bars. Returned values may refer to power or energy consumption.
+	 *   They are aggregated by the selected unit (hour, day, week or month) and, if required, by installation.
+	 *   "Block" length is 24 when aggregating by hour, 15 when aggregating by day and 12 when aggregating by week or month.
+	 * @param dbname				The name of the database, where the target simulation is stored.
+	 * @param aggregateBy			The aggregation unit. Possible values are: hour, day, week and month.
+	 * @param resultsAreEnergy	Whether returned values refer to power or energy consumption.
+	 * @param aInst_id				The id of the target installation. Cannot be null.
+	 * @return
+	 */
+	public static HashMap<String, Double> getComparisonBarsData(String dbname, String aggregateBy, boolean resultsAreEnergy, String aInst_id)
+	{
+		if (aInst_id == null)
+		{
+			System.err.println("The id of the target installation cannot be null.");
+			System.exit(2);
+		}
 			
+		HashMap<String, Double> barsData = new HashMap<String, Double>();
+		Mongo m;
+		try {
+			m = new Mongo();
+			DB db = m.getDB(dbname);
 			DBCollection installations = db.getCollection("installations");
 			List<ObjectId> inst_ids = installations.distinct("_id");
-			collection = db.getCollection("inst_results");
 			
 			double maxInst = Double.MIN_VALUE;
 			double minInst = Double.MAX_VALUE;
 			double avgInst = 0;
 			
-			System.out.println("Results per " + aggregateBy + " and per installation (showing the most recent \"block\" of values - with size " + block_size + ")");
+		
 			for (ObjectId inst_id : inst_ids)
 			{
-				System.out.println("Installation: "+ inst_id);
-				double[] resultsInst2 = getMostRecentBlockOfBarGraphValues(collection, aggregateBy, resultsAreEnergy, inst_id+"", dates);
-				for (int i=0; i<resultsInst2.length; i++)
-					System.out.println(aggregateBy + ": " + i + " \t" + aggrValueName + ": " + resultsInst2[i]);
-				
-				System.out.print("Installation: "+ inst_id + " \t" );
+				TreeMap<String, Double> resultsInst = getConsumptionPlotData(dbname, aggregateBy, resultsAreEnergy, inst_id+"");
 				double value = 0;
 				if (!resultsAreEnergy)
-					value = mean(resultsInst2);
+					value = mean(resultsInst);
 				else
-					value = sum(resultsInst2);
+					value = sum(resultsInst);
 				if (value > maxInst)
 					maxInst = value;
 				if (value < minInst)
 					minInst = value;
 				avgInst += value;
-				System.out.println(aggrValueName.substring(0, 3) +": \t" + value);
-				
-				
-			    System.out.println();
+				if ((inst_id+"").equals(aInst_id))
+					barsData.put("you", value);
 			}
 			avgInst /= (double)inst_ids.size();
 			
-			System.out.println();
-			System.out.println("MAX: " + maxInst);
-			System.out.println("MIN: " + minInst);
-			System.out.println("AVG: " + avgInst);
+			barsData.put("max", maxInst);
+			barsData.put("min", minInst);
+			barsData.put("avg", avgInst);
 			
+			m.close();
+		} catch (UnknownHostException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (MongoException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return barsData;
+	}
+	
+	
+	public static void main(String[] args) {
+		
+		DecimalFormat df = new DecimalFormat("#0.000"); 
+		Mongo m;
+		try {
+			String dbname = "53b27869300460bd8c6825ea";
+			String aggregateBy = "week";		
+			boolean resultsAreEnergy = false;
+			
+
+			m = new Mongo();
+			DB db = m.getDB(dbname);
+				
+			System.out.println("\"Block\" length is 24 when aggregating by hour, 15 when aggregating by day, "
+					+ "and 12 when aggregating by week or month.");
+			System.out.println();
+			
+			System.out.println("Results per " + aggregateBy + " for all installations in the simulation (showing the most recent \"block\" of values)");		     
+			TreeMap<String, Double> results = getConsumptionPlotData(dbname, aggregateBy, resultsAreEnergy, null);
+			for (String key : results.keySet())
+			{
+				double value = Double.parseDouble(results.get(key).toString());  
+	            System.out.println(key + " \t" +value); 
+			}	
+			System.out.println();
+			
+			
+			DBCollection installations = db.getCollection("installations");
+			List<ObjectId> inst_ids = installations.distinct("_id");
+
+			System.out.println("Results per " + aggregateBy + " and per installation (showing the most recent \"block\" of values)");
+			for (ObjectId inst_id : inst_ids)
+			{
+				System.out.println("Installation: "+ inst_id);
+				TreeMap<String, Double> results2 = getConsumptionPlotData(dbname, aggregateBy, resultsAreEnergy, inst_id+"");
+				for (String key : results2.keySet())
+				{
+					double value = Double.parseDouble(results2.get(key).toString());  
+		            System.out.println(key + " \t" +value); 
+				}	
+//			    System.out.println((!resultsAreEnergy?"avg: "+ mean(results):"sum: "+sum(results)));
+			}
+			
+			System.out.println();
+			
+			for (ObjectId inst_id : inst_ids)
+			{
+				System.out.println("Installation: "+ inst_id);
+				HashMap<String, Double> results2 = getComparisonBarsData(dbname, aggregateBy, resultsAreEnergy, inst_id+"");
+				for (String key : results2.keySet())
+				{
+					double value = Double.parseDouble(results2.get(key).toString());  
+		            System.out.print(key + " \t" +value + " \t"); 
+				}	
+				 System.out.println();
+			}
+			m.close();
 		} catch (UnknownHostException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
