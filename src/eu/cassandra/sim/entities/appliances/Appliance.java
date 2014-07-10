@@ -273,5 +273,9 @@ public class Appliance extends Entity {
     public double getCost() {
     	return cost;
     }
+    
+    public double getStandByConsumption() {
+		return standByConsumption;
+	}
 	
 }

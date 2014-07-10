@@ -15,9 +15,6 @@
 */
 package eu.cassandra.sim.entities.people;
 
-import java.text.DecimalFormat;
-import java.text.NumberFormat;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Set;
@@ -57,10 +54,10 @@ public class Activity extends Entity {
 	private HashMap<String, Vector<Double>> probApplianceUsed;
 	private SimulationParams simulationWorld;
 	
-	private Vector<DBObject> activityModels;
-	private Vector<DBObject> starts;
-	private Vector<DBObject> durations;
-	private Vector<DBObject> times;
+//	private Vector<DBObject> activityModels;
+//	private Vector<DBObject> starts;
+//	private Vector<DBObject> durations;
+//	private Vector<DBObject> times;
 	
 	private double maxPower = 0;
 	private double cycleMaxPower = 0;
@@ -154,10 +151,10 @@ public class Activity extends Entity {
 		config = builder.config;
 		probApplianceUsed = builder.probApplianceUsed;
 		simulationWorld = builder.simulationWorld;
-		starts = builder.starts;
-		times = builder.times;
-		durations = builder.durations;
-		activityModels = builder.activityModels;
+//		starts = builder.starts;
+//		times = builder.times;
+//		durations = builder.durations;
+//		activityModels = builder.activityModels;
 	}
 
 	public void addAppliance (String day, Appliance a, Double prob) {
@@ -177,37 +174,37 @@ public class Activity extends Entity {
 		probStartTime.put(day, probDist);
 	}
 	
-	public void addStarts(DBObject o) {
-		starts.add(o);
-	}
-	
-	public void addDurations(DBObject o) {
-		durations.add(o);
-	}
-	
-	public void addTimes(DBObject o) {
-		times.add(o);
-	}
-	
-	public void addModels(DBObject o) {
-		activityModels.add(o);
-	}
-	
-	public Vector<DBObject> getModels() {
-		return activityModels;
-	}
-	
-	public Vector<DBObject> getStarts() {
-		return starts;
-	}
-	
-	public Vector<DBObject> getTimes() {
-		return times;
-	}
-	
-	public Vector<DBObject> getDurations() {
-		return durations;
-	}
+//	public void addStarts(DBObject o) {
+//		starts.add(o);
+//	}
+//	
+//	public void addDurations(DBObject o) {
+//		durations.add(o);
+//	}
+//	
+//	public void addTimes(DBObject o) {
+//		times.add(o);
+//	}
+//	
+//	public void addModels(DBObject o) {
+//		activityModels.add(o);
+//	}
+//	
+//	public Vector<DBObject> getModels() {
+//		return activityModels;
+//	}
+//	
+//	public Vector<DBObject> getStarts() {
+//		return starts;
+//	}
+//	
+//	public Vector<DBObject> getTimes() {
+//		return times;
+//	}
+//	
+//	public Vector<DBObject> getDurations() {
+//		return durations;
+//	}
 	
 	public void addDuration(String day, ProbabilityDistribution probDist) {
 		probDuration.put(day, probDist);
@@ -619,5 +616,33 @@ public class Activity extends Entity {
     public double getCost() {
     	return cost;
     }
+
+	public HashMap<String, ProbabilityDistribution> getProbStartTime() {
+		return probStartTime;
+	}
+
+	public HashMap<String, ProbabilityDistribution> getProbDuration() {
+		return probDuration;
+	}
+
+	public HashMap<String, Boolean> getShiftable() {
+		return shiftable;
+	}
+
+	public HashMap<String, Boolean> getConfig() {
+		return config;
+	}
+
+	public HashMap<String, Vector<Appliance>> getAppliances() {
+		return appliances;
+	}
+	
+	public HashMap<String, ProbabilityDistribution> getnTimesGivenDay() {
+		return nTimesGivenDay;
+	}
+
+	public void setAppliances(HashMap<String, Vector<Appliance>> appliances) {
+		this.appliances = appliances;
+	}
 
 }

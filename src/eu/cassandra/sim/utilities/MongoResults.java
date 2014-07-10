@@ -4,26 +4,7 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
 
-public class MongoResults implements DBResults{
-
-	public final static String COL_APPRESULTS = "app_results";
-	public final static String COL_APPRESULTS_EXP = "app_expected";
-	public final static String COL_ACTRESULTS_EXP = "act_expected";
-	public final static String COL_INSTRESULTS = "inst_results";
-	public final static String COL_INSTRESULTS_EXP = "inst_expected";
-	public final static String COL_INSTRESULTS_HOURLY = "inst_results_hourly";
-	public final static String COL_INSTRESULTS_HOURLY_EN = "inst_results_hourly_energy";
-	public final static String COL_AGGRRESULTS = "aggr_results";
-	public final static String COL_AGGRRESULTS_EXP = "aggr_expected";
-	public final static String COL_AGGRRESULTS_HOURLY = "aggr_results_hourly";
-	public final static String COL_AGGRRESULTS_HOURLY_EN = "aggr_results_hourly_energy";
-	public final static String COL_INSTKPIS = "inst_kpis";
-	public final static String COL_APPKPIS = "app_kpis";
-	public final static String COL_ACTKPIS = "act_kpis";
-	public final static String COL_AGGRKPIS = "aggr_kpis";
-	public final static String AGGR = "aggr";
-	
-	
+public class MongoResults implements DBResults{	
 	
 	private String dbname;
 	

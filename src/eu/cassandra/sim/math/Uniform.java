@@ -109,6 +109,18 @@ public class Uniform implements ProbabilityDistribution {
 
 	    estimateGreaterProbability();
 	  }
+	  
+	  public Uniform (Uniform source)
+	  {
+	    name = "Generic";
+	    type = "Uniform Distribution";
+	    precomputeFrom = source.precomputeFrom;
+	    precomputeTo = source.precomputeTo;
+	    precomputed = source.precomputed;
+	    greaterProbability = source.greaterProbability.clone();
+	    numberOfBins = source.numberOfBins;
+	    histogram = source.histogram.clone();
+	  }
 
 	  public String getType ()
 	  {

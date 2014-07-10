@@ -95,6 +95,17 @@ public class Gaussian implements ProbabilityDistribution
     sigma = s;
     precomputed = false;
   }
+  
+  public Gaussian (Gaussian source)
+  {
+	  mean = source.mean;
+	  sigma = source.sigma;
+	  precomputed = source.precomputed;
+	  numberOfBins = source.numberOfBins;
+	  precomputeFrom = source.precomputeFrom;
+	  precomputeTo = source.precomputeTo;
+	  histogram = source.histogram.clone();
+  }
 
   public String getDescription()
   {

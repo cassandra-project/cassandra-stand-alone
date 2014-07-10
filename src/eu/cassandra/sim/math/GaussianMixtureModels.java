@@ -54,6 +54,7 @@ public class GaussianMixtureModels implements ProbabilityDistribution
   }
 
   /**
+   * Constructor 
    * @param mu
    *          Mean value of the Gaussian distribution.
    * @param s
@@ -68,6 +69,22 @@ public class GaussianMixtureModels implements ProbabilityDistribution
       gaussians[i] = new Gaussian(mu[i], s[i]);
     }
     precomputed = false;
+  }
+  
+  public GaussianMixtureModels (GaussianMixtureModels source)
+  {
+	int n = source.gaussians.length;
+    gaussians = new Gaussian[n];
+    pi = new double[n];
+    for (int i = 0; i < n; i++) {
+      pi[i] = source.pi[i];
+      gaussians[i] = new Gaussian(source.gaussians[i]);
+    }
+    precomputed = source.precomputed;
+    precomputeFrom = source.precomputeFrom;
+    precomputeTo = source.precomputeTo;
+    numberOfBins = source.numberOfBins;
+    histogram =source.histogram.clone();
   }
 
   public String getDescription ()

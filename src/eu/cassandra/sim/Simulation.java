@@ -253,7 +253,7 @@ public class Simulation { // implements Runnable {
 		  						installation.getId(), 
 		  						p * mcrunsRatio, 
 		  						q * mcrunsRatio, 
-		  						DerbyResults.COL_INSTRESULTS);
+		  						DBResults.COL_INSTRESULTS);
 		  				sumP += p;
 		  				sumQ += q;
 		  				avgPPowerPerHour += p;
@@ -305,12 +305,12 @@ public class Simulation { // implements Runnable {
 			  						installation.getId(),
 			  						(avgPPowerPerHourPerInst[counter]/Constants.MIN_IN_HOUR) * mcrunsRatio, 
 			  						(avgQPowerPerHourPerInst[counter]/Constants.MIN_IN_HOUR) * mcrunsRatio, 
-			  						DerbyResults.COL_INSTRESULTS_HOURLY);
+			  						DBResults.COL_INSTRESULTS_HOURLY);
 			  				m.addTickResultForInstallation((tick/Constants.MIN_IN_HOUR), 
 			  						installation.getId(),
 			  						(avgPPowerPerHourPerInst[counter]) * mcrunsRatio, 
 			  						(avgQPowerPerHourPerInst[counter]) * mcrunsRatio, 
-			  						DerbyResults.COL_INSTRESULTS_HOURLY_EN);
+			  						DBResults.COL_INSTRESULTS_HOURLY_EN);
 			  				avgPPowerPerHourPerInst[counter] = 0;
 			  				avgQPowerPerHourPerInst[counter] = 0;
 			  				counter++;
@@ -323,7 +323,7 @@ public class Simulation { // implements Runnable {
 //		  	  		DBConn.getConn().getCollection(MongoRuns.COL_RUNS).update(query, objRun);
   	  			}
   	  			for(Installation installation: installations) {
-  	  			installation.updateCost(tick); // update the rest of the energy
+  	  				installation.updateCost(tick); // update the rest of the energy
   	  				m.addKPIs(installation.getId(), 
   	  						installation.getMaxPower() * mcrunsRatio, 
   	  						installation.getAvgPower() * mcrunsRatio, 
@@ -440,15 +440,13 @@ public class Simulation { // implements Runnable {
   		System.out.println("Simulation setup started");
   		
   		installations = setupScenario();
-  		
   		endTick = Constants.MIN_IN_DAY * numOfDays;
   		
   		// Check type of setup
   		if(setup.equalsIgnoreCase("static")) {
   			staticSetupStandalone(installations);
   		} else if(setup.equalsIgnoreCase("dynamic")) {
-  			System.err.println("Dynamic setup for scenarios not yet supported");
-//  			dynamicSetup(jsonScenario, jump);
+  			dynamicSetupStandalone(null);
   		} else {
   			throw new Exception("Problem with setup property!!!");
   		}
@@ -747,175 +745,139 @@ public class Simulation { // implements Runnable {
   		}
   		for(int i = 0; i < aggr_exp.length; i++) {
   			m.addExpectedPowerTick(i, "aggr", aggr_exp[i], 0, MongoResults.COL_AGGRRESULTS_EXP);
-				System.out.println(aggr_exp[i]);
+//				System.out.println(aggr_exp[i]);
 			}
   		System.out.println("End exp power calc.");
   	}
 	
-	private String addEntity(Entity e, boolean jump) {
-  		BasicDBObject obj = e.toDBObject();
-  		if(!jump) DBConn.getConn(dbname).getCollection(e.getCollection()).insert(obj);
-  		ObjectId objId = (ObjectId)obj.get("_id");
-  		return objId.toString();
-  	}
+//	private String addEntity(Entity e, boolean jump) {
+//  		BasicDBObject obj = e.toDBObject();
+//  		if(!jump) DBConn.getConn(dbname).getCollection(e.getCollection()).insert(obj);
+//  		ObjectId objId = (ObjectId)obj.get("_id");
+//  		return objId.toString();
+//  	}
 
 
 
-	public void dynamicSetupStandalone(DBObject jsonScenario, boolean jump) throws Exception {		
+	public void dynamicSetupStandalone(DBObject jsonScenario) throws Exception {		
 		
-		int numOfInstallations = 10;											// INPUT   <-----------------
-		Vector<Installation> instTypes = setupScenario();			// INPUT   <-----------------
+		int numOfInstallations = 10;																				// INPUT   <-----------------
+		Vector<Installation> instTypes = setupScenario();												// INPUT   <-----------------
 		instTypes.get(0).setName("Collection");
 //		String scenario_id = this.simulationWorld.getName();
 		// number of installation types defined (including collection)
 		int maxInsts = instTypes.size();  					
 		queue = new PriorityBlockingQueue<Event>(2 * numOfInstallations);
-		double[] installationProbabilities = {0.5, 0.5};					// INPUT   <-----------------
-		if (installationProbabilities.length != maxInsts)
-		{
-			System.err.println("Installation probabilities array not defined correctly. Selection among the defined installation types will be made equiprobably");
-			installationProbabilities = new double[maxInsts];
-			for (int i=0; i<maxInsts; i++)
-				installationProbabilities[i] = 1 / (double)maxInsts;
-		}
+		HashMap<String,Double> instGen = new HashMap<String,Double>();				// INPUT   <-----------------
+		instGen.put("inst1", 0.5);
+		instGen.put("inst2", 0.5);
+		HashMap<String,Double> applGen = new HashMap<String,Double>();				// INPUT   <-----------------
+		applGen.put("appl1", 0.75);
+		HashMap<String,Double> personGen = new HashMap<String,Double>();				// INPUT   <-----------------
+		personGen.put("person1", 0.7);
+		personGen.put("person2", 0.3);
 		
-		HashMap<String,Double> instGen = new HashMap<String,Double>();
-		for(int k = 0; k < maxInsts; k++) {
-			String entityId = instTypes.get(k).getId();
-			double prob = installationProbabilities[k];
-			instGen.put(entityId, new Double(prob));
-		}
 		
 		for (int i = 1; i <= numOfInstallations; i++) {
-			DBObject instDoc = (DBObject)jsonScenario.get("inst"+ getInstId(maxInsts, instGen));
-			String instName = ((String)instDoc.get("name"));
+			Installation instDoc = instTypes.get(getInstId(maxInsts, instGen));
+			String instName = instDoc.getName();
 			System.out.println(instName);
 			
 			if (instName.equalsIgnoreCase("Collection")) {
-				String id = i+"";
-				String name = ((String)instDoc.get("name")) + i;
-				String description = (String)instDoc.get("description");
-				String type = (String)instDoc.get("type");
-				Installation inst = new Installation.Builder(
-						id, name, description, type, null, pricing, baseline_pricing).build();
+				String id = instDoc.getId();
+				String name = instDoc.getName() + i;
+				String description = instDoc.getDescription();
+				String type = instDoc.getType();
+				Installation inst = new Installation.Builder(id, name, description, type, null, pricing, baseline_pricing).build();
 //				inst.setParentId(scenario_id);
-				String inst_id = addEntity(inst, jump);
+				String inst_id = id + i;
 				inst.setId(inst_id);
-				int appcount = Utils.getInt(instDoc.get("appcount"));
+				Vector<Appliance> apps = instDoc.getAppliances();
+				int appcount = apps.size();  
 				// Create the appliances
 				HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
-				for (int j = 1; j <= appcount; j++) {
-					DBObject applianceDoc = (DBObject)instDoc.get("app"+j);
-					String appid = ((ObjectId)applianceDoc.get("_id")).toString();
-					String appname = (String)applianceDoc.get("name");
-					String appdescription = (String)applianceDoc.get("description");
-					String apptype = (String)applianceDoc.get("type");
-					double standy = Utils.getDouble(applianceDoc.get("standy_consumption"));
-					boolean base = Utils.getBoolean(applianceDoc.get("base"));
-					DBObject consModDoc = (DBObject)applianceDoc.get("consmod");
-					ConsumptionModel pconsmod = new ConsumptionModel(consModDoc.get("pmodel").toString(), "p");
-					ConsumptionModel qconsmod = new ConsumptionModel(consModDoc.get("qmodel").toString(), "q");
-					Appliance app = new Appliance.Builder(
-							appid,
-							appname,
-							appdescription,
-							apptype,
-							inst,
-							pconsmod,
-							qconsmod,
-							standy,
-							base).build(orng);
+				for (int j = 0; j < appcount; j++) {
+					Appliance applianceDoc = apps.get(j);
+					String appid = applianceDoc.getId();
+					String appname = applianceDoc.getName();
+					String appdescription = applianceDoc.getDescription();
+					String apptype = applianceDoc.getType();
+					double standy = applianceDoc.getStandByConsumption();
+					boolean base = applianceDoc.isBase();
+					ConsumptionModel pconsmod = new ConsumptionModel(applianceDoc.getPConsumptionModel().toDBObject().get("model").toString(), "p");
+					ConsumptionModel qconsmod = new ConsumptionModel(applianceDoc.getQConsumptionModel().toDBObject().get("model").toString(), "q");
+					Appliance app = new Appliance.Builder( appid, appname, appdescription, apptype, inst, pconsmod, qconsmod, standy, base).build(orng);
 					existing.put(appid, app);
-				}
-
-				HashMap<String,Double> gens = new HashMap<String,Double>();
-				for(int k = 0; k < generators.size(); k++) {
-					DBObject generator = (DBObject)generators.get(k);
-					String entityId = (String)generator.get("entity_id");
-					double prob = Utils.getDouble(generator.get("probability"));
-					gens.put(entityId, new Double(prob));
 				}
 
 				Set<String> keys = existing.keySet();
 				for(String key : keys) {
-					Double prob = gens.get(key);
+					Double prob = applGen.get(key);
 					if(prob != null) {
 						double probValue = prob.doubleValue();
 						if(orng.nextDouble() < probValue) {
 							Appliance selectedApp = existing.get(key);
 							selectedApp.setParentId(inst.getId());
-							String app_id = addEntity(selectedApp, jump);
+							String app_id =  inst_id + "_" + selectedApp.getId();
 							selectedApp.setId(app_id);
 							inst.addAppliance(selectedApp);
-							ConsumptionModel cm = selectedApp.getPConsumptionModel();
-							cm.setParentId(app_id);
-							String cm_id = addEntity(cm, jump);
-							cm.setId(cm_id);
+//							ConsumptionModel cm = selectedApp.getPConsumptionModel();
+//							cm.setParentId(app_id);
+//							String cm_id = "lala"; //addEntity(cm, jump);
+//							cm.setId(cm_id);
 						}
 					}
 				}
 
-				int personcount = Utils.getInt(instDoc.get("personcount"));
+				int personcount = instDoc.getPersons().size();
 				// Create the appliances
 				HashMap<String,Person> existingPersons = new HashMap<String,Person>();
-				for (int j = 1; j <= personcount; j++) {
-					DBObject personDoc = (DBObject)instDoc.get("person"+j);
-					String personid = ((ObjectId)personDoc.get("_id")).toString();
-					String personName = (String)personDoc.get("name");
-					String personDescription = (String)personDoc.get("description");
-					String personType = (String)personDoc.get("type");
-					double awareness = Utils.getDouble(personDoc.get("awareness"));
-					double sensitivity = Utils.getDouble(personDoc.get("sensitivity"));
-					Person person = new Person.Builder(
-							personid,
-							personName,
-							personDescription,
-							personType, inst, awareness, sensitivity).build();
-					int actcount = Utils.getInt(personDoc.get("activitycount"));
+				for (int j = 0; j < personcount; j++) {
+					Person personDoc = instDoc.getPersons().get(j);
+					String personid = personDoc.getId();
+					String personName = personDoc.getName();
+					String personDescription = personDoc.getDescription();
+					String personType = personDoc.getType();
+					double awareness = personDoc.getAwareness();
+					double sensitivity = personDoc.getSensitivity();
+					Person person = new Person.Builder(personid, personName, personDescription, personType, inst, awareness, sensitivity).build();
+					Vector<Activity> acts = personDoc.getActivities();
+					int actcount = acts.size();
 					//System.out.println("Act-Count: " + actcount);
-					for (int k = 1; k <= actcount; k++) {
-						DBObject activityDoc = (DBObject)personDoc.get("activity"+k);
-						String activityName = (String)activityDoc.get("name");
-						String activityType = (String)activityDoc.get("type");
-						String actid = ((ObjectId)activityDoc.get("_id")).toString();
-						int actmodcount = Utils.getInt(activityDoc.get("actmodcount"));
-						Activity act = new Activity.Builder(actid, activityName, "",
-								activityType, simulationWorld).build();
+					for (int k = 0; k < actcount; k++) {
+						Activity activityDoc = acts.get(k);
+						String activityName = activityDoc.getName();
+						String activityType = activityDoc.getType();
+						String actid = activityDoc.getId();
+						Activity act = new Activity.Builder(actid, activityName, "", activityType, simulationWorld).build();
+						HashMap<String, Vector<Appliance>> actModApps = act.getAppliances();
+						HashMap<String, Boolean> shiftables = act.getShiftable();
+						HashMap<String, Boolean> exclusives = act.getConfig();
+						HashMap<String, ProbabilityDistribution> probStartTime = act.getProbStartTime();
+						HashMap<String, ProbabilityDistribution> probDuration = act.getProbDuration();
+						HashMap<String, ProbabilityDistribution> probeTimes = act.getnTimesGivenDay();
 						ProbabilityDistribution startDist;
 						ProbabilityDistribution durDist;
 						ProbabilityDistribution timesDist;
-						for (int l = 1; l <= actmodcount; l++) {
-							DBObject actmodDoc = (DBObject)activityDoc.get("actmod"+l);
-							act.addModels(actmodDoc);
-							String actmodName = (String)actmodDoc.get("name");
-							String actmodType = (String)actmodDoc.get("type");
-							String actmodDayType = (String)actmodDoc.get("day_type");
-							boolean shiftable = Utils.getBoolean(actmodDoc.get("shiftable"));
-							boolean exclusive = Utils.getEquality(actmodDoc.get("config"), "exclusive", true);
-							DBObject duration = (DBObject)actmodDoc.get("duration");
-							act.addDurations(duration);
-							durDist = json2dist(duration, "duration");
-							//System.out.println(durDist.getPrecomputedBin());
-							DBObject start = (DBObject)actmodDoc.get("start");
-							act.addStarts(start);
-							startDist = json2dist(start, "start");
-							//System.out.println(startDist.getPrecomputedBin());
-							DBObject rep = (DBObject)actmodDoc.get("repetitions");
-							act.addTimes(rep);
-							timesDist = json2dist(rep, "reps");
-							//System.out.println(timesDist.getPrecomputedBin());
-							act.addDuration(actmodDayType, durDist);
-							act.addStartTime(actmodDayType, startDist);
-							act.addTimes(actmodDayType, timesDist);
-							act.addShiftable(actmodDayType, shiftable);
-							act.addConfig(actmodDayType, exclusive);
+						Vector<Appliance> appliances;
+						for (String key: shiftables.keySet()) {
+							boolean shiftable = shiftables.get(key);
+							boolean exclusive = exclusives.get(key);
+							durDist =  copyProbabilityDistribution(probDuration.get(key), "duration");
+							startDist = copyProbabilityDistribution(probStartTime.get(key), "start");
+							timesDist = copyProbabilityDistribution(probeTimes.get(key), "times");
+							act.addDuration(key, durDist);
+							act.addStartTime(key, startDist);
+							act.addTimes(key, timesDist);
+							act.addShiftable(key, shiftable);
+							act.addConfig(key, exclusive);
 							// add appliances
-							BasicDBList containsAppliances = (BasicDBList)actmodDoc.get("containsAppliances");
-							for(int m = 0; m < containsAppliances.size(); m++) {
-								String containAppId = (String)containsAppliances.get(m);
+							appliances = actModApps.get(key);
+							for(int m = 0; m < appliances.size(); m++) {
+								String containAppId = inst_id + "_" + appliances.get(m).getId();
 								Appliance app = existing.get(containAppId);
 								//act.addAppliance(actmodDayType,app,1.0/containsAppliances.size());
-								act.addAppliance(actmodDayType,app,1.0);
+								act.addAppliance(key,app,1.0);
 							}
 						}
 						person.addActivity(act);
@@ -925,43 +887,41 @@ public class Simulation { // implements Runnable {
 
 				double roulette = orng.nextDouble();
 				double sum = 0;
-				for(int k = 0; k < generators.size(); k++) {
-					DBObject generator = (DBObject)generators.get(k);
-					String entityId = (String)generator.get("entity_id");
+				for( String entityId : personGen.keySet() ) {
 					if(existingPersons.containsKey(entityId)) {
-						double prob = Utils.getDouble(generator.get("probability"));
+						double prob = personGen.get(entityId);
 						sum += prob;
 						if(roulette < sum) {
 							Person selectedPerson = existingPersons.get(entityId);
 							selectedPerson.setParentId(inst.getId());
-							String person_id = addEntity(selectedPerson, jump);
+							String person_id = inst_id + "_" + selectedPerson.getId();
 							selectedPerson.setId(person_id);
 							inst.addPerson(selectedPerson);
 							Vector<Activity> activities = selectedPerson.getActivities();
 							for(Activity a : activities) {
 								a.setParentId(person_id);
-								String act_id = addEntity(a, jump);
+								String act_id = person_id + a.getId();
 								a.setId(act_id);
-								Vector<DBObject> models = a.getModels();
-								Vector<DBObject> starts = a.getStarts();
-								Vector<DBObject> durations = a.getDurations();
-								Vector<DBObject> times = a.getTimes();
-								for(int l = 0; l < models.size(); l++ ) {
-									DBObject m = models.get(l);
-									m.put("act_id", act_id);
-									if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(m);
-									ObjectId objId = (ObjectId)m.get("_id");
-									String actmod_id = objId.toString();
-									DBObject s = starts.get(l);
-									s.put("actmod_id", actmod_id);
-									if(!jump)DBConn.getConn(dbname).getCollection("distributions").insert(s);
-									DBObject d = durations.get(l);
-									d.put("actmod_id", actmod_id);
-									if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(d);
-									DBObject t = times.get(l);
-									t.put("actmod_id", actmod_id);
-									if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(t);
-								}
+//								Vector<DBObject> models = a.getModels();
+//								Vector<DBObject> starts = a.getStarts();
+//								Vector<DBObject> durations = a.getDurations();
+//								Vector<DBObject> times = a.getTimes();
+//								for(int l = 0; l < models.size(); l++ ) {
+//									DBObject m = models.get(l);
+//									m.put("act_id", act_id);
+//									if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(m);
+//									ObjectId objId = (ObjectId)m.get("_id");
+//									String actmod_id = objId.toString();
+//									DBObject s = starts.get(l);
+//									s.put("actmod_id", actmod_id);
+//									if(!jump)DBConn.getConn(dbname).getCollection("distributions").insert(s);
+//									DBObject d = durations.get(l);
+//									d.put("actmod_id", actmod_id);
+//									if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(d);
+//									DBObject t = times.get(l);
+//									t.put("actmod_id", actmod_id);
+//									if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(t);
+//								}
 							}
 							break;
 						}
@@ -971,189 +931,122 @@ public class Simulation { // implements Runnable {
 			}  // end if (instName.equalsIgnoreCase("Collection")) {
 			else 
 			{
-				String id = ((ObjectId)instDoc.get("_id")).toString();
-				String name = (String)instDoc.get("name");
-				String description = (String)instDoc.get("description");
-				String type = (String)instDoc.get("type");
-				String clustername = (String)instDoc.get("cluster");
+				String id = instDoc.getId();
+				String name = instDoc.getName() + i;
+				String description = instDoc.getDescription();
+				String type = instDoc.getType();
+//				String clustername = instDoc.getClu
 				PricingPolicy instPricing = pricing;
 				PricingPolicy instBaseline_pricing = baseline_pricing;
 				Installation inst = new Installation.Builder(
-						id, name, description, type, clustername, instPricing, instBaseline_pricing).build();
+						id, name, description, type, "", instPricing, instBaseline_pricing).build();
 //				inst.setParentId(scenario_id);
-				String inst_id = addEntity(inst, jump);
+				String inst_id = id + i;
 				inst.setId(inst_id);
-				int appcount = ((Integer)instDoc.get("appcount")).intValue();
+				Vector<Appliance> apps = instDoc.getAppliances();
+ 				int appcount = apps.size();  
 				// Create the appliances
 				HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
-				for (int j = 1; j <= appcount; j++) {
-					DBObject applianceDoc = (DBObject)instDoc.get("app"+j);
-					String appid = ((ObjectId)applianceDoc.get("_id")).toString();
-					String appname = (String)applianceDoc.get("name");
-					String appdescription = (String)applianceDoc.get("description");
-					String apptype = (String)applianceDoc.get("type");
-					double standy = Utils.getDouble(applianceDoc.get("standy_consumption"));
-					boolean base = Utils.getBoolean(applianceDoc.get("base"));
-					DBObject consModDoc = (DBObject)applianceDoc.get("consmod");
-					ConsumptionModel pconsmod = new ConsumptionModel(consModDoc.get("pmodel").toString(), "p");
-					ConsumptionModel qconsmod = new ConsumptionModel(consModDoc.get("qmodel").toString(), "q");
-					Appliance app = new Appliance.Builder(
-							appid,
-							appname,
-							appdescription,
-							apptype,
-							inst,
-							pconsmod,
-							qconsmod,
-							standy,
-							base).build(orng);
+				for (int j = 0; j < appcount; j++) {
+					Appliance applianceDoc = apps.get(j);
+					String appid = applianceDoc.getId();
+					String appname = applianceDoc.getName();
+					String appdescription = applianceDoc.getDescription();
+					String apptype = applianceDoc.getType();
+					double standy = applianceDoc.getStandByConsumption();
+					boolean base = applianceDoc.isBase();
+					ConsumptionModel pconsmod = new ConsumptionModel(applianceDoc.getPConsumptionModel().toDBObject().get("model").toString(), "p");
+					ConsumptionModel qconsmod = new ConsumptionModel(applianceDoc.getQConsumptionModel().toDBObject().get("model").toString(), "q");
+					Appliance app = new Appliance.Builder( appid, appname, appdescription, apptype, inst, pconsmod, qconsmod, standy, base).build(orng);
 					app.setParentId(inst.getId());
-					String app_id = addEntity(app, jump);
+					String app_id =  inst_id + "_" + appid;
 					app.setId(app_id);
 					existing.put(appid, app);
 					inst.addAppliance(app);
-					ConsumptionModel cm = app.getPConsumptionModel();
-					cm.setParentId(app_id);
-					String cm_id = addEntity(cm, jump);
-					cm.setId(cm_id);
+//					ConsumptionModel cm = app.getPConsumptionModel();
+//					cm.setParentId(app_id);
+//					String cm_id = addEntity(cm, jump);
+//					cm.setId(cm_id);
 				}
-				DBObject personDoc = (DBObject)instDoc.get("person1");
-				String personid = ((ObjectId)personDoc.get("_id")).toString();
-				String personName = (String)personDoc.get("name");
-				String personDescription = (String)personDoc.get("description");
-				String personType = (String)personDoc.get("type");
-				double awareness = Utils.getDouble(personDoc.get("awareness"));
-				double sensitivity = Utils.getDouble(personDoc.get("sensitivity"));
-				Person person = new Person.Builder(
-						personid,
-						personName,
-						personDescription,
-						personType, inst, awareness, sensitivity).build();
+				
+				Person personDoc = instDoc.getPersons().get(0);
+				String personid = personDoc.getId();
+				String personName = personDoc.getName();
+				String personDescription = personDoc.getDescription();
+				String personType = personDoc.getType();
+				double awareness = personDoc.getAwareness();
+				double sensitivity = personDoc.getSensitivity();
+				Person person = new Person.Builder(personid, personName, personDescription, personType, inst, awareness, sensitivity).build();
 				person.setParentId(inst.getId());
-				String person_id = addEntity(person, jump);
+				String person_id =  inst_id + "_" + personid;
 				person.setId(person_id);
 				inst.addPerson(person);
-				int actcount = ((Integer)personDoc.get("activitycount")).intValue();
-				for (int j = 1; j <= actcount; j++) {
-					DBObject activityDoc = (DBObject)personDoc.get("activity"+j);
-					String activityName = (String)activityDoc.get("name");
-					String activityType = (String)activityDoc.get("type");
-					String actid = ((ObjectId)activityDoc.get("_id")).toString();
-					int actmodcount = ((Integer)activityDoc.get("actmodcount")).intValue();
-					Activity act = new Activity.Builder(actid, activityName, "",
-							activityType, simulationWorld).build();
+				Vector<Activity> acts = personDoc.getActivities();
+				int actcount = acts.size();
+				for (int j = 0; j < actcount; j++) {
+					Activity activityDoc = acts.get(j);
+					String activityName = activityDoc.getName();
+					String activityType = activityDoc.getType();
+					String actid = activityDoc.getId();
+					Activity act = new Activity.Builder(actid, activityName, "", activityType, simulationWorld).build();
+					HashMap<String, Vector<Appliance>> actModApps = act.getAppliances();
+					HashMap<String, Boolean> shiftables = act.getShiftable();
+					HashMap<String, Boolean> exclusives = act.getConfig();
+					HashMap<String, ProbabilityDistribution> probStartTime = act.getProbStartTime();
+					HashMap<String, ProbabilityDistribution> probDuration = act.getProbDuration();
+					HashMap<String, ProbabilityDistribution> probeTimes = act.getnTimesGivenDay();
+					
 					ProbabilityDistribution startDist;
 					ProbabilityDistribution durDist;
 					ProbabilityDistribution timesDist;
-					for (int k = 1; k <= actmodcount; k++) {
-						DBObject actmodDoc = (DBObject)activityDoc.get("actmod"+k);
-						String actmodName = (String)actmodDoc.get("name");
-						String actmodType = (String)actmodDoc.get("type");
-						String actmodDayType = (String)actmodDoc.get("day_type");
-						boolean shiftable = Utils.getBoolean(actmodDoc.get("shiftable"));
-						boolean exclusive = Utils.getEquality(actmodDoc.get("config"), "exclusive", true);
-						DBObject duration = (DBObject)actmodDoc.get("duration");
-						durDist = json2dist(duration, "duration");
-						DBObject start = (DBObject)actmodDoc.get("start");
-						startDist = json2dist(start, "start");
-						DBObject rep = (DBObject)actmodDoc.get("repetitions");
-						timesDist = json2dist(rep, "reps");
-						act.addDuration(actmodDayType, durDist);
-						act.addStartTime(actmodDayType, startDist);
-						act.addTimes(actmodDayType, timesDist);
-						act.addShiftable(actmodDayType, shiftable);
-						act.addConfig(actmodDayType, exclusive);
+					Vector<Appliance> appliances;
+					for (String key: shiftables.keySet()) {
+						boolean shiftable = shiftables.get(key);
+						boolean exclusive = exclusives.get(key);
+						durDist =  copyProbabilityDistribution(probDuration.get(key), "duration");
+						startDist = copyProbabilityDistribution(probStartTime.get(key), "start");
+						timesDist = copyProbabilityDistribution(probeTimes.get(key), "times");
+						act.addDuration(key, durDist);
+						act.addStartTime(key, startDist);
+						act.addTimes(key, timesDist);
+						act.addShiftable(key, shiftable);
+						act.addConfig(key, exclusive);
 						// add appliances
-						BasicDBList containsAppliances = (BasicDBList)actmodDoc.get("containsAppliances");
-						for(int l = 0; l < containsAppliances.size(); l++) {
-							String containAppId = (String)containsAppliances.get(l);
+						appliances = actModApps.get(key);
+						for(int l = 0; l < appliances.size(); l++) {
+							String containAppId = inst_id + "_" + appliances.get(l).getId();
 							Appliance app = existing.get(containAppId);
-							act.addAppliance(actmodDayType,app,1.0/containsAppliances.size());
+							act.addAppliance(key,app,1.0/appliances.size());
 						}
 					}
 					person.addActivity(act);
 					act.setParentId(person_id);
-					String act_id = addEntity(act, jump);
+					String act_id = person_id + actid;
 					act.setId(act_id);
-					Vector<DBObject> models = act.getModels();
-					Vector<DBObject> starts = act.getStarts();
-					Vector<DBObject> durations = act.getDurations();
-					Vector<DBObject> times = act.getTimes();
-					for(int l = 0; l < models.size(); l++ ) {
-						DBObject m = models.get(l);
-						m.put("act_id", act_id);
-						if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(m);
-						ObjectId objId = (ObjectId)m.get("_id");
-						String actmod_id = objId.toString();
-						DBObject s = starts.get(l);
-						s.put("actmod_id", actmod_id);
-						if(!jump)DBConn.getConn(dbname).getCollection("distributions").insert(s);
-						DBObject d = durations.get(l);
-						d.put("actmod_id", actmod_id);
-						if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(d);
-						DBObject t = times.get(l);
-						t.put("actmod_id", actmod_id);
-						if(!jump)DBConn.getConn(dbname).getCollection("act_models").insert(t);
-					}
 				}
 				installations.add(inst);
 			}
 		}
 
 	}
-
-	public static ProbabilityDistribution json2dist(DBObject distribution, String flag) throws Exception {
-		String distType = (String)distribution.get("distrType");
-		switch (distType) {
-		case ("Normal Distribution"):
-			BasicDBList normalList = (BasicDBList)distribution.get("parameters");
-		DBObject normalDoc = (DBObject)normalList.get(0);
-		double mean = Double.parseDouble(normalDoc.get("mean").toString());
-		double std = Double.parseDouble(normalDoc.get("std").toString());
-		Gaussian normal = new Gaussian(mean, std);
-		normal.precompute(0, 1439, 1440);
-		return normal;
-		case ("Uniform Distribution"):
-			BasicDBList unifList = (BasicDBList)distribution.get("parameters");
-		DBObject unifDoc = (DBObject)unifList.get(0);
-		double from = Double.parseDouble(unifDoc.get("start").toString());
-		double to = Double.parseDouble(unifDoc.get("end").toString());
-		// System.out.println(from + " " + to);
-		Uniform uniform = null;
-		if(flag.equalsIgnoreCase("start")) {
-			uniform = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
-		} else {
-			uniform = new Uniform(from, to, false);
-		}
-		return uniform;
-		case ("Gaussian Mixture Models"):
-			BasicDBList mixList = (BasicDBList)distribution.get("parameters");
-		int length = mixList.size();
-		double[] w = new double[length];
-		double[] means = new double[length];
-		double[] stds = new double[length];
-		for(int i = 0; i < mixList.size(); i++) {
-			DBObject tuple = (DBObject)mixList.get(i);
-			w[i] = Double.parseDouble(tuple.get("w").toString());
-			means[i] = Double.parseDouble(tuple.get("mean").toString());
-			stds[i] = Double.parseDouble(tuple.get("std").toString());
-		}
-		GaussianMixtureModels gmm = new GaussianMixtureModels(length, w, means, stds);
-		gmm.precompute(0, 1439, 1440);
-		return gmm;
+	
+	public ProbabilityDistribution copyProbabilityDistribution(ProbabilityDistribution source, String flag) throws Exception
+	{
+		switch (source.getType()) { 
+		case ( "Gaussian"):
+			return new Gaussian((Gaussian)source);
+		case ("Uniform"):
+			return new Uniform((Uniform)source);
+		case ("GMM"):
+			return new GaussianMixtureModels((GaussianMixtureModels)source);
 		case ("Histogram"):
-			BasicDBList hList = (BasicDBList)distribution.get("values");
-		int l = hList.size();
-		double[] v = new double[l];
-		for(int i = 0; i < l; i++) {
-			v[i] = Double.parseDouble(hList.get(i).toString());
-		}
-		Histogram h = new Histogram(v);
-		return h;
+			return new Histogram((Histogram)source);
 		default:
 			throw new Exception("Non existing distribution type. Problem in setting up the simulation.");
 		}
 	}
+
+	
   
 
 

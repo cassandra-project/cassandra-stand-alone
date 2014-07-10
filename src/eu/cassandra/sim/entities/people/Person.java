@@ -115,4 +115,21 @@ public class Person extends Entity {
 	public String getCollection() {
 		return "persons";
 	}
+	
+	public double getAwareness() {
+		return awareness;
+	}
+
+	public void setAwareness(double awareness) {
+		this.awareness = awareness;
+	}
+
+	public double getSensitivity() {
+		return sensitivity;
+	}
+
+	public void setSensitivity(double sensitivity) {
+		this.sensitivity = sensitivity;
+	}
+	
 }

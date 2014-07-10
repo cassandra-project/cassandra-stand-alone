@@ -39,6 +39,11 @@ public class SimulationParams
   private String name;
   private String locationInfo;
   private String responseType;
+  
+  private int mcruns;
+  private double co2;
+  private int numOfDays;
+  private String setup;
 
   public SimulationParams ()
   {
@@ -58,6 +63,7 @@ public class SimulationParams
 	  name = dbo.get("name").toString();
 	  locationInfo = dbo.get("locationInfo").toString();
 	  int duration = Integer.parseInt(dbo.get("numberOfDays").toString());
+	  this.numOfDays = duration;
 
 	  DBObject tempList = (DBObject) dbo.get("calendar");
 
@@ -81,6 +87,7 @@ public class SimulationParams
 	  this.responseType = responseType;
 	  this.name = name;
 	  this.locationInfo = locationInfo;
+	  this.numOfDays = duration;
 	  
 	  simCalendar = new SimCalendar(startDateDay, startDateMonth, startDateYear, duration);
   }
@@ -105,6 +112,38 @@ public class SimulationParams
   {
     return locationInfo;
   }
+
+public int getMcruns() {
+	return mcruns;
+}
+
+public double getCo2() {
+	return co2;
+}
+
+public int getNumOfDays() {
+	return numOfDays;
+}
+
+public void setMcruns(int mcruns) {
+	this.mcruns = mcruns;
+}
+
+public void setCo2(double co2) {
+	this.co2 = co2;
+}
+
+public void setNumOfDays(int numOfDays) {
+	this.numOfDays = numOfDays;
+}
+
+public String getSetup() {
+	return setup;
+}
+
+public void setSetup(String setup) {
+	this.setup = setup;
+}
 
 //  /**
 //   * @param args

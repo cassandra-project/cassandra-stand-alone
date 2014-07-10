@@ -19,7 +19,7 @@ package eu.cassandra.sim.math;
 
 public class Histogram implements ProbabilityDistribution{
 
-	protected int numberOfBins;
+	  protected int numberOfBins;
 	  protected double precomputeFrom;
 	  protected double precomputeTo;
 	  protected double[] histogram;
@@ -50,6 +50,14 @@ public class Histogram implements ProbabilityDistribution{
 		histogram = values;
 		precomputed = true;
 		
+	}
+
+	public Histogram(Histogram source) {
+		precomputeFrom = source.precomputeFrom;
+		precomputeTo = source.precomputeTo;
+		numberOfBins = source.numberOfBins;
+		histogram = source.histogram.clone();
+		precomputed = source.precomputed;
 	}
 
 	@Override
