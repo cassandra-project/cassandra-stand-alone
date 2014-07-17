@@ -384,7 +384,7 @@ public class MongoQueries {
 		Mongo m;
 		try {
 			
-			String dbname = "53b27869300460bd8c6825ea";
+			String dbname = "53bf9b1230047440795beba8";
 
 			System.out.println("Energy sum per appliance type for simulation");
 			HashMap<String, Double> results = getEnergySumsPerApplianceType(dbname, null);

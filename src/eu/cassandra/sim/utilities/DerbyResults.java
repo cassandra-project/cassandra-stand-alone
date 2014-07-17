@@ -22,6 +22,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.HashMap;
 
 /**
  * 
@@ -209,6 +210,11 @@ public class DerbyResults implements DBResults{
 		String query = "SELECT * FROM " + tableName + " WHERE inst_id='" + inst_id + "' AND tick=" + tick;
 		return executeSelectQuery(query);
 	}
+	
+	public ResultSet getExpectedPowerTickResultForInstallation(int tick, String inst_id, String tableName) {
+		String query = "SELECT * FROM " + tableName + " WHERE inst_id='" + inst_id + "' AND tick=" + tick;
+		return executeSelectQuery(query);
+	}
 
 	/**
 	 * 
@@ -281,12 +287,12 @@ public class DerbyResults implements DBResults{
 			s = conn.createStatement();	
 			// Call utility method to check if table exists & create the table if needed
 			if (!checkIfTableExists(conn, tableName)) {
-				System.out.println("Creating table " + tableName);
+//				System.out.println("Creating table " + tableName);
 				s.execute(createString);
 				s.execute(createStringPK);
 				if (createIndex)
 				{
-					System.out.println("Creating index " + tableName + "_INDEX");
+//					System.out.println("Creating index " + tableName + "_INDEX");
 					s.execute(createIndexString);
 				}
 			}
@@ -313,7 +319,7 @@ public class DerbyResults implements DBResults{
 			s = conn.createStatement();	
 			// Call utility method to check if table exists & create the table if needed
 			if (!checkIfTableExists(conn, tableName)) {
-				System.out.println("Creating table " + tableName);
+//				System.out.println("Creating table " + tableName);
 				s.execute(createString);
 				s.execute(createStringPK);
 			}
@@ -441,5 +447,78 @@ public class DerbyResults implements DBResults{
 			errorPrint(e);
 		}
 		return pqData;
+	}
+
+	@Override
+	public HashMap<String, Double> getKPIs(String inst_id) {
+		HashMap<String, Double> result =  new  HashMap<String, Double>();
+		String collection;
+		String id;
+		if(inst_id.equalsIgnoreCase(AGGR)) {
+			id = AGGR;
+			collection = COL_AGGRKPIS;
+		} else {
+			id = inst_id;
+			collection = COL_INSTKPIS;
+		}
+		String sQuery = "select * from " + collection + " where inst_id ='" + id + "'";
+		ResultSet temp = executeSelectQuery(sQuery);
+		try {
+			while (temp.next()) {
+				result.put("Avg Peak (W)", temp.getDouble("AVGPEAK"));
+				result.put("Max Power (W)", temp.getDouble("MAXPOWER"));
+				result.put("Avg Power (W)",  temp.getDouble("AVGPOWER"));
+				result.put("Energy (KWh)", temp.getDouble("ENERGY"));
+				result.put("Cost (EUR)", temp.getDouble("COST"));
+				result.put("CO2", temp.getDouble("CO2"));
+			}
+		} catch (SQLException e) {
+			System.out.println(" . . . exception thrown:");
+			errorPrint(e);
+		}
+		return result;
+		
+	}
+
+	@Override
+	public HashMap<String, Double> getAppKPIs(String app_id) {
+		HashMap<String, Double> result =  new  HashMap<String, Double>();
+		String sQuery = "select * from " + DBResults.COL_APPKPIS + " where app_id='" + app_id + "'";
+		ResultSet temp = executeSelectQuery(sQuery);
+		try {
+			while (temp.next()) {
+				result.put("Max Power (W)", temp.getDouble("MAXPOWER"));
+				result.put("Avg Power (W)",  temp.getDouble("AVGPOWER"));
+				result.put("Energy (KWh)", temp.getDouble("ENERGY"));
+				result.put("Cost (EUR)", temp.getDouble("COST"));
+				result.put("CO2", temp.getDouble("CO2"));
+			}
+
+		} catch (SQLException e) {
+			System.out.println(" . . . exception thrown:");
+			errorPrint(e);
+		}
+		return result;
+	}
+
+	@Override
+	public HashMap<String, Double> getActKPIs(String act_id) {
+		HashMap<String, Double> result =  new  HashMap<String, Double>();
+		String sQuery = "select * from " + DBResults.COL_ACTKPIS + " where act_id='" + act_id + "'";
+		ResultSet temp = executeSelectQuery(sQuery);
+		try {
+			while (temp.next()) {
+				result.put("Max Power (W)", temp.getDouble("MAXPOWER"));
+				result.put("Avg Power (W)",  temp.getDouble("AVGPOWER"));
+				result.put("Energy (KWh)", temp.getDouble("ENERGY"));
+				result.put("Cost (EUR)", temp.getDouble("COST"));
+				result.put("CO2", temp.getDouble("CO2"));
+			}
+
+		} catch (SQLException e) {
+			System.out.println(" . . . exception thrown:");
+			errorPrint(e);
+		}
+		return result;
 	}
 }

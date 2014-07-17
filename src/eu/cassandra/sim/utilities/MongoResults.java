@@ -1,5 +1,7 @@
 package eu.cassandra.sim.utilities;
 
+import java.util.HashMap;
+
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
@@ -12,6 +14,7 @@ public class MongoResults implements DBResults{
  		dbname = adbname;
 	}
 	
+	@Override
 	public void createIndexes() {
 		DBObject index = new BasicDBObject("tick", 1);
 		DBConn.getConn(dbname).getCollection(COL_AGGRRESULTS).createIndex(index);
@@ -25,44 +28,13 @@ public class MongoResults implements DBResults{
 		DBConn.getConn(dbname).getCollection(COL_INSTRESULTS_HOURLY).createIndex(index);
 	}
 	
-//	/**
-//	 * 
-//	 * @param app_id
-//	 * @param openTick
-//	 * @throws MongoRefNotFoundException
-//	 */
-//	public void addOpenTick(String app_id, int openTick) throws MongoRefNotFoundException {
-//		DBObject refObj = new MongoDBQueries().getEntity(MongoAppliances.COL_APPLIANCES, app_id);
-//		if(refObj == null) {
-//			throw new MongoRefNotFoundException("Reference Key: " + 
-//					app_id + " was not found for " + MongoAppliances.COL_APPLIANCES);
-//		}
-//		DBObject data = new BasicDBObject();
-//		data.put("app_id", app_id);
-//		data.put("opentick", openTick);
-//		DBConn.getConn(dbname).getCollection(COL_APPRESULTS).insert(data);
-//	}
-
-	/**
-	 * 
-	 * @param app_id
-	 * @param closeTick
-	 */
-	public void addCloseTick(String app_id, int closeTick) {
-		DBObject q = new BasicDBObject();
-		q.put("app_id", app_id);
-		DBObject data = new BasicDBObject();
-		data.put("$set", new BasicDBObject("closetick", closeTick));
-		q.put("closetick:", new BasicDBObject("$exists",false));
-		DBConn.getConn(dbname).getCollection(COL_APPRESULTS).update(q,data,false,false);
-	}
-	
 	/**
 	 * @param inst_id
 	 * @param maxPower
 	 * @param avgPower
 	 * @param energy
 	 */
+	@Override
 	public void addKPIs(String inst_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		boolean first = false;
 		DBObject query = new BasicDBObject();
@@ -120,7 +92,38 @@ public class MongoResults implements DBResults{
 			DBConn.getConn(dbname).getCollection(collection).update(query, data, false, false);
 		}
 	}
+	
+	@Override
+	public HashMap<String, Double> getKPIs(String inst_id) {
+		HashMap<String, Double> temp =  new  HashMap<String, Double>();
+		DBObject query = new BasicDBObject();
+		String collection;
+		String id;
+		if(inst_id.equalsIgnoreCase(AGGR)) {
+			id = AGGR;
+			collection = COL_AGGRKPIS;
+		} else {
+			id = inst_id;
+			collection = COL_INSTKPIS;
+		}
+		query.put("inst_id", id);
+		DBObject data = DBConn.getConn(dbname).getCollection(collection).findOne(query);
+		
+		if(data == null) {
+			System.err.println("No data found for installation " + inst_id);
+		} else {
+			temp.put("Avg Peak (W)", ((Double)data.get("avgPeak")).doubleValue());
+			temp.put("Max Power (W)", ((Double)data.get("maxPower")).doubleValue());
+			temp.put("Avg Power (W)", ((Double)data.get("avgPower")).doubleValue());
+			temp.put("Energy (KWh)", ((Double)data.get("energy")).doubleValue());
+			temp.put("Cost (EUR)", ((Double)data.get("cost")).doubleValue());
+			temp.put("CO2", ((Double)data.get("co2")).doubleValue());
+		}
+		
+		return temp;
+	}
 
+	@Override
 	public void addAppKPIs(String app_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		boolean first = false;
 		DBObject query = new BasicDBObject();
@@ -157,6 +160,28 @@ public class MongoResults implements DBResults{
 		}
 	}
 	
+	@Override
+	public HashMap<String, Double> getAppKPIs(String app_id) {
+		HashMap<String, Double> temp =  new  HashMap<String, Double>();
+		DBObject query = new BasicDBObject();
+		String collection = DBResults.COL_APPKPIS;
+		query.put("app_id", app_id);
+		DBObject data = DBConn.getConn(dbname).getCollection(collection).findOne(query);
+		
+		if(data == null) {
+			System.err.println("No data found for appliance " + app_id);
+		} else {
+			temp.put("Max Power (W)", ((Double)data.get("maxPower")).doubleValue());
+			temp.put("Avg Power (W)", ((Double)data.get("avgPower")).doubleValue());
+			temp.put("Energy (KWh)", ((Double)data.get("energy")).doubleValue());
+			temp.put("Cost (EUR)", ((Double)data.get("cost")).doubleValue());
+			temp.put("CO2", ((Double)data.get("co2")).doubleValue());
+		}
+		
+		return temp;
+	}
+	
+	@Override
 	public void addActKPIs(String app_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		boolean first = false;
 		DBObject query = new BasicDBObject();
@@ -193,6 +218,26 @@ public class MongoResults implements DBResults{
 		}
 	}
 
+	@Override
+	public HashMap<String, Double> getActKPIs(String act_id) {
+		HashMap<String, Double> temp =  new  HashMap<String, Double>();
+		DBObject query = new BasicDBObject();
+		String collection = DBResults.COL_ACTKPIS;
+		query.put("act_id", act_id);
+		DBObject data = DBConn.getConn(dbname).getCollection(collection).findOne(query);
+		
+		if(data == null) {
+			System.err.println("No data found for activity " + act_id);
+		} else {
+			temp.put("Max Power (W)", ((Double)data.get("maxPower")).doubleValue());
+			temp.put("Avg Power (W)", ((Double)data.get("avgPower")).doubleValue());
+			temp.put("Energy (KWh)", ((Double)data.get("energy")).doubleValue());
+			temp.put("Cost (EUR)", ((Double)data.get("cost")).doubleValue());
+			temp.put("CO2", ((Double)data.get("co2")).doubleValue());
+		}
+		
+		return temp;
+	}
 	
 	/**
 	 * 
@@ -201,6 +246,7 @@ public class MongoResults implements DBResults{
 	 * @param p
 	 * @param q
 	 */
+	@Override
 	public void addTickResultForInstallation(int tick,
 			String inst_id, double p, double q, String collection) {
 		boolean first = false;
@@ -228,6 +274,7 @@ public class MongoResults implements DBResults{
 		}
 	}
 	
+	@Override
 	public void addExpectedPowerTick(int tick, String id, double p, double q, String collection) {
 		DBObject data = new BasicDBObject();
 		data.put("id", id);
@@ -245,24 +292,21 @@ public class MongoResults implements DBResults{
 		return DBConn.getConn(dbname).getCollection(collection).findOne(query);
 	}
 	
-	public void normalize(int tick, String inst_id, int divisor, String collection) {
+	public DBObject getExpectedPowerTickResultForInstallation(int tick,
+			String inst_id, String collection) {
 		DBObject query = new BasicDBObject();
-		query.put("inst_id", inst_id);
+		query.put("id", inst_id);
 		query.put("tick", tick);
-		DBObject data = DBConn.getConn(dbname).getCollection(collection).findOne(query);
-		double newp = ((Double)data.get("p")).doubleValue() / divisor;
-		double newq = ((Double)data.get("q")).doubleValue() / divisor;
-		data.put("p",newp);
-		data.put("q",newq);
-		DBConn.getConn(dbname).getCollection(collection).update(query, data, false, false);
+		return DBConn.getConn(dbname).getCollection(collection).findOne(query);
 	}
-
+	
 	/**
 	 * 
 	 * @param tick
 	 * @param p
 	 * @param q
 	 */
+	@Override
 	public void addAggregatedTickResult(int tick, double p, double q, String collection) {
 		boolean first = false;
 		DBObject query = new BasicDBObject();
@@ -288,15 +332,5 @@ public class MongoResults implements DBResults{
 		}
 	}
 	
-	public void normalize(int tick, int divisor, String collection) {
-		DBObject query = new BasicDBObject();
-		query.put("tick", tick);
-		DBObject data = DBConn.getConn(dbname).getCollection(collection).findOne(query);
-		double newp = ((Double)data.get("p")).doubleValue() / divisor;
-		double newq = ((Double)data.get("q")).doubleValue() / divisor;
-		data.put("p",newp);
-		data.put("q",newq);
-		DBConn.getConn(dbname).getCollection(collection).update(query, data, false, false);
-	}
 }
 

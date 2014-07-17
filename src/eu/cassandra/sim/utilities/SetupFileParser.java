@@ -31,6 +31,7 @@ import java.util.Vector;
 
 public class SetupFileParser {
 	
+	public Properties generalProps = new Properties();
 	public Properties propPricing = new Properties();
 	public Properties propPricingBaseline = new Properties();
 	public Properties propSimulation = new Properties();
@@ -41,6 +42,7 @@ public class SetupFileParser {
 	public Vector<Properties> propAppliances = new Vector<Properties>();
 	public Vector<Properties> propActivities = new Vector<Properties>();
 	public Vector<Properties> propActModels = new Vector<Properties>();
+	public Properties demographics = new Properties();
 	
 	Hashtable<String, String[]> propRequired = new Hashtable<String, String[]>();
 	
@@ -50,6 +52,12 @@ public class SetupFileParser {
 	boolean foundPricingBaselineSegment = false;
 	
 	public SetupFileParser() {
+		
+		String[] requiredPropertiesGeneral = {}; //{ "seed", "useDerby", "printKPIs"};
+		propRequired.put("general_properties", requiredPropertiesGeneral);
+		
+		String[] requiredPropertiesDemographics= { "name", "number_of_entities", "participation_probs_installations", "participation_probs_persons", "participation_probs_apps"};
+		propRequired.put("demographics", requiredPropertiesDemographics); 
 		
 		String[] requiredPropertiesScenario = { "name", "setup"};
 		propRequired.put("scenario", requiredPropertiesScenario);
@@ -133,6 +141,19 @@ public class SetupFileParser {
 			}
 
 			br.close();
+			
+			if (this.propSimulation.isEmpty())
+				throw new Exception("ERROR: required \"simulation\" segment missing from the setup file");
+			
+			if (this.propScenario.isEmpty())
+				throw new Exception("ERROR: required \"scenario\" segment missing from the setup file");
+			
+			if (this.propInstallations.isEmpty())
+				throw new Exception("ERROR: at least one \"installation\" segment must be present in the setup file");
+			
+			checkResponseType(propSimulation.getProperty("response_type"), propPricingBaseline, propPricing);
+			
+			
 		
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -147,6 +168,12 @@ public class SetupFileParser {
 	{
 		Properties prop = new Properties();
 		switch(segmentTitle) {
+		case "demographics":
+			prop = this.demographics;
+			break;
+		case "general_properties":
+			prop = this.generalProps;
+			break;
 		case "simulation":
 			if (foundSimulationSegment)
 				throw new Exception("ERROR: only one \"simulation\" segment allowed per setup file");
@@ -225,6 +252,24 @@ public class SetupFileParser {
 			String repetitions_distrType = prop.getProperty("repetitions_distrType");
 			checkDistribution(repetitions_distrType, prop, "repetitions");
 		}
+	}
+	
+	private void checkResponseType(String responseType, Properties propBP, Properties propP) throws Exception
+	{
+		if (responseType.equals("Discrete") || responseType.equals("Optimal") || responseType.equals("Normal")) 
+		{
+			if (propBP.get("type") == null)
+				   throw new Exception("ERROR: baseline pricing scheme undefined  for demand response scenario of type \"" + responseType + "\"");
+			if (propP.get("type") == null)
+				 throw new Exception("ERROR: pricing scheme undefined  for demand response scenario of type \"" + responseType + "\"");
+		}
+		else if (responseType.equals("None")) 
+		{
+			if (propBP.get("type") != null)
+				  System.err.println("WARNING: baseline pricing scheme ignored for scenarios with response type \"" + responseType + "\".");
+		}
+		else
+			throw new Exception("ERROR: unkown response type \"" + responseType + "\" employed");
 	}
 	
 	private void checkDistribution(String distrType, Properties prop, String distrCase) throws Exception

@@ -2,53 +2,7 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/asm-3.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/collections-generic-4.01.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/colt-1.2.0.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/commons-codec-1.7.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/commons-io-2.4.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/commons-logging-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/concurrent-1.3.4.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/gson-2.2.2.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/httpclient-4.2.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/httpcore-4.2.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/j3d-core-1.3.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jackson-core-asl-1.9.2.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jackson-jaxrs-1.9.2.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jackson-mapper-asl-1.9.2.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jackson-xc-1.9.2.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jersey-client-1.12.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jersey-core-1.12.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jersey-json-1.12.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jersey-multipart-1.12.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jersey-server-1.12.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jersey-servlet-1.12.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jettison-1.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jsontools-core-1.7.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jsr311-api-1.1.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-3d-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-3d-demos-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-algorithms-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-api-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-graph-impl-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-io-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-jai-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-jai-samples-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-samples-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/jung-visualization-2.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/junit.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/log4j-1.2.16.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/mimepull-1.9.3.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/mockito-all-1.9.5.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/servlet-api.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/slf4j-api-1.6.6.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/slf4j-nop-1.6.6.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/stax-api-1.0.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/vahlasJsonValidation.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/vecmath-1.3.1.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/weka_369.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/cassandra/wstx-asl-3.2.6.jar"/>
-	<classpathentry kind="lib" path="/Volumes/Data/CODE_PROJECTS/Java Libs/db-derby-10.10.1.1-bin/lib/derby.jar"/>
-	<classpathentry kind="lib" path="/Users/fanitzima/Desktop/mongo-java-driver-2.12.2.jar"/>
+	<classpathentry kind="lib" path="lib/mongo-java-driver-2.12.2.jar"/>
+	<classpathentry kind="lib" path="lib/derby.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -362,8 +362,8 @@ public class MongoPublicPageQueries {
 		DecimalFormat df = new DecimalFormat("#0.000"); 
 		Mongo m;
 		try {
-			String dbname = "53b27869300460bd8c6825ea";
-			String aggregateBy = "week";		
+			String dbname = "53bfb11b3004aad3ee3f413c";
+			String aggregateBy = "day";		
 			boolean resultsAreEnergy = false;
 			
 

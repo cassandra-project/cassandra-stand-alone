@@ -43,21 +43,21 @@ public class DBConn {
 
 	private DB db;
 
-	private DBConn() {
-		try {
-			InitialContext ic = new InitialContext();
-			DB_NAME = (String) ic.lookup("java:/comp/env/mongo.db");
-			DB_HOST = (String) ic.lookup("java:/comp/env/mongo.host.address");
-			m = new Mongo(DB_HOST);
-		} catch (UnknownHostException e) {
-			e.printStackTrace();
-		} catch (MongoException e) {
-			e.printStackTrace();
-		} catch (NamingException e) {
-			e.printStackTrace();
-		}
-		db = m.getDB(DB_NAME);
-	}
+//	private DBConn() {
+//		try {
+//			InitialContext ic = new InitialContext();
+//			DB_NAME = (String) ic.lookup("java:/comp/env/mongo.db");
+//			DB_HOST = (String) ic.lookup("java:/comp/env/mongo.host.address");
+//			m = new Mongo(DB_HOST);
+//		} catch (UnknownHostException e) {
+//			e.printStackTrace();
+//		} catch (MongoException e) {
+//			e.printStackTrace();
+//		} catch (NamingException e) {
+//			e.printStackTrace();
+//		}
+//		db = m.getDB(DB_NAME);
+//	}
 	
 	private DBConn(boolean isStandAlone) {
 		try {

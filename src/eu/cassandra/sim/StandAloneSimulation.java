@@ -1,25 +1,26 @@
-/*   
-   Copyright 2011-2013 The Cassandra Consortium (cassandra-fp7.eu)
-
-   Licensed under the Apache License, Version 2.0 (the "License");
-   you may not use this file except in compliance with the License.
-   You may obtain a copy of the License at
-
-       http://www.apache.org/licenses/LICENSE-2.0
-
-   Unless required by applicable law or agreed to in writing, software
-   distributed under the License is distributed on an "AS IS" BASIS,
-   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-   See the License for the specific language governing permissions and
-   limitations under the License.
-*/
 package eu.cassandra.sim;
 
+import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
-import java.util.Vector;
+/*   
+Copyright 2011-2013 The Cassandra Consortium (cassandra-fp7.eu)
 
-import com.mongodb.BasicDBList;
-import com.mongodb.DBObject;
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+import java.util.Hashtable;
+import java.util.Properties;
+import java.util.Vector;
 
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
@@ -31,8 +32,8 @@ import eu.cassandra.sim.math.GaussianMixtureModels;
 import eu.cassandra.sim.math.Histogram;
 import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.Uniform;
-import eu.cassandra.sim.utilities.ConsumptionModelsLibrary;
-import eu.cassandra.sim.utilities.DistributionsLibrary;
+import eu.cassandra.sim.utilities.DBResults;
+import eu.cassandra.sim.utilities.SetupFileParser;
 
 /**
  * 
@@ -40,354 +41,221 @@ import eu.cassandra.sim.utilities.DistributionsLibrary;
  * @author Fani A. Tzima (fani [at] iti [dot] gr)
  * 
  */
-public class StandAloneSimulation extends Simulation{
+public class StandAloneSimulation extends Simulation {
 	
-	public StandAloneSimulation(String aresources_path, String adbname, int seed) {
-		super(aresources_path, adbname, seed);
+	
+
+	public StandAloneSimulation(String aresources_path, String adbname, int seed, boolean useDerby) {
+		super(aresources_path, adbname, seed, useDerby);
 	}
 	
-//	@Override
-	public Vector<Installation> setupScenario2()
+	@SuppressWarnings("deprecation")
+	@Override
+	public Vector<Installation> setupScenario()
 	{
-  	    String scenarioName = "Scenario1";
-  		String responseType = "None"; 		// "None", "Optimal", "Normal", "Discrete", "Daily"
-  	    String locationInfo ="Katerini";
-  	    int numOfDays = 3; 						// duration
-  	    int startDateDay = 5;
-	    int startDateMonth = 4;
-	    int startDateYear = 2014;
+  	    String scenarioName = sfp.propScenario.getProperty("name");
+  		String responseType = sfp.propSimulation.getProperty("response_type");
+  	    String locationInfo = sfp.propSimulation.getProperty("locationInfo") != null ? sfp.propSimulation.getProperty("locationInfo") : "";
+  	    int numOfDays = Integer.parseInt((sfp.propSimulation.getProperty("numberOfDays") != null ? sfp.propSimulation.getProperty("numberOfDays").trim() : "1")); 					
+  	    int startDateDay = Integer.parseInt((sfp.propSimulation.getProperty("start_dayOfMonth") != null ? sfp.propSimulation.getProperty("start_dayOfMonth").trim() : new Date().getDate()+"")); 	
+	    int startDateMonth = Integer.parseInt((sfp.propSimulation.getProperty("start_month") != null ? sfp.propSimulation.getProperty("start_month").trim() : new Date().getMonth()+"")); 		
+	    int startDateYear = Integer.parseInt((sfp.propSimulation.getProperty("start_year") != null ? sfp.propSimulation.getProperty("start_year").trim() : new Date().getYear()+"")); 	
 	    SimulationParams simParams = new SimulationParams(responseType, scenarioName, locationInfo, numOfDays, startDateDay,  startDateMonth, startDateYear);
 	    
-	    // TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
+	    int mcruns = Integer.parseInt((sfp.propSimulation.getProperty("mcruns") != null ? sfp.propSimulation.getProperty("mcruns").trim() : "1")); 	
+  		double co2 = Integer.parseInt((sfp.propSimulation.getProperty("co2") != null ? sfp.propSimulation.getProperty("co2").trim() : "0")); 	
+  		String setup = sfp.propScenario.getProperty("setup");
+			
+	    if (setup.equals("dynamic"))
+	    {
+	    		if (sfp.demographics.isEmpty())
+	    		{
+					try {
+						throw new Exception("ERROR: Demographic data have to be provided for dynamic scenarios.");
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.exit(0);
+					}
+	    		}
+	    		else
+	    		{
+			    String dName = sfp.demographics.getProperty("name") != null ? sfp.demographics.getProperty("name") : "";
+			    String dType = sfp.demographics.getProperty("type") != null ? sfp.demographics.getProperty("type") : "";
+			    String dDescription = sfp.demographics.getProperty("description") != null ? sfp.demographics.getProperty("description") : "";
+			    int number_of_entities = Integer.parseInt((sfp.demographics.getProperty("number_of_entities") != null ? sfp.demographics.getProperty("number_of_entities").trim() : "1")); 
+			    String participation_probs_installations = sfp.demographics.getProperty("participation_probs_installations") != null ? sfp.demographics.getProperty("participation_probs_installations") : "";
+			    String participation_probs_persons = sfp.demographics.getProperty("participation_probs_persons") != null ? sfp.demographics.getProperty("participation_probs_persons") : "";
+			    String participation_probs_apps = sfp.demographics.getProperty("participation_probs_apps") != null ? sfp.demographics.getProperty("participation_probs_apps") : "";
+			    
+			    this.demographics = new DemographicData(dName, dDescription, dType, number_of_entities, 
+			    		parseProbabilities(participation_probs_installations), parseProbabilities(participation_probs_persons), parseProbabilities(participation_probs_apps));
+	    		}
+	    }
 	    
-//  		String pricingType = "ScalarEnergyPricing"; 			
-//  		int billingCycle = 120;  					// all cases
-//  		double fixedCharge = 15;				// all cases
-//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-//		double[] prices = {0.10, 0.07, 0.07, 0.06};		
-//		double[] levels = {0, 400, 400, 500};				
-//		builderPP.scalarEnergyPricing(prices, levels);
-//		PricingPolicy pricPolicy = builderPP.build();
-		
- 		String pricingType = "AllInclusivePricing"; 			
-  		int billingCycle = 120;  					// all cases
-  		double fixedCharge = 15;				// all cases
-  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);			
-		builderPP.allInclusivePricing(100, 50, 100);
-		PricingPolicy pricPolicy = builderPP.build();
-		
-//		String pricingType = "EnergyPowerPricing"; 			
-//  		int billingCycle = 30;  					// all cases
-//  		double fixedCharge = 2;				// all cases
-//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-//		double contractedCapacity = 10;
-//		double energyPricing = 0.08;
-//		double powerPricing = 2.5;
-//		builderPP.energyPowerPricing(contractedCapacity, energyPricing, powerPricing);
-//		PricingPolicy pricPolicy = builderPP.build();
-	    
-//		String pricingType = "MaximumPowerPricing"; 			
-//  		int billingCycle = 30;  					// all cases
-//  		double fixedCharge = 0;				// all cases
-//  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-//		double energyPricing = 0.08;
-//		double powerPricing = 2.5;
-//		builderPP.maximumPowerPricing(energyPricing, powerPricing, 0.0);
-//		PricingPolicy pricPolicy = builderPP.build();
-	    
-//	    String pricingType = "TOUPricing"; 			
-//	    int billingCycle = 90;  					// all cases
-//	    double fixedCharge = 10;				// all cases
-//	    PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-//	    double[] prices = {0.5, 0.01, 0.10};		
-//	    String[] froms = {"14:00", "00:00", "19:45"};
-//	    String[] tos = {"19:45", "14:00", "23:45"};
-//	    builderPP.touPricing(froms, tos, prices);
-//	    PricingPolicy pricPolicy = builderPP.build();
-	    
-//	    String pricingType = "ScalarEnergyPricingTimeZones"; 			
-//	    int billingCycle = 120;  					// all cases
-//	    double fixedCharge = 10;				// all cases
-//	    PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-//	    double[] prices = {0.10, 0.08, 0.07, 0.06};		
-//	    double[] levels = {0, 400, 400, 500};	
-//	    double offpeakPrice = 0.05;
-//	    	String[] froms = new String[0];
-//	    String[] tos  = new String[0];
-//	    builderPP.scalarEnergyPricingTimeZones(offpeakPrice, prices, levels, froms, tos);
-//	    PricingPolicy pricPolicy = builderPP.build();
-		
-		String pricingTypeB = "None"; 		
-		PricingPolicy pricPolicyB = new PricingPolicy();
+ 		PricingPolicy pricPolicy = new PricingPolicy();
+ 		if (!sfp.propPricing.isEmpty() && !sfp.propPricing.getProperty("type").equals("None"))
+ 		{
+ 			String pricingType = sfp.propPricing.getProperty("type");		
+	  		int billingCycle = Integer.parseInt((sfp.propPricing.getProperty("billingCycle") != null ? sfp.propPricing.getProperty("billingCycle").trim() : "0")); 
+	  		double fixedCharge = Integer.parseInt((sfp.propPricing.getProperty("fixedCharge") != null ? sfp.propPricing.getProperty("fixedCharge").trim() : "0")); 
+	  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);	
+	  		try {
+				pricPolicy = constructPricingPolicy(pricingType, builderPP);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+ 		} 			
+  		
+ 		PricingPolicy pricPolicyB = new PricingPolicy(); 
+ 		if (!sfp.propPricingBaseline.isEmpty() && !sfp.propPricingBaseline.getProperty("type").equals("None"))
+ 		{
+ 			String pricingType = sfp.propPricingBaseline.getProperty("type");		
+	  		int billingCycle = Integer.parseInt((sfp.propPricingBaseline.getProperty("billingCycle") != null ? sfp.propPricingBaseline.getProperty("billingCycle").trim() : "0")); 
+	  		double fixedCharge = Integer.parseInt((sfp.propPricingBaseline.getProperty("fixedCharge") != null ? sfp.propPricingBaseline.getProperty("fixedCharge").trim() : "0")); 
+	  		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);	
+	  		try {
+	  			pricPolicyB = constructPricingPolicy(pricingType, builderPP);
+	  		} catch (Exception e) {
+				e.printStackTrace();
+			}
+ 		}
 		
 		
-	    int mcruns = 5;
-  		double co2 = 2; 
-  		String setup = "static"; 							// static, dynamic
+	   
 
   		
   		Vector<Installation> installations = new Vector<Installation>();
   		
+  		//Create the installations
+  		Hashtable<String, Integer> instIndexes = new Hashtable<String, Integer>();
+  		int index = 0;
+  		for(Properties prop : sfp.propInstallations) 
+  		{
+			String instName = prop.getProperty("name");
+			String instID= prop.getProperty("id").trim();
+			String instDescription = prop.getProperty("description") != null ? prop.getProperty("description") : "";
+			String instType = prop.getProperty("type") != null ? prop.getProperty("type") : "";
+			Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, pricPolicy, pricPolicyB).build();
+			installations.add(inst);
+			instIndexes.put(instID, index);
+			index++;
+  		}
   		
-  		//Create the installation
-		String instName = "Milioudis Base";			// installation names
-		String instID= "inst1";								// installation ids
-		String instDescription = "Milioudis Base";	// installation descriptions
-		String instType = "lala1";							// installation types
-		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, pricPolicy, pricPolicyB).build();
+  		// Create the consumption models
+  		Hashtable<String, ConsumptionModel> consModels = new Hashtable<String, ConsumptionModel>();
+  		for(Properties prop : sfp.propConsModels) 
+  		{
+  			String id = prop.getProperty("id").trim();
+  			ConsumptionModel consModelP = new ConsumptionModel();
+  			ConsumptionModel consModelQ = new ConsumptionModel();
+			try {
+				consModelP = new ConsumptionModel(prop.getProperty("pmodel"), "p");
+				consModelQ = new ConsumptionModel(prop.getProperty("qmodel"), "q");
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+  			 
+  			consModels.put(id+"_p", consModelP);
+  			consModels.put(id+"_q", consModelQ);
+  		}
 		
 		// Create the appliances
-		HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
+		HashMap<String, Appliance> appliances = new HashMap<String, Appliance>();
+  		for(Properties prop : sfp.propAppliances) 
+  		{
+			String applName = prop.getProperty("name");
+			String appliID = prop.getProperty("id").trim();
+			String applDescription = prop.getProperty("description") != null ? prop.getProperty("description") : "";
+			String applType = prop.getProperty("type") != null ? prop.getProperty("type") : "";
+			double applStandByCons = Double.parseDouble((prop.getProperty("standy_consumption") != null ? prop.getProperty("standy_consumption").trim() : "0.0")); 	
+			boolean applIsBase = Boolean.parseBoolean((prop.getProperty("base") != null ? prop.getProperty("base").trim() : "false")); 	
+			Installation inst = installations.get(instIndexes.get(prop.getProperty("installation")));
+			String consumption_model =  prop.getProperty("consumption_model").trim();
+			ConsumptionModel consMP = consModels.get(consumption_model+"_p");
+  			ConsumptionModel consMQ = consModels.get(consumption_model+"_q");
+			Appliance app1 = new Appliance.Builder(appliID,  applName, applDescription, applType, inst, consMP, consMQ, applStandByCons, applIsBase).build(getOrng());
+			appliances.put(appliID, app1);
+			inst.addAppliance(app1);
+  		}
 		
-		String applName ="Cleaning Washing Machine";
-		String appliID = "appl1";
-		String applDescription = "Description of Cleaning Washing Machine";
-		String applType = "Washing";
-		double applStandByCons = 0;
-		boolean applIsBase = false;
-		ConsumptionModel consModelsP = ConsumptionModelsLibrary.getConsumptionModelForWashingMachine("p");
-		ConsumptionModel consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForWashingMachine("q");
-		Appliance app1 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app1);
-		inst.addAppliance(app1);
-		
-		applName ="Lighting Lighting 0";
-		appliID = "appl2";
-		applDescription = "Description of Lighting Lighting 0";
-		applType = "Lighting";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForLighting("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForLighting("q");
-		Appliance app2 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app2);
-		inst.addAppliance(app2);
-		
-		applName ="Cleaning Vacuum Cleaner 0";
-		appliID = "appl3";
-		applDescription = "Description of Cleaning Vacuum Cleaner 0";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner1("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner1("q");
-		Appliance app3 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app3);
-		inst.addAppliance(app3);
-		
-		applName ="Cleaning Water Heater";
-		appliID = "appl4";
-		applDescription = "Description of Cleaning Water Heater";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForWaterHeater("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForWaterHeater("q");
-		Appliance app4 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app4);
-		inst.addAppliance(app4);
+		// Create the people
+  		HashMap<String, Person> people = new HashMap<String, Person>();
+  		for(Properties prop : sfp.propPeople) 
+  		{
+			String personName = prop.getProperty("name");
+			String personID = prop.getProperty("id");
+			String personDesc = prop.getProperty("description") != null ? prop.getProperty("description") : "";
+			String personType = prop.getProperty("type") != null ? prop.getProperty("type") : "";
+			double awareness= Double.parseDouble((prop.getProperty("awareness") != null ? prop.getProperty("awareness").trim() : "0.0")); 	
+			double sensitivity=Double.parseDouble((prop.getProperty("sensitivity") != null ? prop.getProperty("sensitivity").trim() : "0.0")); 	
+			Installation inst = installations.get(instIndexes.get(prop.getProperty("installation").trim()));
+			Person person = new Person.Builder(personID, personName, personDesc, personType, inst, awareness, sensitivity).build();
+			inst.addPerson(person);	
+			people.put(personID, person);
+  		}
+  		
+  		// Create the activities
+  		HashMap<String, Activity> activities = new HashMap<String, Activity>();
+  		for(Properties prop : sfp.propActivities) 
+  		{
+			String activityName = prop.getProperty("name");
+			String activityID = prop.getProperty("id");
+			String activityDesc = prop.getProperty("description") != null ? prop.getProperty("description") : "";
+			String activityType = prop.getProperty("type") != null ? prop.getProperty("type") : "";
+			Activity act = new Activity.Builder(activityID, activityName, activityDesc, activityType, simParams).build();
+			activities.put(activityID, act);
+			Person person = people.get(prop.getProperty("person").trim());
+			person.addActivity(act);
+  		}
+  		
+  		// Create the activity models 
+  		for(Properties prop : sfp.propActModels) 
+  		{
+  			String id = prop.getProperty("id");
+  			String actmodDayType = prop.getProperty("day_type");
+  			boolean shiftable = Boolean.parseBoolean((prop.getProperty("shiftable") != null ? prop.getProperty("shiftable").trim() : "false")); 	
+  			boolean exclusive = Boolean.parseBoolean((prop.getProperty("exclusive") != null ? prop.getProperty("exclusive").trim() : "true")); 	 
+  			String temp = prop.getProperty("containsAppliances");
+  			String[] containsAppliances = temp.split(",");
+  			
+  			Activity act = activities.get(prop.getProperty("activity").trim());
+  			
+  			String distrType = prop.getProperty("start_distrType");
+  			ProbabilityDistribution actModelStart;
+			try {
+				actModelStart = constructDistribution(distrType, prop, "start");
+				act.addStartTime(actmodDayType, actModelStart);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
 
-		applName ="Cleaning Vacuum Cleaner 1";
-		appliID = "appl5";
-		applDescription = "Description of Cleaning Vacuum Cleaner 1";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner2("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner2("q");
-		Appliance app5 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app5);
-		inst.addAppliance(app5);
-		
-		
-		// Create the people
-		String personName = "Nikos";
-		String personID = "person1";
-		String personDesc ="Person";	
-		String personType ="Boy";	
-		double awareness= 0.8;
-		double sensitivity=0.3;
-		Person person = new Person.Builder(personID, personName, personDesc, personType, inst, awareness, sensitivity).build();
-		
-		// Create the activities
-		String activityName = "Cleaning"; 
-		String activityID = "act1";
-		String activityDesc = "Person Cleaning Activity"; 
-		String activityType = "lala"; 
-		Activity act1 = new Activity.Builder(activityID, activityName, activityDesc, activityType, simParams).build();
-		
-		String actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
-		
-		ProbabilityDistribution durDist = new Gaussian(1, 1); 			// Normal Distribution: mean = 1, std = 1
-		durDist.precompute(0, 1439, 1440);
-		act1.addDuration(actmodDayType, durDist);
-		
-		ProbabilityDistribution startDist = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
-		act1.addStartTime(actmodDayType, startDist);
-		
-		double[] v4 = {0.25,0.375,0.25,0,0,0,0,0.125};
-		ProbabilityDistribution timesDist = new Histogram(v4);
-		act1.addTimes(actmodDayType, timesDist);
-		
-		boolean shiftable = false;
-		act1.addShiftable(actmodDayType, shiftable);
-		boolean exclusive = true;
-		act1.addConfig(actmodDayType, exclusive);
-		
-		String[] containsAppliances = {"appl1", "appl3", "appl4", "appl5"};
-//		String[] containsAppliances = {"appl1"};
-		// add appliances
-		for(int m = 0; m < containsAppliances.length; m++) {
-			String containAppId = containsAppliances[m];
-			Appliance app  = existing.get(containAppId);
-			act1.addAppliance(actmodDayType,app,1.0/containsAppliances.length);
-		}
-		
-		person.addActivity(act1);
-		
-		
-		activityName = "Lighting";
-		activityID = "act2";
-		activityDesc = "Person Lighting Activity";
-		Activity.Builder actBuilder = new Activity.Builder(activityID, activityName, activityDesc, "", simParams);
-		
-		actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
-		
-		ProbabilityDistribution durDist2 = new Gaussian(1, 1); 				
-		durDist2.precompute(0, 1439, 1440);
-		actBuilder.duration(actmodDayType, durDist2);
-		
-		ProbabilityDistribution startDist2 = new Histogram(DistributionsLibrary.getStartTimeHistForLighting());
-		actBuilder.startTime(actmodDayType, startDist2);
-		
-		double[] v2a = {0.22222,0.33333,0.44444};
-		ProbabilityDistribution timesDist2 = new Histogram(v2a);
-		actBuilder.times(actmodDayType, timesDist2);
-		
-		shiftable = false;
-		actBuilder.shiftable(actmodDayType, shiftable);
-		
-		Activity act2 = actBuilder.build();
-		exclusive = true;
-		act2.addConfig(actmodDayType, exclusive);
-		
-		String[] containsAppliances2 = {"appl2"};
-		// add appliances
-		for(int m = 0; m < containsAppliances2.length; m++) {
-			String containAppId = containsAppliances2[m];
-			Appliance app  = existing.get(containAppId);
-			act2.addAppliance(actmodDayType,app,1.0/containsAppliances2.length);
-		}
-		
-		person.addActivity(act2);
-		
-		inst.addPerson(person);	
-		installations.add(inst);
-		
-		
-		//Create the installation
-		instName = "Fani's house";			// installation names
-		instID= "inst2";								// installation ids
-		instDescription = "Fani's house";	// installation descriptions
-		instType = "lala1";							// installation types
-		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription, null, pricPolicy, pricPolicyB).build();
-		
-		// Create the appliances
-		existing = new HashMap<String,Appliance>();
-		
-		applName ="Cleaning Washing Machine";
-		appliID = "appl21";
-		applDescription = "Description of Cleaning Washing Machine";
-		applType = "Washing";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForWashingMachine("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForWashingMachine("q");
-		Appliance app21 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst2, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app21);
-		inst2.addAppliance(app21);
-		
-		// Create the people
-		personName = "Fani";
-		personID = "person2";
-		personDesc ="Person";	
-		personType ="Girl";	
-		awareness= 0.9;
-		sensitivity=0.7;
-		Person person2 = new Person.Builder(personID, personName, personDesc, personType, inst2, awareness, sensitivity).build();
-		
-		// Create the activities
-		activityName = "Cleaning"; 
-		activityID = "act21";
-		activityDesc = "Person Cleaning Activity"; 
-		activityType = "lala"; 
-		Activity act21 = new Activity.Builder(activityID, activityName, activityDesc, activityType, simParams).build();
-		
-		String[] containsAppliances21 = {"appl21"};
-		
-		actmodDayType = "weekends";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 	
-		double[] w = {0.7, 0.3};
-     	double[] means = {480, 1200};
-     	double[] stds = {40, 60};
-		ProbabilityDistribution durDist3 = new GaussianMixtureModels(w.length, w, means, stds);
-		durDist3.precompute(0, 1439, 1440);
-		act21.addDuration(actmodDayType, durDist3);
-		ProbabilityDistribution startDist3 = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
-		act21.addStartTime(actmodDayType, startDist3);
-		double[] v42 = {0.25,0.375,0.25,0,0,0,0,0.125};
-		ProbabilityDistribution timesDist3 = new Histogram(v42);
-		act21.addTimes(actmodDayType, timesDist3);
-		act21.addShiftable(actmodDayType, shiftable);
-		act21.addConfig(actmodDayType, exclusive);
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
-		
-		actmodDayType = "weekdays";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
-		double[] durDist4V = {100.0, 50.0, 200.0};
-		ProbabilityDistribution durDist4 = new Histogram(durDist4V);
-		act21.addDuration(actmodDayType, durDist4);
-		ProbabilityDistribution startDist4 = null;
-		double from = 100;
-		double to = 400;
-		if ("startDist4".contains("start")) 
-			startDist4 = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
-		else 
-			startDist4 = new Uniform(from, to, false);	
-		act21.addStartTime(actmodDayType, startDist4);
-		double[] timesDist4V = {0.2, 0.3, 0.5, 0.4};
-		ProbabilityDistribution timesDist4 = new Histogram(timesDist4V);
-		act21.addTimes(actmodDayType, timesDist4);
-		act21.addShiftable(actmodDayType, shiftable);
-		act21.addConfig(actmodDayType, exclusive);
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
-		
-		
-		// add appliances
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
-		
-		person2.addActivity(act21);
-		
-		inst2.addPerson(person2);	
-		
-		installations.add(inst2);
-		
+			distrType = prop.getProperty("duration_distrType").trim();
+  			ProbabilityDistribution actModelDuration;
+  			try {
+  				actModelDuration = constructDistribution(distrType, prop, "duration");
+  				act.addDuration(actmodDayType, actModelDuration);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+  			
+  			distrType = prop.getProperty("repetitions_distrType");
+  			ProbabilityDistribution actModelTimes;
+  			try {
+  				actModelTimes = constructDistribution(distrType, prop, "repetitions");
+  				act.addTimes(actmodDayType, actModelTimes);
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+  			
+  			act.addShiftable(actmodDayType, shiftable);
+  			act.addConfig(actmodDayType, exclusive);
+  			
+  			for(int m = 0; m < containsAppliances.length; m++) {
+  				String containAppId = containsAppliances[m].trim();
+  				Appliance app  = appliances.get(containAppId);
+  				act.addAppliance(actmodDayType,app,1.0/containsAppliances.length);
+  			}
+  		}
 		
 		this.simulationWorld = simParams;
   		this.mcruns = mcruns;
@@ -400,406 +268,266 @@ public class StandAloneSimulation extends Simulation{
   		return installations;
 	}
 	
-	@Override
-	public Vector<Installation> setupScenario()
+	private PricingPolicy constructPricingPolicy(String pricingType, PricingPolicy.Builder builderPP) throws Exception
 	{
-		this.simulationWorld = setupFaniTestScenario1_SimulationParams();
-		
-		this.mcruns = this.simulationWorld.getMcruns();
-		this.co2 = this.simulationWorld.getCo2();
-		this.numOfDays = this.simulationWorld.getNumOfDays();
-		this.setup = this.simulationWorld.getSetup();
-		
-		HashMap<String, PricingPolicy> temp = setupFaniTestScenario1_PricingPolicies();
-		this.pricing = temp.get("PP");
-		this.baseline_pricing = temp.get("baselinePP");
-		
-		
-		if (this.pricing == null)
-			this.pricing = new PricingPolicy();
-		if (this.baseline_pricing == null)
-			this.baseline_pricing = new PricingPolicy();
-	
-		return  setupFaniTestScenario1_Installations(this.simulationWorld);
-	}
-		
-		
-	
-	
-	private SimulationParams setupFaniTestScenario1_SimulationParams()
-	{
-		String scenarioName = "Scenario1";
-  		String responseType = "None"; 		// "None", "Optimal", "Normal", "Discrete", "Daily"
-  	    String locationInfo ="Katerini";
-  	    int numOfDays = 3; 						// duration
-  	    int startDateDay = 5;
-	    int startDateMonth = 4;
-	    int startDateYear = 2014;
-	    int mcruns = 5;
-  		double co2 = 2; 
-  		String setup = "static"; 							// static, dynamic
-  		
-  		
-	    SimulationParams simParams = new SimulationParams(responseType, scenarioName, locationInfo, numOfDays, startDateDay,  startDateMonth, startDateYear);
-	    simParams.setMcruns(mcruns);
-	    simParams.setCo2(co2);
-	    simParams.setSetup(setup);
-	    
-	    return simParams;
-	}
-	
-	
-	private HashMap<String, PricingPolicy> setupFaniTestScenario1_PricingPolicies()
-	{
-		// TOUPricing, ScalarEnergyPricing, ScalarEnergyPricingTimeZones, EnergyPowerPricing, MaximumPowerPricing, AllInclusivePricing, None (default)
-	    
-		//		String pricingType = "ScalarEnergyPricing"; 			
-		//		int billingCycle = 120;  					// all cases
-		//		double fixedCharge = 15;				// all cases
-		//		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-		//	double[] prices = {0.10, 0.07, 0.07, 0.06};		
-		//	double[] levels = {0, 400, 400, 500};				
-		//	builderPP.scalarEnergyPricing(prices, levels);
-		//	PricingPolicy pricPolicy = builderPP.build();
-	
-		String pricingType = "AllInclusivePricing"; 			
-		int billingCycle = 120;  					// all cases
-		double fixedCharge = 15;				// all cases
-		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);			
-		builderPP.allInclusivePricing(100, 50, 100);
-		PricingPolicy pricPolicy = builderPP.build();
-	
-		//	String pricingType = "EnergyPowerPricing"; 			
-		//		int billingCycle = 30;  					// all cases
-		//		double fixedCharge = 2;				// all cases
-		//		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-		//	double contractedCapacity = 10;
-		//	double energyPricing = 0.08;
-		//	double powerPricing = 2.5;
-		//	builderPP.energyPowerPricing(contractedCapacity, energyPricing, powerPricing);
-		//	PricingPolicy pricPolicy = builderPP.build();
-		    
-		//	String pricingType = "MaximumPowerPricing"; 			
-		//		int billingCycle = 30;  					// all cases
-		//		double fixedCharge = 0;				// all cases
-		//		PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-		//	double energyPricing = 0.08;
-		//	double powerPricing = 2.5;
-		//	builderPP.maximumPowerPricing(energyPricing, powerPricing, 0.0);
-		//	PricingPolicy pricPolicy = builderPP.build();
-		    
-		//    String pricingType = "TOUPricing"; 			
-		//    int billingCycle = 90;  					// all cases
-		//    double fixedCharge = 10;				// all cases
-		//    PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-		//    double[] prices = {0.5, 0.01, 0.10};		
-		//    String[] froms = {"14:00", "00:00", "19:45"};
-		//    String[] tos = {"19:45", "14:00", "23:45"};
-		//    builderPP.touPricing(froms, tos, prices);
-		//    PricingPolicy pricPolicy = builderPP.build();
-		    
-		//    String pricingType = "ScalarEnergyPricingTimeZones"; 			
-		//    int billingCycle = 120;  					// all cases
-		//    double fixedCharge = 10;				// all cases
-		//    PricingPolicy.Builder builderPP = new PricingPolicy.Builder(pricingType, fixedCharge, billingCycle);
-		//    double[] prices = {0.10, 0.08, 0.07, 0.06};		
-		//    double[] levels = {0, 400, 400, 500};	
-		//    double offpeakPrice = 0.05;
-		//    	String[] froms = new String[0];
-		//    String[] tos  = new String[0];
-		//    builderPP.scalarEnergyPricingTimeZones(offpeakPrice, prices, levels, froms, tos);
-		//    PricingPolicy pricPolicy = builderPP.build();
-	
-		String pricingTypeB = "None"; 		
-		PricingPolicy pricPolicyB = new PricingPolicy();
-		
-		HashMap<String, PricingPolicy> temp = new HashMap<String, PricingPolicy>();
-		temp.put("baselinePP", pricPolicyB);
-		temp.put("PP", pricPolicy);
-		return temp;
+		String regexp = "[0-2]\\d:[0-5]\\d";
+		switch(pricingType) {
+  		case "TOUPricing":
+  			String[] timezones = sfp.propPricing.getProperty("timezones").replace("[", "").replace("]", "").split(",");
+  			String[] pricesS = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
+  			if (timezones.length != pricesS.length)
+  				throw new Exception("ERROR: timezones and prices lists must have the same length");
+  			String[] froms = new String[timezones.length];
+  			String[] tos = new String[timezones.length];
+  			double[] prices = new double[timezones.length];
+  			for(int i = 0; i < timezones.length; i++) {
+  				String from = timezones[i].split("-")[0].trim();
+  				String to = timezones[i].split("-")[1].trim();
+  				if (!from.matches(regexp) || !to.matches(regexp))
+  					throw new Exception("ERROR: unrecognized time format in timezones (should be of the form hh:mm eg. 23:58)");  				
+  				froms[i] = from;
+  				tos[i] = to;
+  				prices[i] = Double.parseDouble(pricesS[i]);
+  			}
+  			builderPP.touPricing(froms, tos, prices);
+  			break;
+  		case "ScalarEnergyPricing":
+  			String[] levelsLS = sfp.propPricing.getProperty("levels").replace("[", "").replace("]", "").split(",");
+  			String[] pricesLS = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
+  			if (levelsLS.length != pricesLS.length)
+  				throw new Exception("ERROR: levels and prices lists must have the same length");
+  			double[] levelsL = new double[levelsLS.length];
+  			double[] pricesL = new double[levelsLS.length];
+  			for(int i = 0; i < levelsLS.length; i++) {
+  				levelsL[i] = Double.parseDouble(levelsLS[i]);
+  				pricesL[i] = Double.parseDouble(pricesLS[i]);
+  			}
+  			builderPP.scalarEnergyPricing(pricesL, levelsL);
+  			break;
+  		case "ScalarEnergyPricingTimeZones":
+  			double offpeakPrice = Double.parseDouble((sfp.propPricing.getProperty("offpeakPrice") != null ? sfp.propPricing.getProperty("offpeakPrice").trim() : "0"));
+  			String[] levelsAS = sfp.propPricing.getProperty("levels").replace("[", "").replace("]", "").split(",");
+  			String[] pricesAS = sfp.propPricing.getProperty("prices").replace("[", "").replace("]", "").split(","); 
+  			if (levelsAS.length != pricesAS.length)
+  				throw new Exception("ERROR: levels and prices lists must have the same length");
+  			double[] levelsA = new double[levelsAS.length];
+  			double[] pricesA = new double[levelsAS.length];
+  			for(int i = 0; i < levelsAS.length; i++) {
+  				levelsA[i] = Double.parseDouble(levelsAS[i]);
+  				pricesA[i] = Double.parseDouble(pricesAS[i]);
+  			}
+  			String[] offpeakHours = sfp.propPricing.getProperty("offpeakHours").replace("[", "").replace("]", "").split(",");
+  			if (offpeakHours.length == 1 && offpeakHours[0].equals(""))
+  				offpeakHours = new String[0];
+  			String[] fromsA = new String[offpeakHours.length];
+  			String[] tosA = new String[offpeakHours.length];
+  			for(int i = 0; i < offpeakHours.length; i++) {
+  				String from = offpeakHours[i].split("-")[0].trim();
+  				String to = offpeakHours[i].split("-")[1].trim();
+  				fromsA[i] = from;
+  				tosA[i] = to;
+  			}
+  			builderPP.scalarEnergyPricingTimeZones(offpeakPrice, pricesA, levelsA, fromsA, tosA);
+  			break;
+  		case "EnergyPowerPricing":
+  			double contractedCapacity = Integer.parseInt((sfp.propPricing.getProperty("contractedCapacity") != null ? sfp.propPricing.getProperty("contractedCapacity").trim() : "0"));
+  			double energyPricing = Double.parseDouble((sfp.propPricing.getProperty("energyPrice") != null ? sfp.propPricing.getProperty("energyPrice").trim() : "0.0"));
+  			double powerPricing = Double.parseDouble((sfp.propPricing.getProperty("powerPrice") != null ? sfp.propPricing.getProperty("powerPrice").trim() : "0.0"));
+  			builderPP.energyPowerPricing(contractedCapacity, energyPricing, powerPricing);
+  			break;
+  		case "MaximumPowerPricing":
+  			double maximumPower = Double.parseDouble((sfp.propPricing.getProperty("maximumPower") != null ? sfp.propPricing.getProperty("maximumPower").trim() : "0.0"));
+  			double energyPricing2 = Double.parseDouble((sfp.propPricing.getProperty("energyPrice") != null ? sfp.propPricing.getProperty("energyPrice").trim() : "0.0"));
+  			double powerPricing2 =Double.parseDouble((sfp.propPricing.getProperty("powerPrice") != null ? sfp.propPricing.getProperty("powerPrice").trim() : "0.0"));
+  			builderPP.maximumPowerPricing(energyPricing2, powerPricing2, maximumPower);
+  			break;
+  		case "AllInclusivePricing":
+  			int fixedCost = Integer.parseInt((sfp.propPricing.getProperty("fixedCost") != null ? sfp.propPricing.getProperty("fixedCost").trim() : "0"));
+  			double additionalCost = Double.parseDouble((sfp.propPricing.getProperty("additionalCost") != null ? sfp.propPricing.getProperty("additionalCost").trim() : "0.0"));
+  			double contractedEnergy = Double.parseDouble((sfp.propPricing.getProperty("contractedEnergy") != null ? sfp.propPricing.getProperty("contractedEnergy").trim() : "0.0"));
+  			builderPP.allInclusivePricing(fixedCost, additionalCost, contractedEnergy);
+  			break;
+  		default:
+			throw new Exception("ERROR: unkown pricing policy type \"" + pricingType + "\" employed");
+  		}
+		return builderPP.build();
 	}
 	
-	private Vector<Installation> setupFaniTestScenario1_Installations(SimulationParams simParams)
+	private ProbabilityDistribution constructDistribution(String distType, Properties prop, String caseD) throws Exception
 	{
-  		Vector<Installation> installations = new Vector<Installation>();
-  		
-  		//Create the installation
-		String instName = "Milioudis Base";			// installation names
-		String instID= "inst1";								// installation ids
-		String instDescription = "Milioudis Base";	// installation descriptions
-		String instType = "lala1";							// installation types
-		
-		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, this.pricing, this.baseline_pricing).build();
-		
-		// Create the appliances
-		HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
-		
-		String applName ="Cleaning Washing Machine";
-		String appliID = "appl1";
-		String applDescription = "Description of Cleaning Washing Machine";
-		String applType = "Washing";
-		double applStandByCons = 0;
-		boolean applIsBase = false;
-		ConsumptionModel consModelsP = ConsumptionModelsLibrary.getConsumptionModelForWashingMachine("p");
-		ConsumptionModel consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForWashingMachine("q");
-		Appliance app1 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app1);
-		inst.addAppliance(app1);
-		
-		applName ="Lighting Lighting 0";
-		appliID = "appl2";
-		applDescription = "Description of Lighting Lighting 0";
-		applType = "Lighting";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForLighting("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForLighting("q");
-		Appliance app2 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app2);
-		inst.addAppliance(app2);
-		
-		applName ="Cleaning Vacuum Cleaner 0";
-		appliID = "appl3";
-		applDescription = "Description of Cleaning Vacuum Cleaner 0";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner1("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner1("q");
-		Appliance app3 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app3);
-		inst.addAppliance(app3);
-		
-		applName ="Cleaning Water Heater";
-		appliID = "appl4";
-		applDescription = "Description of Cleaning Water Heater";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForWaterHeater("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForWaterHeater("q");
-		Appliance app4 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app4);
-		inst.addAppliance(app4);
-
-		applName ="Cleaning Vacuum Cleaner 1";
-		appliID = "appl5";
-		applDescription = "Description of Cleaning Vacuum Cleaner 1";
-		applType = "Cleaning";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner2("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForVacuumCleaner2("q");
-		Appliance app5 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app5);
-		inst.addAppliance(app5);
-		
-		
-		// Create the people
-		String personName = "Nikos";
-		String personID = "person1";
-		String personDesc ="Person";	
-		String personType ="Boy";	
-		double awareness= 0.8;
-		double sensitivity=0.3;
-		Person person = new Person.Builder(personID, personName, personDesc, personType, inst, awareness, sensitivity).build();
-		
-		// Create the activities
-		String activityName = "Cleaning"; 
-		String activityID = "act1";
-		String activityDesc = "Person Cleaning Activity"; 
-		String activityType = "lala"; 
-		Activity act1 = new Activity.Builder(activityID, activityName, activityDesc, activityType, simParams).build();
-		
-		String actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
-		
-		ProbabilityDistribution durDist = new Gaussian(1, 1); 			// Normal Distribution: mean = 1, std = 1
-		durDist.precompute(0, 1439, 1440);
-		act1.addDuration(actmodDayType, durDist);
-		
-		ProbabilityDistribution startDist = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
-		act1.addStartTime(actmodDayType, startDist);
-		
-		double[] v4 = {0.25,0.375,0.25,0,0,0,0,0.125};
-		ProbabilityDistribution timesDist = new Histogram(v4);
-		act1.addTimes(actmodDayType, timesDist);
-		
-		boolean shiftable = false;
-		act1.addShiftable(actmodDayType, shiftable);
-		boolean exclusive = true;
-		act1.addConfig(actmodDayType, exclusive);
-		
-		String[] containsAppliances = {"appl1", "appl3", "appl4", "appl5"};
-//		String[] containsAppliances = {"appl1"};
-		// add appliances
-		for(int m = 0; m < containsAppliances.length; m++) {
-			String containAppId = containsAppliances[m];
-			Appliance app  = existing.get(containAppId);
-			act1.addAppliance(actmodDayType,app,1.0/containsAppliances.length);
+		switch (distType) {
+		case ("Normal Distribution"):
+			String tempN = prop.getProperty(caseD + "_parameters").replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace("\"", "");
+			String[] paramsN = tempN.split(",");
+			if (paramsN.length != 2 || !(paramsN[0].contains("mean") || paramsN[1].contains("mean")) || !(paramsN[0].contains("std") || paramsN[1].contains("std")) )
+				throw new Exception("ERROR: Normal Distribution requires exaclty 2 parameters, named \"mean\" and \"std\". E.g. [{\"mean\":45,\"std\":10}]");
+			
+			double mean = 1;
+			double std = 1;
+			if (paramsN[0].contains("mean"))
+			{
+				mean = Double.parseDouble(paramsN[0].replace("mean", "").replace(":", "").trim());
+				std = Double.parseDouble(paramsN[1].replace("std", "").replace(":", "").trim());
+			}
+			else
+			{
+				mean = Double.parseDouble(paramsN[1].replace("mean", "").replace(":", "").trim());
+				std = Double.parseDouble(paramsN[0].replace("std", "").replace(":", "").trim());
+			}		
+			Gaussian normal = new Gaussian(mean, std);
+			normal.precompute(0, 1439, 1440);
+			return normal;
+		case ("Uniform Distribution"):
+			String tempU = prop.getProperty(caseD + "_parameters").replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace("\"", "");
+			String[] paramsU = tempU.split(",");
+			if (paramsU.length != 2 || !(paramsU[0].contains("start") || paramsU[1].contains("start")) || !(paramsU[0].contains("end") || paramsU[1].contains("end")) )
+				throw new Exception("ERROR: Uniform Distribution requires exaclty 2 parameters, named \"start\" and \"end\". E.g. [{\"start\":100,\"end\":200}]");
+			double from = 1;
+			double to = 1;
+			if (paramsU[0].contains("start"))
+			{
+				from = Double.parseDouble(paramsU[0].replace("start", "").replace(":", "").trim());
+				to = Double.parseDouble(paramsU[1].replace("end", "").replace(":", "").trim());
+			}
+			else
+			{
+				from = Double.parseDouble(paramsU[1].replace("start", "").replace(":", "").trim());
+				to = Double.parseDouble(paramsU[0].replace("end", "").replace(":", "").trim());
+			}		
+			Uniform uniform = null;
+			if(caseD.equalsIgnoreCase("start")) {
+				uniform = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
+			} else {
+				uniform = new Uniform(from, to, false);
+			}
+			return uniform;
+		case ("Gaussian Mixture Models"):
+			String tempM = prop.getProperty(caseD + "_parameters").replace("[", "").replace("]", "").replace("\"", "");
+			String[] paramsM = tempM.split("}");
+			int length = paramsM.length-1;
+			double[] means = new double[length];
+			double[] stds = new double[length];
+			double[] w = new double[length];
+			double sumW = 0;
+			for (int i=0; i<length; i++)
+			{
+				String tempS = paramsM[i].replace("{", "").trim();
+				if (tempS.startsWith(","))
+					tempS = tempS.substring(1);
+				String[] paramsMM = tempS.split(",");
+				if (paramsMM.length != 3 || !(paramsMM[0].contains("mean") || paramsMM[1].contains("mean") || paramsMM[2].contains("mean")) 
+						|| !(paramsMM[0].contains("std") || paramsMM[1].contains("std") || paramsMM[2].contains("std")) 
+						|| !(paramsMM[0].contains("w") || paramsMM[1].contains("w") || paramsMM[2].contains("w")) )
+					throw new Exception("ERROR: Gaussian Mixture Models require exaclty 3 parameters for each tuple, named \"mean\", \"std\" and \"w\". "+
+						" E.g. [{\"w\":0.5 , \"mean\":45,\"std\":10}, {\"w\":0.5 , \"mean\":100,\"std\":10}]");
+				for (int j=0; j<3; j++)
+				{
+					if (paramsMM[j].contains("mean"))
+						means[i] = Double.parseDouble(paramsMM[j].replace("mean", "").replace(":", "").trim());
+					else if (paramsMM[j].contains("std"))
+						stds[i] = Double.parseDouble(paramsMM[j].replace("std", "").replace(":", "").trim());
+					else
+					{
+						w[i] = Double.parseDouble(paramsMM[j].replace("w", "").replace(":", "").trim());
+						sumW += w[i];
+					}
+				}
+			}
+			if (sumW != 1)
+				throw new Exception("ERROR: Gaussian Mixture Models require for tuple weights to sum up to 1");
+			GaussianMixtureModels gmm = new GaussianMixtureModels(length, w, means, stds);
+			gmm.precompute(0, 1439, 1440);
+			return gmm;
+		case ("Histogram"):
+			String tempH = prop.getProperty(caseD + "_values").replace("[", "").replace("]", "").replace("\"", "").trim();
+			String[] values = tempH.split(",");
+			if (values.length == 1 && values[0].equals(""))
+				values = new String[0];
+			double[] v = new double[values.length];
+			for (int i=0; i<values.length; i++)
+				try {
+					v[i] = Double.parseDouble(values[i]);
+				} 
+				catch (NumberFormatException e) {
+					throw new Exception("ERROR: Histogram requires a list of (double) values. E.g. [1,2,3,4...]");
+				}
+			Histogram h = new Histogram(v);
+			return h;
+		default:
+			throw new Exception("ERROR: Non-existing distribution type. Problem in setting up the simulation.");
 		}
-		
-		person.addActivity(act1);
-		
-		
-		activityName = "Lighting";
-		activityID = "act2";
-		activityDesc = "Person Lighting Activity";
-		Activity.Builder actBuilder = new Activity.Builder(activityID, activityName, activityDesc, "", simParams);
-		
-		actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
-		
-		ProbabilityDistribution durDist2 = new Gaussian(1, 1); 				
-		durDist2.precompute(0, 1439, 1440);
-		actBuilder.duration(actmodDayType, durDist2);
-		
-		ProbabilityDistribution startDist2 = new Histogram(DistributionsLibrary.getStartTimeHistForLighting());
-		actBuilder.startTime(actmodDayType, startDist2);
-		
-		double[] v2a = {0.22222,0.33333,0.44444};
-		ProbabilityDistribution timesDist2 = new Histogram(v2a);
-		actBuilder.times(actmodDayType, timesDist2);
-		
-		shiftable = false;
-		actBuilder.shiftable(actmodDayType, shiftable);
-		
-		Activity act2 = actBuilder.build();
-		exclusive = true;
-		act2.addConfig(actmodDayType, exclusive);
-		
-		String[] containsAppliances2 = {"appl2"};
-		// add appliances
-		for(int m = 0; m < containsAppliances2.length; m++) {
-			String containAppId = containsAppliances2[m];
-			Appliance app  = existing.get(containAppId);
-			act2.addAppliance(actmodDayType,app,1.0/containsAppliances2.length);
-		}
-		
-		person.addActivity(act2);
-		
-		inst.addPerson(person);	
-		installations.add(inst);
-		
-		
-		//Create the installation
-		instName = "Fani's house";			// installation names
-		instID= "inst2";								// installation ids
-		instDescription = "Fani's house";	// installation descriptions
-		instType = "lala1";							// installation types
-		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription, null, this.pricing, this.baseline_pricing).build();
-		
-		// Create the appliances
-		existing = new HashMap<String,Appliance>();
-		
-		applName ="Cleaning Washing Machine";
-		appliID = "appl21";
-		applDescription = "Description of Cleaning Washing Machine";
-		applType = "Washing";
-		applStandByCons = 0;
-		applIsBase = false;
-		consModelsP = ConsumptionModelsLibrary.getConsumptionModelForWashingMachine("p");
-		consModelsQ = ConsumptionModelsLibrary.getConsumptionModelForWashingMachine("q");
-		Appliance app21 = new Appliance.Builder(appliID,  applName, applDescription, applType, 
-				inst2, consModelsP, consModelsQ, applStandByCons, applIsBase).build(getOrng());
-		existing.put(appliID, app21);
-		inst2.addAppliance(app21);
-		
-		// Create the people
-		personName = "Fani";
-		personID = "person2";
-		personDesc ="Person";	
-		personType ="Girl";	
-		awareness= 0.9;
-		sensitivity=0.7;
-		Person person2 = new Person.Builder(personID, personName, personDesc, personType, inst2, awareness, sensitivity).build();
-		
-		// Create the activities
-		activityName = "Cleaning"; 
-		activityID = "act21";
-		activityDesc = "Person Cleaning Activity"; 
-		activityType = "lala"; 
-		Activity act21 = new Activity.Builder(activityID, activityName, activityDesc, activityType, simParams).build();
-		
-		String[] containsAppliances21 = {"appl21"};
-		
-		actmodDayType = "weekends";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 	
-		double[] w = {0.7, 0.3};
-     	double[] means = {480, 1200};
-     	double[] stds = {40, 60};
-		ProbabilityDistribution durDist3 = new GaussianMixtureModels(w.length, w, means, stds);
-		durDist3.precompute(0, 1439, 1440);
-		act21.addDuration(actmodDayType, durDist3);
-		ProbabilityDistribution startDist3 = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
-		act21.addStartTime(actmodDayType, startDist3);
-		double[] v42 = {0.25,0.375,0.25,0,0,0,0,0.125};
-		ProbabilityDistribution timesDist3 = new Histogram(v42);
-		act21.addTimes(actmodDayType, timesDist3);
-		act21.addShiftable(actmodDayType, shiftable);
-		act21.addConfig(actmodDayType, exclusive);
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
-		
-		actmodDayType = "weekdays";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
-		double[] durDist4V = {100.0, 50.0, 200.0};
-		ProbabilityDistribution durDist4 = new Histogram(durDist4V);
-		act21.addDuration(actmodDayType, durDist4);
-		ProbabilityDistribution startDist4 = null;
-		double from = 100;
-		double to = 400;
-		if ("startDist4".contains("start")) 
-			startDist4 = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
-		else 
-			startDist4 = new Uniform(from, to, false);	
-		act21.addStartTime(actmodDayType, startDist4);
-		double[] timesDist4V = {0.2, 0.3, 0.5, 0.4};
-		ProbabilityDistribution timesDist4 = new Histogram(timesDist4V);
-		act21.addTimes(actmodDayType, timesDist4);
-		act21.addShiftable(actmodDayType, shiftable);
-		act21.addConfig(actmodDayType, exclusive);
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
-		
-		
-		// add appliances
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
-		
-		person2.addActivity(act21);
-		
-		inst2.addPerson(person2);	
-		
-		installations.add(inst2);
-		
-  		return installations;
 	}
 	
 	public static void main(String[] args)
 	{	
-		String aresources_path = "/Users/fanitzima";
-		int seed = 171181;
-		StandAloneSimulation sim = new  StandAloneSimulation(aresources_path, "FaniTestScenario1"+System.currentTimeMillis(), seed);
+//		String filename = "SimpleStaticScenario.txt";
+		String filename = "properties.txt";
+		String outputPath = "./";
+		if (args.length >= 2)
+		{
+			filename = args[0];
+			outputPath = args[1];
+		}
+		if (args.length > 2)
+			System.err.println("WARNING: Only two arguments required. Ignoring arguments after the first two.");
+		if (args.length <= 1)
+		{
+			System.err.println("WARNING: Two arguments required <setup_file_name> <ouput_dir_path>. Running simulation with default values.");
+		}
+			
+		sfp = new SetupFileParser();
+		sfp.parseFileForProperties(filename);	
+		StandAloneSimulation sas = new StandAloneSimulation(outputPath, "RunFrom" + (new File(filename)).getName().replace(".", "_")+System.currentTimeMillis(), 
+					sfp.generalProps.getProperty("seed") != null ? Integer.parseInt(sfp.generalProps.getProperty("seed")) : 0,
+					sfp.generalProps.getProperty("useDerby") != null ? Boolean.parseBoolean(sfp.generalProps.getProperty("useDerby")) : true );
 		
-  		try {
-			sim.setupStandalone(false);
+		try {
+			sas.setupStandalone(false);
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
-  		sim.runStandAlone();
+	
+		sas.runStandAlone();
+		
+		boolean printKPIs =sfp.generalProps.getProperty("printKPIs") != null ? Boolean.parseBoolean(sfp.generalProps.getProperty("printKPIs")) : false;
+		if (printKPIs)
+		{	
+			System.out.println();
+			printKPIs(sas.getM().getKPIs(DBResults.AGGR), null, DBResults.AGGR);
+			for (Installation inst: sas.getInstallations())
+			{
+				printKPIs(sas.getM().getKPIs(inst.getId()), "installation", inst.getId());
+				for (Appliance app: inst.getAppliances())
+					printKPIs(sas.getM().getAppKPIs(app.getId()), "appliance", app.getId());
+			    	for (Person p: inst.getPersons())
+			    		for (Activity a: p.getActivities())
+			    			printKPIs(sas.getM().getActKPIs(a.getId()), p.getName() + "'s activity", a.getId());
+			}
+		}
 	}
 	
+	private HashMap<String, Double> parseProbabilities(String probsText)
+	{
+		HashMap<String, Double> results = new HashMap<String, Double>();
+		String tempN = probsText.replace("[", "").replace("]", "").replace("\"", "");
+		String[] pairs = tempN.split(",");
+		for (String pair : pairs)
+		{
+			String[] parts = pair.split(":");
+			results.put(parts[0].trim(), Double.parseDouble(parts[1]));
+		}
+		return results;
+	}
+	
+	private static void printKPIs( HashMap<String, Double> kpis, String entityType, String entityId)
+	{
+		if (entityType == null && entityId == DBResults.AGGR)
+			System.out.println("Aggregate KPIs");
+		else
+			System.out.println("KPIs for " + entityType + " " + entityId);
+		for (String key: kpis.keySet())
+			System.out.println(key + " \t" + kpis.get(key));
+		System.out.println();
+	}
 
 }

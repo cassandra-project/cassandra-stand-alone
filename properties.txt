@@ -1,20 +1,26 @@
+--> demographics
+name = lalatype = laladescription = lalanumber_of_entities = 2participation_probs_installations = [ inst1:0.5 , inst2:0.5 ]participation_probs_persons = [ person1:0.7 , person2:0.3 ]participation_probs_apps = [ appl1:0.75 , appl2:0.75, appl3:0.75, appl4:0.75, appl5:0.75, appl21:0.75 ]
 --> simulation
 co2 = 2 
 description =  
 locationInfo = Katerini 
-mcruns = 5 
+mcruns = 1 
 name = TestPricing
 numberOfDays = 3
 start_dayOfMonth = 5
 start_month = 4
 start_year = 2014
 response_type = None
+
+--> general_properties
 seed = 171181
+useDerby = false
+printKPIs = true
 
 --> scenario
 name = Scenario1
 description = 
-setup = static
+setup = dynamic
 
 --> pricing_policy
 name = TestAIP

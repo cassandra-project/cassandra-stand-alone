@@ -16,6 +16,8 @@
 */
 package eu.cassandra.sim.utilities;
 
+import java.util.HashMap;
+
 /**
  * 
  * 
@@ -44,9 +46,15 @@ public interface DBResults {
 	
 	public void addKPIs(String inst_id, double maxPower, double avgPower, double energy, double cost, double co2);
 	
+	public HashMap<String, Double> getKPIs(String inst_id);
+	
 	public void addAppKPIs(String app_id, double maxPower, double avgPower, double energy, double cost, double co2);
 	
+	public HashMap<String, Double> getAppKPIs(String app_id);
+	
 	public void addActKPIs(String act_id, double maxPower, double avgPower, double energy, double cost, double co2);
+	
+	public HashMap<String, Double> getActKPIs(String act_id);
 	
 	public void addTickResultForInstallation(int tick, String inst_id, double p, double q, String tableName);
 	

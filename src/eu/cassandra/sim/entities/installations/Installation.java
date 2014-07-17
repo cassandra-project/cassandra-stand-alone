@@ -322,5 +322,31 @@ public class Installation extends Entity {
     public String getCollection() {
     	return "installations";
     }
+    
+    public void printInstallationInfo()
+    {
+	    	System.out.println("Installation name: " + this.getName());
+	    	System.out.println("... contains appliances:");
+	    	for (Appliance app: this.getAppliances())
+	    		System.out.println("\tAppliance name: " + app.getName());
+	    	System.out.println("... contains persons:");
+	    	for (Person p: this.getPersons())
+	    	{
+	    		System.out.println("\tPerson name: " + p.getName());
+	    		System.out.println("\t... contains activities:");
+	    		for (Activity a: p.getActivities())
+	    		{
+	    			System.out.println("\t\tActivity name: " + a.getName());
+	    			System.out.println("\t\t... contains activity models for:");
+	    			for (String key: a.getProbDuration().keySet())
+	    			{
+	    				System.out.print("\t\t\t " + key + ": ");
+	    				for (Appliance temp: a.getAppliances().get(key))
+	    					System.out.print(temp.getName() + ", \t");
+	    				System.out.println();
+	    			}
+	    		}
+	    	}
+    }
 
 }
