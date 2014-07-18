@@ -13,7 +13,7 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package eu.cassandra.sim.utilities;
+package eu.cassandra.sim.model_library;
 
 import java.util.ArrayList;
 
@@ -26,7 +26,7 @@ import eu.cassandra.sim.entities.appliances.Tripplet;
 /**
  * 
  * 
- * @author Fani A. Tzima (fani [at] iti [dot] gr)
+ *  @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  * 
  */
 public class ConsumptionModelsLibrary {

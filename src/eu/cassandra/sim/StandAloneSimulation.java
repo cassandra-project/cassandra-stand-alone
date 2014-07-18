@@ -38,7 +38,7 @@ import eu.cassandra.sim.utilities.SetupFileParser;
 /**
  * 
  * 
- * @author Fani A. Tzima (fani [at] iti [dot] gr)
+ *  @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  * 
  */
 public class StandAloneSimulation extends Simulation {

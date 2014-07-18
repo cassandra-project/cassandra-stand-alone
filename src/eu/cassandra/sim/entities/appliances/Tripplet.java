@@ -1,5 +1,11 @@
 package eu.cassandra.sim.entities.appliances;
 
+/**
+ * 
+ * 
+ *  @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
+ * 
+ */
 public class Tripplet {
 	double v, s;
 	

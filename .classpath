@@ -3,6 +3,6 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/mongo-java-driver-2.12.2.jar"/>
-	<classpathentry kind="lib" path="lib/derby.jar"/>
+	<classpathentry kind="lib" path="lib/derby-10.10.1.1.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

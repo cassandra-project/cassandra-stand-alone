@@ -31,13 +31,13 @@ import eu.cassandra.sim.math.GaussianMixtureModels;
 import eu.cassandra.sim.math.Histogram;
 import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.Uniform;
-import eu.cassandra.sim.utilities.ConsumptionModelsLibrary;
-import eu.cassandra.sim.utilities.DistributionsLibrary;
+import eu.cassandra.sim.model_library.ConsumptionModelsLibrary;
+import eu.cassandra.sim.model_library.DistributionsLibrary;
 
 /**
  * 
  * 
- * @author Fani A. Tzima (fani [at] iti [dot] gr)
+ * @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  * 
  */
 public class MyStandAloneSimulation extends Simulation{
@@ -1068,7 +1068,7 @@ public class MyStandAloneSimulation extends Simulation{
 		String aresources_path = "/Users/fanitzima";
 		int seed = 171181;
 		boolean useDerby = false;
-		MyStandAloneSimulation sim = new  MyStandAloneSimulation(aresources_path, "ProjectDynDynScenario"+System.currentTimeMillis(), seed, useDerby);
+		MyStandAloneSimulation sim = new MyStandAloneSimulation(aresources_path, "ProjectDynDynScenario"+System.currentTimeMillis(), seed, useDerby);
 		
   		try {
 			sim.setupStandalone(false);

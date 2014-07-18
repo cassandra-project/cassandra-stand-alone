@@ -25,7 +25,7 @@ import java.util.Vector;
 /**
  * 
  * 
- * @author Fani A. Tzima (fani [at] iti [dot] gr)
+ *  @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  * 
  */
 
