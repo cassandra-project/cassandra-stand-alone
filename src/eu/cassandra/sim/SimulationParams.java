@@ -13,40 +13,58 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-
 package eu.cassandra.sim;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Calendar;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
-
-import eu.cassandra.sim.utilities.Utils;
-
 /**
- * The Simulation class can simulate up to 4085 years of simulation.
+ * The simulation's parameter set.
  * 
  * @author Kyriakos C. Chatzidimitriou (kyrcha [at] iti [dot] gr)
+ * @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  * 
  */
 public class SimulationParams
 {
 
+  /** The simulation's calendar. */
   private SimCalendar simCalendar;
+  
+  /** The parameter set name. */
   private String name;
+  
+  /** The location info. */
   private String locationInfo;
+  
+  /** The response type. */
   private String responseType;
   
+  /** The number of Monte-Carlo runs. */
   private int mcruns;
+  
+  /** The the CO2 factor for the simulation. */
   private double co2;
+  
+  /** The number of days the simulation will run for. */
   private int numOfDays;
+  
+  /** The scenario setup type (static or dynamic). */
   private String setup;
 
-
-  public SimulationParams(String responseType, String name, String locationInfo, int duration, int startDateDay,  int startDateMonth, int startDateYear)
+  /**
+   * Instantiates a new simulation parameter set.
+   *
+   * @param responseType the response type
+   * @param name the name
+   * @param locationInfo the location info
+   * @param duration the duration (in days)
+   * @param startDateDay the start-date day
+   * @param startDateMonth the start-date month
+   * @param startDateYear the start-date year
+   * @param mcruns the number of Monte-Carlo runs
+   * @param co2 the CO2 factor
+   * @param setup the scenario setup type (static or dynamic)
+   */
+  public SimulationParams(String responseType, String name, String locationInfo, int duration, int startDateDay,  int startDateMonth, int startDateYear, 
+		  int mcruns, double co2, String setup)
   {
 	  this.responseType = responseType;
 	  this.name = name;
@@ -54,77 +72,122 @@ public class SimulationParams
 	  this.numOfDays = duration;
 	  
 	  simCalendar = new SimCalendar(startDateDay, startDateMonth, startDateYear, duration);
+	  
+	  this.mcruns = mcruns;
+	  this.co2 = co2;
+	  this.setup = setup;
   }
-  
-  
+
+  /**
+   * Gets the simulation's calendar.
+   *
+   * @return the simulation's calendar
+   */
   public SimCalendar getSimCalendar ()
   {
     return simCalendar;
   }
 
+  /**
+   * Gets parameter set name.
+   *
+   * @return the parameter set name
+   */
   public String getName ()
   {
     return name;
   }
 
+  /**
+   * Gets the response type.
+   *
+   * @return the response type
+   */
   public String getResponseType ()
   {
     return responseType;
   }
   
+  /**
+   * Gets the location info.
+   *
+   * @return the location info
+   */
   public String getLocationInfo ()
   {
     return locationInfo;
   }
 
+/**
+ * Gets the number of Monte-Carlo runs.
+ *
+ * @return the number of Monte-Carlo runs
+ */
 public int getMcruns() {
 	return mcruns;
 }
 
+/**
+ * Gets the CO2 factor.
+ *
+ * @return the CO2 factor
+ */
 public double getCo2() {
 	return co2;
 }
 
+/**
+ * Gets the number of days.
+ *
+ * @return the number of days
+ */
 public int getNumOfDays() {
 	return numOfDays;
 }
 
+/**
+ * Sets the number of Monte-Carlo runs.
+ *
+ * @param mcruns the new number of Monte-Carlo runs
+ */
 public void setMcruns(int mcruns) {
 	this.mcruns = mcruns;
 }
 
+/**
+ * Sets the CO2 factor.
+ *
+ * @param co2 the new CO2 factor
+ */
 public void setCo2(double co2) {
 	this.co2 = co2;
 }
 
+/**
+ * Sets the number of days.
+ *
+ * @param numOfDays the new number of days
+ */
 public void setNumOfDays(int numOfDays) {
 	this.numOfDays = numOfDays;
 }
 
+/**
+ * Gets the scenario setup type.
+ *
+ * @return the scenario setup type (static or dynamic)
+ */
 public String getSetup() {
 	return setup;
 }
 
+/**
+ * Sets the scenario setup type.
+ *
+ * @param setup the new scenario setup type (static or dynamic)
+ */
 public void setSetup(String setup) {
 	this.setup = setup;
 }
-
-//  /**
-//   * @param args
-//   * @throws IOException
-//   * @throws ParseException
-//   */
-//  public static void main (String[] args) throws IOException, ParseException
-//  {
-//    String s = Utils.readFile("simparam.json");
-//
-//    DBObject obj = (DBObject) JSON.parse(s);
-//
-//    SimulationParams sp = new SimulationParams(obj);
-//
-//    System.out.println("Name:" + sp.getName());
-//    System.out.println("Location Info:" + sp.getLocationInfo());
-//    System.out.println("SimCalendar:" + sp.getSimCalendar().toString());
-//  }
 
 }

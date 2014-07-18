@@ -1,3 +1,18 @@
+/*   
+   Copyright 2011-2013 The Cassandra Consortium (cassandra-fp7.eu)
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+ */
 package eu.cassandra.sim;
 
 import java.io.File;
@@ -32,23 +47,38 @@ import eu.cassandra.sim.math.GaussianMixtureModels;
 import eu.cassandra.sim.math.Histogram;
 import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.Uniform;
-import eu.cassandra.sim.utilities.DBResults;
 import eu.cassandra.sim.utilities.SetupFileParser;
 
 /**
+ * The StandAloneSimulation class includes an implementation of the setupScenario() method that
+ * parses a properly formatted input text file and  <br>
+ * (a) sets up the installations (or installation types) to be included in the simulation, <br>
+ * (b) sets up the pricing scheme(s) to be used in the simulation, <br>
+ * (c) defines the set of simulation parameters to be used and, in case of dynamic scenarios, <br>
+ * (d) the demographic data, according to which the entities involved in the simulation will be instantiated.
  * 
- * 
- *  @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
+ * @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  * 
  */
 public class StandAloneSimulation extends Simulation {
 	
-	
-
-	public StandAloneSimulation(String aresources_path, String adbname, int seed, boolean useDerby) {
-		super(aresources_path, adbname, seed, useDerby);
+	/**
+	 * Instantiates a new stand alone simulation, whose scenario setup is stored in a properly formatted input file.
+	 *
+	 * @param outputPath the path to the output directory
+	 * @param dbName the name of the database where output data will be stored
+	 * @param seed the seed for the random number generator
+	 * @param useDerby whether to use MongoDB (false) or Apache Derby (true) for storing simulation output data
+	 */
+	public StandAloneSimulation(String outputPath, String dbName, int seed, boolean useDerby) {
+		super(outputPath, dbName, seed, useDerby);
 	}
 	
+	
+	/**
+	 * Specific implementation of the  {@link eu.cassandra.sim.Simulation#setupScenario() setupScenario} method
+	 * that parses the information required to setup a scenario from a properly formatted input file.
+	 */
 	@SuppressWarnings("deprecation")
 	@Override
 	public Vector<Installation> setupScenario()
@@ -60,11 +90,13 @@ public class StandAloneSimulation extends Simulation {
   	    int startDateDay = Integer.parseInt((sfp.propSimulation.getProperty("start_dayOfMonth") != null ? sfp.propSimulation.getProperty("start_dayOfMonth").trim() : new Date().getDate()+"")); 	
 	    int startDateMonth = Integer.parseInt((sfp.propSimulation.getProperty("start_month") != null ? sfp.propSimulation.getProperty("start_month").trim() : new Date().getMonth()+"")); 		
 	    int startDateYear = Integer.parseInt((sfp.propSimulation.getProperty("start_year") != null ? sfp.propSimulation.getProperty("start_year").trim() : new Date().getYear()+"")); 	
-	    SimulationParams simParams = new SimulationParams(responseType, scenarioName, locationInfo, numOfDays, startDateDay,  startDateMonth, startDateYear);
-	    
 	    int mcruns = Integer.parseInt((sfp.propSimulation.getProperty("mcruns") != null ? sfp.propSimulation.getProperty("mcruns").trim() : "1")); 	
   		double co2 = Integer.parseInt((sfp.propSimulation.getProperty("co2") != null ? sfp.propSimulation.getProperty("co2").trim() : "0")); 	
   		String setup = sfp.propScenario.getProperty("setup");
+	    SimulationParams simParams = new SimulationParams(responseType, scenarioName, locationInfo, numOfDays, 
+	    		startDateDay,  startDateMonth, startDateYear, mcruns, co2, setup);
+	    
+	   
 			
 	    if (setup.equals("dynamic"))
 	    {
@@ -258,15 +290,13 @@ public class StandAloneSimulation extends Simulation {
   		}
 		
 		this.simulationWorld = simParams;
-  		this.mcruns = mcruns;
-  		this.co2 = co2;
   		this.pricing = pricPolicy;
   		this.baseline_pricing = pricPolicyB;
-  		this.numOfDays = numOfDays;
-  		this.setup = setup;
+  		
   		
   		return installations;
 	}
+	
 	
 	private PricingPolicy constructPricingPolicy(String pricingType, PricingPolicy.Builder builderPP) throws Exception
 	{
@@ -458,54 +488,6 @@ public class StandAloneSimulation extends Simulation {
 		}
 	}
 	
-	public static void main(String[] args)
-	{	
-//		String filename = "SimpleStaticScenario.txt";
-		String filename = "properties.txt";
-		String outputPath = "./";
-		if (args.length >= 2)
-		{
-			filename = args[0];
-			outputPath = args[1];
-		}
-		if (args.length > 2)
-			System.err.println("WARNING: Only two arguments required. Ignoring arguments after the first two.");
-		if (args.length <= 1)
-		{
-			System.err.println("WARNING: Two arguments required <setup_file_name> <ouput_dir_path>. Running simulation with default values.");
-		}
-			
-		sfp = new SetupFileParser();
-		sfp.parseFileForProperties(filename);	
-		StandAloneSimulation sas = new StandAloneSimulation(outputPath, "RunFrom" + (new File(filename)).getName().replace(".", "_")+System.currentTimeMillis(), 
-					sfp.generalProps.getProperty("seed") != null ? Integer.parseInt(sfp.generalProps.getProperty("seed")) : 0,
-					sfp.generalProps.getProperty("useDerby") != null ? Boolean.parseBoolean(sfp.generalProps.getProperty("useDerby")) : true );
-		
-		try {
-			sas.setupStandalone(false);
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-	
-		sas.runStandAlone();
-		
-		boolean printKPIs =sfp.generalProps.getProperty("printKPIs") != null ? Boolean.parseBoolean(sfp.generalProps.getProperty("printKPIs")) : false;
-		if (printKPIs)
-		{	
-			System.out.println();
-			printKPIs(sas.getM().getKPIs(DBResults.AGGR), null, DBResults.AGGR);
-			for (Installation inst: sas.getInstallations())
-			{
-				printKPIs(sas.getM().getKPIs(inst.getId()), "installation", inst.getId());
-				for (Appliance app: inst.getAppliances())
-					printKPIs(sas.getM().getAppKPIs(app.getId()), "appliance", app.getId());
-			    	for (Person p: inst.getPersons())
-			    		for (Activity a: p.getActivities())
-			    			printKPIs(sas.getM().getActKPIs(a.getId()), p.getName() + "'s activity", a.getId());
-			}
-		}
-	}
-	
 	private HashMap<String, Double> parseProbabilities(String probsText)
 	{
 		HashMap<String, Double> results = new HashMap<String, Double>();
@@ -519,15 +501,48 @@ public class StandAloneSimulation extends Simulation {
 		return results;
 	}
 	
-	private static void printKPIs( HashMap<String, Double> kpis, String entityType, String entityId)
-	{
-		if (entityType == null && entityId == DBResults.AGGR)
-			System.out.println("Aggregate KPIs");
-		else
-			System.out.println("KPIs for " + entityType + " " + entityId);
-		for (String key: kpis.keySet())
-			System.out.println(key + " \t" + kpis.get(key));
-		System.out.println();
+	
+	/**
+	 * The main method. Parses the scenario input file, sets up and runs the simulation, and, finally, outputs results. 
+	 *
+	 * @param args The table of arguments. Two arguments are required: "setup_file_name" and "ouput_dir_path".
+	 * If more than two arguments are provided, the ones after the first two are ignored.
+	 * If less than two arguments are provided, simulation is run using the default values "properties.txt" and "./", respectively.
+	 */
+	public static void main(String[] args)
+	{	
+		String filename = "SimpleStaticScenario.txt";
+//		String filename = "properties.txt";
+		String outputPath = "./";
+		if (args.length >= 2)
+		{
+			filename = args[0];
+			outputPath = args[1];
+		}
+		if (args.length > 2)
+			System.err.println("WARNING: Only two arguments required. Ignoring arguments after the first two.");
+		if (args.length <= 1)
+		{
+			System.err.println("WARNING: Two arguments required <setup_file_name> <ouput_dir_path>. Running simulation with default values \"properties.txt\" and \"./\".");
+		}
+			
+		sfp = new SetupFileParser();
+		sfp.parseFileForProperties(filename);	
+		StandAloneSimulation sas = new StandAloneSimulation(outputPath, "RunFrom" + (new File(filename)).getName().replace(".", "_")+System.currentTimeMillis(), 
+					sfp.generalProps.getProperty("seed") != null ? Integer.parseInt(sfp.generalProps.getProperty("seed")) : 0,
+					sfp.generalProps.getProperty("useDerby") != null ? Boolean.parseBoolean(sfp.generalProps.getProperty("useDerby")) : true );
+		
+		try {
+			sas.setup(false);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	
+		sas.runSimulation();
+		
+		boolean printKPIs =sfp.generalProps.getProperty("printKPIs") != null ? Boolean.parseBoolean(sfp.generalProps.getProperty("printKPIs")) : false;
+		if (printKPIs)
+			sas.printKPIs();
 	}
 
 }

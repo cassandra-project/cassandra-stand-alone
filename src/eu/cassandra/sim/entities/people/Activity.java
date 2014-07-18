@@ -645,5 +645,14 @@ public class Activity extends Entity {
 		this.appliances = appliances;
 	}
 	
+	public void addAppliances(String[] applianceIds, HashMap<String, Appliance> appliances, String actmodDayType)
+	{
+		for(int m = 0; m < applianceIds.length; m++) {
+			String containAppId = applianceIds[m];
+			Appliance app  = appliances.get(containAppId);
+			addAppliance(actmodDayType,app,1.0/applianceIds.length);
+		}
+	}
+	
 
 }

@@ -9,20 +9,10 @@ description = A simple static scenario (1 installation, 1 person, 1 activity & 2
 setup = static
 
 --> installation
-id = inst1
-description = Sample installation
-location = Thessaloniki 
-name = Fani’s house 
-type = Flat
+id = inst1name = Fani's house type = Flatdescription = Sample installationtrans_id = 12345678location = Thessaloniki lat = 0long = 0
 
---> person
-id = person1
-name = Fani
-description = Single person 
-installation = inst1
-awareness = 0.8
-sensitivity = 0.3
-type = Girl
+--> appliance
+id = appl1name = Cleaning Washing Machinetype = Cleaningdescription = Description of Cleaning Washing Machineenergy_class = Class Astandy_consumption = 0 base = falseshiftable = false controllable = false installation = inst1consumption_model = consModel1
 
 --> consumption_model
 id = consModel1
@@ -32,17 +22,17 @@ pmodel = { "n" : 0 , "params" : [ { "n" : 1 , "values" : [ { "p" : 107.740000000
 qmodel = { "n" : 0 , "params" : [ { "n" : 1 , "values" : [ { "q" : 107.74000000000001 , "d" : 10 , "s" : 0}]}]}
 
 --> appliance
-id = appl1
-name = Cleaning Washing Machine
-base = false
-controllable = false 
-description = Description of Cleaning Washing Machine
-energy_class = Class A
-installation = inst1
-shiftable = false 
-standy_consumption = 0 
+id = appl2
+name = Cleaning Vacuum Cleaner
 type = Cleaning
-consumption_model = consModel1
+description = Description of Cleaning Vacuum Cleaner
+energy_class = Class A
+standy_consumption = 0 
+base = false
+shiftable = false
+controllable = false 
+installation = inst1
+consumption_model = consModel2
 
 --> consumption_model
 id = consModel2
@@ -51,29 +41,32 @@ description = P and Q Consumption Model for Cleaning Vacuum Cleaner
 pmodel = {"n":0,"params":[{"n":1,"values":[{"p":1193.8874999999998,"d":10,"s":0}]}]}
 qmodel = {"n":0,"params":[{"n":1,"values":[{"q":-164.385,"d":10,"s":0}]}]}
 
---> appliance
-id = appl2
-name = Cleaning Vacuum Cleaner
-base = false
-controllable = false 
-description = Description of Cleaning Vacuum Cleaner
-energy_class = Class A
+--> person
+id = person1
+name = Fani
+type = Girl
+description = Single person 
 installation = inst1
-shiftable = false 
-standy_consumption = 0 
-type = Cleaning
-consumption_model = consModel2
+awareness = 0.8
+sensitivity = 0.3
+
+--> activity
+id = act1
+name = Person Cleaning Activity
+type = Cleaning 
+description = Person Cleaning Activity 
+person = person1 
 
 --> activity_model
 id = actModel1
-activity = act1
-exclusive = true
-containsAppliances = appl1, appl2
-day_type = any
 name = Person Cleaning Activity Model
+type = Cleaning
+description = Person Cleaning Activity Model
+day_type = any
 shiftable = false 
-type = 
-description = Person Cleaning Activity Model 	
+exclusive = true
+activity = act1
+containsAppliances = appl1, appl2
 duration_distrType = Normal Distribution	
 duration_values = [ ]
 duration_parameters = [ { "mean" : 1 , "std" : 1}]
@@ -84,24 +77,8 @@ repetitions_distrType = Histogram
 repetitions_values =  [0.25,0.375,0.25,0,0,0,0,0.125]
 repetitions_parameters = [ ]
 
---> activity
-id = act1
-description = Person Cleaning Activity 
-name = Person Cleaning Activity
-person = person1 
-type = Cleaning 
-
 --> simulation
-name = lala
-co2 = 2 
-description = A simple static scenario to be simulated for 3 days, starting on 05/04/2014. 
-locationInfo = Thessaloniki 
-mcruns = 5 
-numberOfDays = 3
-start_dayOfMonth = 5
-start_month = 4
-start_year = 2014
-response_type = None
+name = Sample simulation parameterslocationInfo = Thessalonikimcruns = 5 start_dayOfMonth = 5start_month = 4start_year = 2014numberOfDays = 3response_type = Nonedescription = A simple static scenario in Thessaloniki to be simulated for 3 days, starting on 05/04/2014co2 = 2 
 
 --> pricing_policy
 name = TestAIP

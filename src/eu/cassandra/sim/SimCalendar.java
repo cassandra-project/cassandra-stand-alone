@@ -15,144 +15,87 @@
  */
 package eu.cassandra.sim;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * The simulation's calendar.
+ * 
+ * @author Kyriakos C. Chatzidimitriou (kyrcha [at] iti [dot] gr)
+ * 
+ */
 public class SimCalendar {
+	
+	/** The calendar. */
 	private Calendar myCalendar;
+	
+	/** The calendar's base date. */
 	private Date base;
+	
+	/** The calendar's granularity. */
 	private String granularity = "Minute";
+	
+	/** The calendar's granularity value. */
 	private int granularityValue = 1;
+	
+	/** The calendar's duration. */
 	private int duration = 0;
-	
-	private static final String[] ABBR_DAYS = {"NA", "Sun", "Mon", "Tue", "Wed",
-		"Thu", "Fri", "Sat"};
 
-	public SimCalendar() {
+	/** The Constant ABBR_DAYS. */
+	private static final String[] ABBR_DAYS = { "NA", "Sun", "Mon", "Tue",
+			"Wed", "Thu", "Fri", "Sat" };
 
-		myCalendar = Calendar.getInstance();
-
-		int day = myCalendar.get(Calendar.DAY_OF_MONTH);
-		int month = myCalendar.get(Calendar.MONTH);
-		int year = myCalendar.get(Calendar.YEAR);
-
-		myCalendar.set(year, month, day, 0, 0, 0);
-		base = myCalendar.getTime();
-
-	}
-
-	public SimCalendar(Date date, int duration) {
-
-		myCalendar = Calendar.getInstance();
-
-		int day = myCalendar.get(Calendar.DAY_OF_MONTH);
-		int month = myCalendar.get(Calendar.MONTH);
-		int year = myCalendar.get(Calendar.YEAR);
-
-		myCalendar.set(year, month, day, 0, 0, 0);
-		base = myCalendar.getTime();
-		this.duration = duration;
-
-	}
-	
+	/**
+	 * Instantiates a new simulation calendar.
+	 *
+	 * @param day the day
+	 * @param month the month
+	 * @param year the year
+	 * @param duration the duration
+	 */
 	public SimCalendar(int day, int month, int year, int duration) {
 
 		myCalendar = Calendar.getInstance();
 
-		myCalendar.set(year, month-1, day, 0, 0, 0);
+		myCalendar.set(year, month - 1, day, 0, 0, 0);
 		base = myCalendar.getTime();
 		this.duration = duration;
 
 	}
 
-	public SimCalendar (Date date, String granularity, int value) {
-
-		setGranularity(granularity, value);
-		myCalendar = Calendar.getInstance();
-		myCalendar.setTime(date);
-
-		int day = myCalendar.get(Calendar.DAY_OF_MONTH);
-		int month = myCalendar.get(Calendar.MONTH);
-		int year = myCalendar.get(Calendar.YEAR);
-
-		myCalendar.set(year, month, day, 0, 0, 0);
-
-		base = myCalendar.getTime();
-
-	}
-
-	public SimCalendar (String season, String granularity, int value) {
-
-		setGranularity(granularity, value);
-		myCalendar = Calendar.getInstance();
-
-		int day = 1;
-		int month;
-		int year = myCalendar.get(Calendar.YEAR);
-
-		switch (season) {
-		case "Summer":
-
-			month = Calendar.JUNE;
-			break;
-
-		case "Spring":
-
-			month = Calendar.MARCH;
-			break;
-
-		case "Autumn":
-
-			month = Calendar.SEPTEMBER;
-			break;
-
-		case "Winter":
-
-			month = Calendar.DECEMBER;
-			break;
-
-		default:
-
-			month = Calendar.JANUARY;
-
-		}
-
-		myCalendar.set(year, month, day, 0, 0, 0);
-
-		base = myCalendar.getTime();
-
-	}
-
-	public SimCalendar (int month, String granularity, int value) {
-
-		setGranularity(granularity, value);
-		myCalendar = Calendar.getInstance();
-
-		int day = 1;
-		int year = myCalendar.get(Calendar.YEAR);
-
-		myCalendar.set(year, month - 1, day, 0, 0, 0);
-
-		base = myCalendar.getTime();
-
-	}
-
-	public Calendar getMyCalendar () {
+	/**
+	 * Gets the calendar.
+	 *
+	 * @return the calendar
+	 */
+	public Calendar getMyCalendar() {
 		return myCalendar;
 	}
 
-	public Date getBase () {
+	/**
+	 * Gets the calendar's base date.
+	 *
+	 * @return the calendar's base date
+	 */
+	public Date getBase() {
 		return base;
 	}
 
-	public String getGranularity () {
+	/**
+	 * Gets the calendar's granularity.
+	 *
+	 * @return the calendar's granularity
+	 */
+	public String getGranularity() {
 		return granularity;
 	}
 
-	public int getGranularityRaw () {
+	/**
+	 * Gets the calendar's granularity (in raw format).
+	 *
+	 * @return the calendar's granularity (in raw format).
+	 */
+	public int getGranularityRaw() {
 
 		switch (granularity) {
 		case "Minute":
@@ -181,24 +124,35 @@ public class SimCalendar {
 
 	}
 
-	public int getGranularityValue () {
+	/**
+	 * Gets the calendar's granularity value.
+	 *
+	 * @return the calendar'sgranularity value
+	 */
+	public int getGranularityValue() {
 		return granularityValue;
 	}
 
-	private void setGranularity (String gran, int value) {
-		granularity = gran;
-		granularityValue = value;
-	}
-	
+	/**
+	 * Copy a calendar.
+	 *
+	 * @param cal the calendar to copy
+	 * @return the copied calendar
+	 */
 	private Calendar copyCal(Calendar cal) {
 		Calendar temp = Calendar.getInstance();
-		temp.set(myCalendar.get(Calendar.YEAR), 
-				myCalendar.get(Calendar.MONTH), 
+		temp.set(myCalendar.get(Calendar.YEAR), myCalendar.get(Calendar.MONTH),
 				myCalendar.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
 		return temp;
 	}
 
-	public boolean isWeekend (int tick) {
+	/**
+	 * Checks if it is weekend.
+	 *
+	 * @param tick the current tick
+	 * @return true, if it is weekend
+	 */
+	public boolean isWeekend(int tick) {
 		Calendar temp = copyCal(myCalendar);
 		int gran = getGranularityRaw();
 		temp.add(gran, tick * granularityValue);
@@ -207,7 +161,13 @@ public class SimCalendar {
 			return true;
 		return false;
 	}
-	
+
+	/**
+	 * Gets the current date.
+	 *
+	 * @param tick the current tick
+	 * @return the current date
+	 */
 	public String getCurrentDate(int tick) {
 		Calendar temp = copyCal(myCalendar);
 		int gran = getGranularityRaw();
@@ -216,7 +176,13 @@ public class SimCalendar {
 		int month = temp.get(Calendar.MONTH) + 1;
 		return day + "/" + month;
 	}
-	
+
+	/**
+	 * Gets the current day of week.
+	 *
+	 * @param tick the current tick
+	 * @return the current day of week
+	 */
 	public String getDayOfWeek(int tick) {
 		Calendar temp = copyCal(myCalendar);
 		int gran = getGranularityRaw();
@@ -224,35 +190,15 @@ public class SimCalendar {
 		return ABBR_DAYS[temp.get(Calendar.DAY_OF_WEEK)];
 	}
 
-	public String toString () {
-		String temp =
-				"Base: " + base + " Granularity: " + granularity + 
-				" Granularity Value: " + granularityValue + " Duration: " + duration;
+	/* (non-Javadoc)
+	 * @see java.lang.Object#toString()
+	 */
+	@Override
+	public String toString() {
+		String temp = "Base: " + base + " Granularity: " + granularity
+				+ " Granularity Value: " + granularityValue + " Duration: "
+				+ duration;
 		return temp;
-	}
-
-	public static void main (String[] args) throws ParseException {
-		String date = "10/07/2010";
-		DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
-		Date temp = df.parse(date);
-		System.out.println(temp.toString());
-		System.out.println(Calendar.SUNDAY); // 1
-		System.out.println(Calendar.MONDAY); // 2
-		System.out.println(Calendar.TUESDAY); // 3
-		System.out.println(Calendar.WEDNESDAY); // 4
-		System.out.println(Calendar.THURSDAY); // 5
-		System.out.println(Calendar.FRIDAY); // 6
-		System.out.println(Calendar.SATURDAY); // 7
-		SimCalendar test = new SimCalendar();
-		System.out.println(test.toString());
-		test = new SimCalendar(Calendar.getInstance().getTime(), "Minute", 10);
-		System.out.println(test.toString());
-		test = new SimCalendar("Spring", "Minute", 10);
-		System.out.println(test.toString());
-		test = new SimCalendar(5, "Day", 1);
-		System.out.println(test.toString());
-		System.out.println(test.isWeekend(1));
-		System.out.println(test.isWeekend(5));
 	}
 
 }
