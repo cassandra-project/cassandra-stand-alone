@@ -12,8 +12,7 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
-
+ */
 package eu.cassandra.sim.math;
 
 import eu.cassandra.sim.utilities.Constants;
@@ -21,249 +20,198 @@ import eu.cassandra.sim.utilities.Constants;
 
 /**
  * @author Antonios Chrysopoulos
- * @version prelim
- * @since 2012-26-06
  */
 public class GaussianMixtureModels implements ProbabilityDistribution
 {
-  protected double[] pi;
-  protected Gaussian[] gaussians;
+	protected double[] pi;
+	protected Gaussian[] gaussians;
 
-  // For precomputation
-  protected boolean precomputed;
-  protected int numberOfBins;
-  protected double precomputeFrom;
-  protected double precomputeTo;
-  protected double[] histogram;
-  
-  public String getType()
-  {
-    return "GMM";
-  }
+	// For precomputation
+	protected boolean precomputed;
+	protected int numberOfBins;
+	protected double precomputeFrom;
+	protected double precomputeTo;
+	protected double[] histogram;
 
-  /**
-   * Constructor. Sets the parameters of the standard normal
-   * distribution, with mean 0 and standard deviation 1.
-   */
-  public GaussianMixtureModels (int n)
-  {
-    pi = new double[n];
-    for (int i = 0; i < n; i++) {
-      pi[i] = (1.0 / n);
-      gaussians[i] = new Gaussian();
-    }
-    precomputed = false;
-  }
-
-  /**
-   * Constructor 
-   * @param mu
-   *          Mean value of the Gaussian distribution.
-   * @param s
-   *          Standard deviation of the Gaussian distribution.
-   */
-  public GaussianMixtureModels (int n, double[] pi, double[] mu, double[] s, boolean precomputed)
-  {
-    gaussians = new Gaussian[n];
-    this.pi = new double[n];
-    this.precomputed = precomputed;
-    for (int i = 0; i < n; i++) {
-      this.pi[i] = pi[i];
-      gaussians[i] = new Gaussian(mu[i], s[i], false);
-    }
-    if (precomputed)
-    		precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);   
-  }
- 
-  public GaussianMixtureModels (GaussianMixtureModels source)
-  {
-	int n = source.gaussians.length;
-    gaussians = new Gaussian[n];
-    pi = new double[n];
-    for (int i = 0; i < n; i++) {
-      pi[i] = source.pi[i];
-      gaussians[i] = new Gaussian(source.gaussians[i]);
-    }
-    precomputed = source.precomputed;
-    precomputeFrom = source.precomputeFrom;
-    precomputeTo = source.precomputeTo;
-    numberOfBins = source.numberOfBins;
-    histogram =source.histogram.clone();
-  }
-
-  public String getDescription ()
-  {
-    String description = "Gaussian Mixture Models probability density function";
-    return description;
-  }
-
-  public int getNumberOfParameters ()
-  {
-    return 3 * pi.length;
-  }
-
-  public double[] getParameters (int index)
-  {
-    double[] temp = new double[3];
-
-    temp[0] = gaussians[index].getParameter(0);
-    temp[1] = gaussians[index].getParameter(1);
-    temp[2] = pi[index];
-
-    return temp;
-  }
-
-  public void setParameters (int index, double[] values)
-  {
-
-    gaussians[index].setParameter(0, values[0]);
-    gaussians[index].setParameter(1, values[1]);
-    pi[index] = values[2];
-
-  }
-
-  public void precompute (double startValue, double endValue, int nBins)
-  {
-    if (startValue >= endValue) {
-      // TODO Throw an exception or whatever.
-      return;
-    }
-    precomputeFrom = startValue;
-    precomputeTo = endValue;
-    numberOfBins = nBins;
-    histogram = new double[nBins];
-
-    for (int i = 0; i < gaussians.length; i++) {
-      gaussians[i].precompute(startValue, endValue, nBins);
-    }
-
-    for (int i = 0; i < nBins; i++) {
-
-      for (int j = 0; j < gaussians.length; j++) {
-        histogram[i] += pi[j] * gaussians[j].getHistogram()[i];
-      }
-      
-    }
-
-    precomputed = true;
-  }
-
-  public double getProbability (double x)
-  {
-    double sum = 0;
-    for (int j = 0; j < pi.length; j++) {
-      sum += pi[j] * gaussians[j].getProbability(x);
-    }
-    return sum;
-  }
-
-  public double getCumulativeProbability (double z)
-  {
-    double sum = 0;
-    for (int j = 0; j < pi.length; j++) {
-      sum +=
-        pi[j]
-                * Gaussian.bigPhi(z, gaussians[j].getParameter(0),
-                                  gaussians[j].getParameter(1));
-    }
-    return sum;
-  }
-
-  public double getPrecomputedProbability (double x)
-  {
-    if (!precomputed) {
-      return -1;
-    }
-    double div = (precomputeTo - precomputeFrom) / (double) numberOfBins;
-    int bin = (int) Math.floor((x - precomputeFrom) / div);
-    if (bin == numberOfBins) {
-      bin--;
-    }
-    return histogram[bin];
-  }
-
-  public int getPrecomputedBin (double rn)
-  {
-    if (!precomputed) {
-      return -1;
-    }
-    // double div = (precomputeTo - precomputeFrom) / (double) numberOfBins;
-    double dice = rn;
-    double sum = 0;
-    for (int i = 0; i < numberOfBins; i++) {
-      sum += histogram[i];
-      // if(dice < sum) return (int)(precomputeFrom + i * div);
-      if (dice < sum) {
-        return i;
-      }
-    }
-    return -1;
-  }
-  
-  public void precompute (int endValue)
-  {
-    if (endValue == 0) {
-      // TODO Throw an exception or whatever.
-      return;
-    }
-    int startValue = 0;
-    int nBins = endValue;
-    
-    precompute(startValue, endValue,nBins);
-    
-  }
-  
-  public double[] getHistogram ()
-  {
-	if (precomputed == false){
-		System.out.println("Not computed yet!");
-		return null;		
+	@Override
+	public String getType()
+	{
+		return "GMM";
 	}
-	  
-    return histogram;
-  }
 
-  public void status ()
-  {
 
-    System.out.print("Gaussian Mixture with");
-    System.out.println(" Number of Mixtures:" + pi.length);
-    for (int i = 0; i < pi.length; i++) {
-      System.out.print("Mixture " + i);
-      System.out.print(" Mean: " + gaussians[i].getParameter(0));
-      System.out.print(" Sigma: " + gaussians[i].getParameter(1));
-      System.out.print(" Weight: " + pi[i]);
-      System.out.println();
-    }
-    System.out.println("Precomputed: " + precomputed);
-    if (precomputed) {
-      System.out.print("Number of Beans: " + numberOfBins);
-      System.out.print(" Starting Point: " + precomputeFrom);
-      System.out.println(" Ending Point: " + precomputeTo);
-    }
-    System.out.println();
-  }
-  
-  @Override
-  public double getProbabilityGreater (int x)
-  {
-    double prob = 0;
+	/**
+	 * Constructor 
+	 * @param mu
+	 *          Mean value of the Gaussian distribution.
+	 * @param s
+	 *          Standard deviation of the Gaussian distribution.
+	 */
+	public GaussianMixtureModels (int n, double[] pi, double[] mu, double[] s, boolean precomputed)
+	{
+		gaussians = new Gaussian[n];
+		this.pi = new double[n];
+		this.precomputed = precomputed;
+		for (int i = 0; i < n; i++) {
+			this.pi[i] = pi[i];
+			gaussians[i] = new Gaussian(mu[i], s[i], false);
+		}
+		if (precomputed)
+			precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);   
+	}
 
-    int start = (int) x;
+	public GaussianMixtureModels (GaussianMixtureModels source)
+	{
+		int n = source.gaussians.length;
+		gaussians = new Gaussian[n];
+		pi = new double[n];
+		for (int i = 0; i < n; i++) {
+			pi[i] = source.pi[i];
+			gaussians[i] = new Gaussian(source.gaussians[i]);
+		}
+		precomputed = source.precomputed;
+		precomputeFrom = source.precomputeFrom;
+		precomputeTo = source.precomputeTo;
+		numberOfBins = source.numberOfBins;
+		histogram =source.histogram.clone();
+	}
 
-    for (int i = start+1; i < histogram.length; i++)
-      prob += histogram[i];
+	@Override
+	public String getDescription ()
+	{
+		String description = "Gaussian Mixture Models probability density function";
+		return description;
+	}
 
-    return prob;
-  }
+	@Override
+	public int getNumberOfParameters ()
+	{
+		return 3 * pi.length;
+	}
 
-  public double getParameter (int index)
-  {
-    return 0;
-  }
+	@Override
+	public void precompute (double startValue, double endValue, int nBins)
+	{
+		if (startValue >= endValue) {
+			// TODO Throw an exception or whatever.
+			return;
+		}
+		precomputeFrom = startValue;
+		precomputeTo = endValue;
+		numberOfBins = nBins;
+		histogram = new double[nBins];
 
-  public void setParameter (int index, double value)
-  {
-  }
+		for (int i = 0; i < gaussians.length; i++) {
+			gaussians[i].precompute(startValue, endValue, nBins);
+		}
+
+		for (int i = 0; i < nBins; i++) {
+			for (int j = 0; j < gaussians.length; j++) {
+				histogram[i] += pi[j] * gaussians[j].getHistogram()[i];
+			} 
+		}
+
+		precomputed = true;
+	}
+
+	@Override
+	public double getProbability (double x)
+	{
+		double sum = 0;
+		for (int j = 0; j < pi.length; j++) {
+			sum += pi[j] * gaussians[j].getProbability(x);
+		}
+		return sum;
+	}
+
+	@Override
+	public double getPrecomputedProbability (double x)
+	{
+		if (!precomputed) {
+			return -1;
+		}
+		double div = (precomputeTo - precomputeFrom) / numberOfBins;
+		int bin = (int) Math.floor((x - precomputeFrom) / div);
+		if (bin == numberOfBins) {
+			bin--;
+		}
+		return histogram[bin];
+	}
+
+	@Override
+	public int getPrecomputedBin (double rn)
+	{
+		if (!precomputed) {
+			return -1;
+		}
+		// double div = (precomputeTo - precomputeFrom) / (double) numberOfBins;
+		double dice = rn;
+		double sum = 0;
+		for (int i = 0; i < numberOfBins; i++) {
+			sum += histogram[i];
+			// if(dice < sum) return (int)(precomputeFrom + i * div);
+			if (dice < sum) {
+				return i;
+			}
+		}
+		return -1;
+	}
+
+	@Override
+	public double[] getHistogram ()
+	{
+		if (precomputed == false){
+			System.out.println("Not computed yet!");
+			return null;		
+		}
+
+		return histogram;
+	}
+
+	@Override
+	public void status ()
+	{
+
+		System.out.print("Gaussian Mixture with");
+		System.out.println(" Number of Mixtures:" + pi.length);
+		for (int i = 0; i < pi.length; i++) {
+			System.out.print("Mixture " + i);
+			System.out.print(" Mean: " + gaussians[i].getParameter(0));
+			System.out.print(" Sigma: " + gaussians[i].getParameter(1));
+			System.out.print(" Weight: " + pi[i]);
+			System.out.println();
+		}
+		System.out.println("Precomputed: " + precomputed);
+		if (precomputed) {
+			System.out.print("Number of Beans: " + numberOfBins);
+			System.out.print(" Starting Point: " + precomputeFrom);
+			System.out.println(" Ending Point: " + precomputeTo);
+		}
+		System.out.println();
+	}
+
+	@Override
+	public double getProbabilityGreater (int x)
+	{
+		double prob = 0;
+
+		int start = x;
+
+		for (int i = start+1; i < histogram.length; i++)
+			prob += histogram[i];
+
+		return prob;
+	}
+
+	@Override
+	public double getParameter (int index)
+	{
+		return 0;
+	}
+
+	@Override
+	public void setParameter (int index, double value)
+	{
+	}
 
 }

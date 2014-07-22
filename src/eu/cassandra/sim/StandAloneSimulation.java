@@ -18,21 +18,6 @@ package eu.cassandra.sim;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
-/*   
-Copyright 2011-2013 The Cassandra Consortium (cassandra-fp7.eu)
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-*/
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -283,11 +268,13 @@ public class StandAloneSimulation extends Simulation {
   			act.addShiftable(actmodDayType, shiftable);
   			act.addConfig(actmodDayType, exclusive);
   			
-  			for(int m = 0; m < containsAppliances.length; m++) {
-  				String containAppId = containsAppliances[m].trim();
-  				Appliance app  = appliances.get(containAppId);
-  				act.addAppliance(actmodDayType,app,1.0/containsAppliances.length);
-  			}
+  			act.addAppliances(containsAppliances, appliances, actmodDayType);
+  			
+//  			for(int m = 0; m < containsAppliances.length; m++) {
+//  				String containAppId = containsAppliances[m].trim();
+//  				Appliance app  = appliances.get(containAppId);
+//  				act.addAppliance(actmodDayType,app,1.0/containsAppliances.length);
+//  			}
   		}
 		
 		this.simulationWorld = simParams;
@@ -426,7 +413,7 @@ public class StandAloneSimulation extends Simulation {
 			}		
 			Uniform uniform = null;
 			if(caseD.equalsIgnoreCase("start")) {
-				uniform = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
+				uniform = new Uniform(from, to, true);
 			} else {
 				uniform = new Uniform(from, to, false);
 			}

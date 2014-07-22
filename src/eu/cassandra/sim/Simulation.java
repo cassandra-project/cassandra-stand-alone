@@ -388,12 +388,10 @@ public abstract class Simulation {
 							act.addConfig(key, exclusive);
 							// add appliances
 							appliances = actModApps.get(key);
-							for(int m = 0; m < appliances.size(); m++) {
-								String containAppId = inst_id + "_" + appliances.get(m).getId();
-								Appliance app = existing.get(containAppId);
-								//act.addAppliance(actmodDayType,app,1.0/containsAppliances.size());
-								act.addAppliance(key,app,1.0);
-							}
+							String[] containsAppliances = new String[appliances.size()];
+							for(int m = 0; m < appliances.size(); m++) 
+								containsAppliances[m] = inst_id + "_" + appliances.get(m).getId();
+							act.addAppliances(containsAppliances, existing, key);
 						}
 						person.addActivity(act);
 					}
@@ -527,11 +525,10 @@ public abstract class Simulation {
 						act.addConfig(key, exclusive);
 						// add appliances
 						appliances = actModApps.get(key);
-						for(int l = 0; l < appliances.size(); l++) {
-							String containAppId = inst_id + "_" + appliances.get(l).getId();
-							Appliance app = existing.get(containAppId);
-							act.addAppliance(key,app,1.0/appliances.size());
-						}
+						String[] containsAppliances = new String[appliances.size()];
+						for(int l = 0; l < appliances.size(); l++) 
+							containsAppliances[l] = inst_id + "_" + appliances.get(l).getId();
+						act.addAppliances(containsAppliances, existing, key);
 					}
 					person.addActivity(act);
 //					act.setParentId(person_id);

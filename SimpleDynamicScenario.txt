@@ -9,10 +9,10 @@ description = A simple dynamic scenario (1 "as-is" installation and 1 collection
 setup = dynamic
 
 --> installation
-id = instAname = Collection description = Installation including person types and appliances to be dynamically instantiated
+id = col1name = Collection description = Installation including person types and appliances to be dynamically instantiated
 
 --> appliance
-id = appl1name = Washing Machine 1type = Washingdescription = Description of Washing Machine 1standy_consumption = 0 base = falseinstallation = instAconsumption_model = consModel1
+id = appl1name = Washing Machine 1type = Washingdescription = Description of Washing Machine 1standy_consumption = 0 base = falseinstallation = col1consumption_model = consModel1
 
 --> consumption_model
 id = consModel1
@@ -26,7 +26,7 @@ id = appl2
 name = Lighting 
 type = Lighting 
 description = Description of Lighting 
-standy_consumption = 0 base = falseinstallation = instAconsumption_model = consModel2
+standy_consumption = 0 base = falseinstallation = col1consumption_model = consModel2
 
 --> consumption_model
 id = consModel2
@@ -40,7 +40,7 @@ id = appl3
 name = Vacuum Cleaner 1
 type = Cleaning
 description = Description of Vacuum Cleaner 1
-standy_consumption = 0 base = falseinstallation = instA
+standy_consumption = 0 base = falseinstallation = col1
 consumption_model = consModel3
 
 --> consumption_model
@@ -55,7 +55,7 @@ id = appl4
 name = Water Heater
 type = Water Heating
 description = Description of Water Heater
-standy_consumption = 0 base = falseinstallation = instA
+standy_consumption = 0 base = falseinstallation = col1
 consumption_model = consModel4
 
 --> consumption_model
@@ -70,7 +70,7 @@ id = appl5
 name = Vacuum Cleaner 2
 type = Cleaning
 description = Description of Vacuum Cleaner 2
-standy_consumption = 0 base = falseinstallation = instA
+standy_consumption = 0 base = falseinstallation = col1
 consumption_model = consModel5
 
 --> consumption_model
@@ -85,7 +85,7 @@ id = appl6
 name = Washing Machine 2
 type = Washing
 description = Description of Washing Machine 2
-standy_consumption = 0 base = falseinstallation = instA
+standy_consumption = 0 base = falseinstallation = col1
 consumption_model = consModel6
 
 --> consumption_model
@@ -100,7 +100,7 @@ id = person1
 name = Nikos
 type = Boy
 description = Male Person 
-installation = instA
+installation = col1
 awareness = 0.8
 sensitivity = 0.3
 
@@ -159,7 +159,7 @@ id = person2
 name = Fani
 type = Girl
 description = Female Person 
-installation = instA
+installation = col1
 awareness = 0.9
 sensitivity = 0.7
 
@@ -207,10 +207,10 @@ repetitions_values =  [0.2, 0.3, 0.5, 0.4]
 repetitions_parameters = [ ]
 
 --> installation
-id = instBname = Odysseas' house description = Installation to be instantiated "as-is"
+id = inst1name = Odysseas' house description = Installation to be instantiated "as-is"
 
 --> appliance
-id = appl7name = Odysseas' Washing Machinetype = Washingdescription = Description of Odysseas' Washing Machinestandy_consumption = 0 base = falseinstallation = instBconsumption_model = consModel7
+id = appl7name = Odysseas' Washing Machinetype = Washingdescription = Description of Odysseas' Washing Machinestandy_consumption = 0 base = falseinstallation = inst1consumption_model = consModel7
 
 --> consumption_model
 id = consModel7
@@ -224,7 +224,7 @@ id = person3
 name = Odysseas
 type = Boy
 description = Single Person 
-installation = instB
+installation = inst1
 awareness = 0.8
 sensitivity = 0.3
 
@@ -256,7 +256,9 @@ repetitions_parameters = [ ]
 --> simulation
 name = Sample simulation parameterslocationInfo = Thessalonikimcruns = 1 start_dayOfMonth = 5start_month = 4start_year = 2014numberOfDays = 3response_type = Nonedescription = A simple dynamic scenario in Thessaloniki to be simulated for 3 days, starting on 05/04/2014co2 = 2 
 
---> demographicsname = demographic data type = mixed description = scenario with dynamic and as-is installationsnumber_of_entities = 2participation_probs_installations = [ instA:0.5 , instB:0.5 ]participation_probs_persons = [ person1:0.7 , person2:0.3 ]participation_probs_apps = [ app1:1.0, app2:1.0, app3:1.0, app4:1.0, app5:1.0, app6:1.0]
+--> demographicsname = demographic data type = mixed description = scenario with dynamic and as-is installationsnumber_of_entities = 2participation_probs_installations = [ col1:0.5 , inst1:0.5 ]participation_probs_persons = [ person1:0.7 , person2:0.3 ]
+participation_probs_apps = [ app1:0.75, app2:0.75, app3:0.75, app4:0.75, app5:0.75, app6:0.75]—-> whatever
+participation_probs_apps = [ app1:1.0, app2:1.0, app3:1.0, app4:1.0, app5:1.0, app6:1.0]
 
 --> pricing_policy
 name = TestSEP

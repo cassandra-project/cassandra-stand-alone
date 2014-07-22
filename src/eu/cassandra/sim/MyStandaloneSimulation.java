@@ -341,11 +341,7 @@ public class MyStandaloneSimulation extends Simulation{
 		String[] containsAppliances = {"appl1", "appl3", "appl4", "appl5"};
 //		String[] containsAppliances = {"appl1"};
 		// add appliances
-		for(int m = 0; m < containsAppliances.length; m++) {
-			String containAppId = containsAppliances[m];
-			Appliance app  = existing.get(containAppId);
-			act1.addAppliance(actmodDayType,app,1.0/containsAppliances.length);
-		}
+		act1.addAppliances(containsAppliances, existing, actmodDayType);
 		
 		person.addActivity(act1);
 		
@@ -377,11 +373,7 @@ public class MyStandaloneSimulation extends Simulation{
 		
 		String[] containsAppliances2 = {"appl2"};
 		// add appliances
-		for(int m = 0; m < containsAppliances2.length; m++) {
-			String containAppId = containsAppliances2[m];
-			Appliance app  = existing.get(containAppId);
-			act2.addAppliance(actmodDayType,app,1.0/containsAppliances2.length);
-		}
+		act2.addAppliances(containsAppliances2, existing, actmodDayType);
 		
 		person.addActivity(act2);
 		
@@ -419,11 +411,7 @@ public class MyStandaloneSimulation extends Simulation{
 		act21.addTimes(actmodDayType, timesDist3);
 		act21.addShiftable(actmodDayType, shiftable);
 		act21.addConfig(actmodDayType, exclusive);
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
+		act21.addAppliances(containsAppliances21, existing, actmodDayType);
 		
 		actmodDayType = "weekdays";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
 		double[] durDist4V = {100.0, 50.0, 200.0};
@@ -432,21 +420,14 @@ public class MyStandaloneSimulation extends Simulation{
 		ProbabilityDistribution startDist4 = null;
 		double from = 100;
 		double to = 400;
-		if ("startDist4".contains("start")) 
-			startDist4 = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
-		else 
-			startDist4 = new Uniform(from, to, false);	
+		startDist4 = new Uniform(from, to, true);	
 		act21.addStartTime(actmodDayType, startDist4);
 		double[] timesDist4V = {0.2, 0.3, 0.5, 0.4};
 		ProbabilityDistribution timesDist4 = new Histogram(timesDist4V);
 		act21.addTimes(actmodDayType, timesDist4);
 		act21.addShiftable(actmodDayType, shiftable);
 		act21.addConfig(actmodDayType, exclusive);
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
+		act21.addAppliances(containsAppliances21, existing, actmodDayType);
 		
 		person2.addActivity(act21);
 		
@@ -575,11 +556,7 @@ public class MyStandaloneSimulation extends Simulation{
 		String[] containsAppliances = {"appl1", "appl3", "appl4", "appl5"};
 //		String[] containsAppliances = {"appl1"};
 		// add appliances
-		for(int m = 0; m < containsAppliances.length; m++) {
-			String containAppId = containsAppliances[m];
-			Appliance app  = existing.get(containAppId);
-			act1.addAppliance(actmodDayType,app,1.0/containsAppliances.length);
-		}
+		act1.addAppliances(containsAppliances, existing, actmodDayType);
 		
 		person.addActivity(act1);
 		
@@ -611,11 +588,7 @@ public class MyStandaloneSimulation extends Simulation{
 		
 		String[] containsAppliances2 = {"appl2"};
 		// add appliances
-		for(int m = 0; m < containsAppliances2.length; m++) {
-			String containAppId = containsAppliances2[m];
-			Appliance app  = existing.get(containAppId);
-			act2.addAppliance(actmodDayType,app,1.0/containsAppliances2.length);
-		}
+		act2.addAppliances(containsAppliances2, existing, actmodDayType);
 		
 		person.addActivity(act2);
 		
@@ -678,11 +651,7 @@ public class MyStandaloneSimulation extends Simulation{
 		act21.addTimes(actmodDayType, timesDist3);
 		act21.addShiftable(actmodDayType, shiftable);
 		act21.addConfig(actmodDayType, exclusive);
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
+		act21.addAppliances(containsAppliances21, existing, actmodDayType);
 		
 		actmodDayType = "weekdays";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
 		double[] durDist4V = {100.0, 50.0, 200.0};
@@ -691,21 +660,14 @@ public class MyStandaloneSimulation extends Simulation{
 		ProbabilityDistribution startDist4 = null;
 		double from = 100;
 		double to = 400;
-		if ("startDist4".contains("start")) 
-			startDist4 = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
-		else 
-			startDist4 = new Uniform(from, to, false);	
+		startDist4 = new Uniform(from, to, true);	
 		act21.addStartTime(actmodDayType, startDist4);
 		double[] timesDist4V = {0.2, 0.3, 0.5, 0.4};
 		ProbabilityDistribution timesDist4 = new Histogram(timesDist4V);
 		act21.addTimes(actmodDayType, timesDist4);
 		act21.addShiftable(actmodDayType, shiftable);
 		act21.addConfig(actmodDayType, exclusive);
-		for(int m = 0; m < containsAppliances21.length; m++) {
-			String containAppId = containsAppliances21[m];
-			Appliance app  = existing.get(containAppId);
-			act21.addAppliance(actmodDayType,app,1.0/containsAppliances21.length);
-		}
+		act21.addAppliances(containsAppliances21, existing, actmodDayType);
 		
 		person2.addActivity(act21);
 		

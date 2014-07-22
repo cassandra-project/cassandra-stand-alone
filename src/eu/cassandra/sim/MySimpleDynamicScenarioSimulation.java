@@ -84,7 +84,7 @@ public class MySimpleDynamicScenarioSimulation extends Simulation{
 		
 		//Create the "Collection" installation including person types and appliances to be dynamically instantiated
 		String instName = "Collection";			
-		String instID= "instA";								
+		String instID= "col1";								
 		String instDescription = "Installation including person types and appliances to be dynamically instantiated";	
 		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
@@ -280,10 +280,7 @@ public class MySimpleDynamicScenarioSimulation extends Simulation{
 		ProbabilityDistribution startDist4 = null;
 		double from = 100;
 		double to = 400;
-		if ("startDist4".contains("start")) 
-			startDist4 = new Uniform(Math.max(from-1,0), Math.min(to-1, 1439), true);
-		else 
-			startDist4 = new Uniform(from, to, false);	
+		startDist4 = new Uniform(from, to, true);	
 		act21.addStartTime(actmodDayType, startDist4);
 		double[] timesDist4V = {0.2, 0.3, 0.5, 0.4};
 		ProbabilityDistribution timesDist4 = new Histogram(timesDist4V);
@@ -301,7 +298,7 @@ public class MySimpleDynamicScenarioSimulation extends Simulation{
 		
 		//Create an installation to be instantiated "as-is"
 		instName = "Odysseas' house";			
-		instID= "instB";								
+		instID= "inst1";								
 		instDescription = "Installation to be instantiated \"as-is\"";	
 		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
@@ -361,16 +358,16 @@ public class MySimpleDynamicScenarioSimulation extends Simulation{
 		// set up demographic data
 		int numOfInstallations = 2;		
 		TreeMap<String,Double>instGen = new TreeMap<String,Double>();			
-		instGen.put("instA", 0.5);
-		instGen.put("instB", 0.5);
-		TreeMap<String,Double> applGen = new TreeMap<String,Double>();				
-		applGen.put("appl1", 1.0);
-		applGen.put("appl2", 1.0);
-		applGen.put("appl3", 1.0);
-		applGen.put("appl4", 1.0);
-		applGen.put("appl5", 1.0);
-		applGen.put("appl6", 1.0);
-//		applGen.put("appl7", 1.0);
+		instGen.put("col1", 0.5);
+		instGen.put("inst1", 0.5);
+		TreeMap<String,Double> applGen = new TreeMap<String,Double>();		
+		double applianceProb = 1.0;
+		applGen.put("appl1", applianceProb);
+		applGen.put("appl2", applianceProb);
+		applGen.put("appl3", applianceProb);
+		applGen.put("appl4", applianceProb);
+		applGen.put("appl5", applianceProb);
+		applGen.put("appl6", applianceProb);
 		TreeMap<String,Double> personGen = new TreeMap<String,Double>();				
 		personGen.put("person1", 0.7);
 		personGen.put("person2", 0.3);

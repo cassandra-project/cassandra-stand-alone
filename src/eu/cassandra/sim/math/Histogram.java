@@ -13,43 +13,44 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
 package eu.cassandra.sim.math;
 
 
 public class Histogram implements ProbabilityDistribution{
 
-	  protected int numberOfBins;
-	  protected double precomputeFrom;
-	  protected double precomputeTo;
-	  protected double[] histogram;
-	  protected boolean precomputed;
-	
+	protected int numberOfBins;
+	protected double precomputeFrom;
+	protected double precomputeTo;
+	protected double[] histogram;
+	protected boolean precomputed;
+
 	public Histogram(int size){
-		
+
 		precomputeFrom = 0;
 		precomputeTo = size;
 		numberOfBins = size;
 		histogram = new double[size];
 		precomputed = false;
 	}
-	
+
+	@Override
 	public String getType()
-	  {
-	    return "Histogram";
-	  }
-	
+	{
+		return "Histogram";
+	}
+
 	/**
-	  * Constructor. Takes a set of values and put them in the histogram.
-	  */
+	 * Constructor. Takes a set of values and put them in the histogram.
+	 */
 	public Histogram(double[] values){
-		
+
 		precomputeFrom = 0;
 		precomputeTo = values.length;
 		numberOfBins = values.length;
 		histogram = values;
 		precomputed = true;
-		
+
 	}
 
 	public Histogram(Histogram source) {
@@ -63,7 +64,7 @@ public class Histogram implements ProbabilityDistribution{
 	@Override
 	public String getDescription() {
 		String description = "Histogram Frequency Probability Density function";
-	    return description;
+		return description;
 	}
 
 	@Override
@@ -79,19 +80,13 @@ public class Histogram implements ProbabilityDistribution{
 	@Override
 	public void setParameter(int index, double value) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void precompute(double startValue, double endValue, int nBins) {
 		// TODO Auto-generated method stub
-		
-	}
 
-	@Override
-	public void precompute(int endValue) {
-		// TODO Auto-generated method stub
-		
 	}
 
 	@Override
@@ -106,53 +101,53 @@ public class Histogram implements ProbabilityDistribution{
 
 	@Override
 	public int getPrecomputedBin (double rn)
-	  {
-	    if (!precomputed) {
-	      return -1;
-	    }
-	    // double div = (precomputeTo - precomputeFrom) / (double) numberOfBins;
-	    double dice = rn;
-	    double sum = 0;
-	    for (int i = 0; i < numberOfBins; i++) {
-	      sum += histogram[i];
-	      // if(dice < sum) return (int)(precomputeFrom + i * div);
-	      if (dice < sum)
-	        return i;
-	    }
-	    return -1;
-	  }
+	{
+		if (!precomputed) {
+			return -1;
+		}
+		// double div = (precomputeTo - precomputeFrom) / (double) numberOfBins;
+		double dice = rn;
+		double sum = 0;
+		for (int i = 0; i < numberOfBins; i++) {
+			sum += histogram[i];
+			// if(dice < sum) return (int)(precomputeFrom + i * div);
+			if (dice < sum)
+				return i;
+		}
+		return -1;
+	}
 
 	@Override
 	public double[] getHistogram() {
-		
+
 		return histogram;
 	}
-	
-	  @Override
-	  public double getProbabilityGreater (int x)
-	  {
-	    double prob = 0;
 
-	    int start = (int) x;
+	@Override
+	public double getProbabilityGreater (int x)
+	{
+		double prob = 0;
 
-	    for (int i = start+1; i < histogram.length; i++)
-	      prob += histogram[i];
+		int start = x;
 
-	    return prob;
-	  }
+		for (int i = start+1; i < histogram.length; i++)
+			prob += histogram[i];
+
+		return prob;
+	}
 
 	@Override
 	public void status() {
 		System.out.print("Histogram");
-	    System.out.print(" Number Of Bins: " + getParameter(0));
-	    if (precomputed) {
-	      System.out.print(" Starting Point: " + precomputeFrom);
-	      System.out.println(" Ending Point: " + precomputeTo);
-	    }
-	    
-	    for (int i = 0; i < histogram.length;i++){
-	    	System.out.println("Index: " + i + " Value: " + histogram[i]);
-	    }
-	    System.out.println();
+		System.out.print(" Number Of Bins: " + getParameter(0));
+		if (precomputed) {
+			System.out.print(" Starting Point: " + precomputeFrom);
+			System.out.println(" Ending Point: " + precomputeTo);
+		}
+
+		for (int i = 0; i < histogram.length;i++){
+			System.out.println("Index: " + i + " Value: " + histogram[i]);
+		}
+		System.out.println();
 	}
 }

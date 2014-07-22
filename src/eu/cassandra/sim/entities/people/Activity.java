@@ -157,7 +157,7 @@ public class Activity extends Entity {
 		activityModels = builder.activityModels;
 	}
 
-	public void addAppliance (String day, Appliance a, Double prob) {
+	private void addAppliance (String day, Appliance a, Double prob) {
 		if(appliances.get(day) == null) {
 			appliances.put(day, new Vector<Appliance>());
 		}
@@ -648,7 +648,7 @@ public class Activity extends Entity {
 	public void addAppliances(String[] applianceIds, HashMap<String, Appliance> appliances, String actmodDayType)
 	{
 		for(int m = 0; m < applianceIds.length; m++) {
-			String containAppId = applianceIds[m];
+			String containAppId = applianceIds[m].trim();
 			Appliance app  = appliances.get(containAppId);
 			addAppliance(actmodDayType,app,1.0/applianceIds.length);
 		}

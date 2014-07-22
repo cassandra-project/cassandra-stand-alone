@@ -13,13 +13,10 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-
 package eu.cassandra.sim.math;
 
 /**
- * @author Christos Diou <diou remove this at iti dot gr>
- * @version prelim
- * @since 2012-22-01
+ * @author Christos Diou <diou at iti dot gr>
  */
 public interface ProbabilityDistribution
 {
@@ -88,25 +85,6 @@ public interface ProbabilityDistribution
    */
   public void precompute (double startValue, double endValue, int nBins);
 
-  /**
-   * Precomputes a set of distribution values.
-   * 
-   * Given a set of end point of the distribution this method computes
-   * the probability of randomly drawing a value from each bin, including the bin
-   * starting value and not including the end value. The computed
-   * value is stored in a histogram vector and can later be directly
-   * accessed using the method getPrecomputedProbability(). If the
-   * distribution is a probability density function, then this
-   * function may compute the integral of the pdf for the bin value
-   * range, otherwise the function will only compute the probability
-   * at the starting value of the bin.
-   * 
-   * @param endValue
-   *          The ending value of the probability
-   *          distribution domain or the lower bound for which probabilities
-   *          will be pre-computed.
-   */
-  public void precompute (int endValue);
   
   /**
    * Get the probability value P(x).
