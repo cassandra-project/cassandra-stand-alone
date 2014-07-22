@@ -22,16 +22,19 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.PriorityBlockingQueue;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 import com.mongodb.DBObject;
+
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
 import eu.cassandra.sim.entities.installations.Installation;
@@ -183,6 +186,12 @@ public abstract class Simulation {
 
 		Vector<Installation> insts = setupScenario();
 		
+		if (insts == null)
+			throw new Exception("No installations defined for the current scenario.");
+		
+		if (simulationWorld == null)
+			throw new Exception("No simulation parameters defined for the current scenario.");
+		
 		this.mcruns = this.simulationWorld.getMcruns();
 		this.co2 = this.simulationWorld.getCo2();
 		this.numOfDays = this.simulationWorld.getNumOfDays();
@@ -191,15 +200,18 @@ public abstract class Simulation {
 		endTick = Constants.MIN_IN_DAY * numOfDays;
 
 		// Check type of setup
-		if(setup.equalsIgnoreCase("static")) {
+		if (setup.equalsIgnoreCase("static")) {
 			//  			this.installations = insts;
 			staticSetup(insts);
-		} else if(setup.equalsIgnoreCase("dynamic")) {
+		} 
+		else if (setup.equalsIgnoreCase("dynamic")) {
+			if (this.demographics == null)
+				throw new Exception("Demographics undefined for \"dynamic\" scenario.");
 			this.installations = new Vector<Installation>();
 			dynamicSetup(insts, isCallDuringRun);
 			//  			dynamicSetupStandalone(jump);
 		} else {
-			throw new Exception("Problem with setup property!!!");
+			throw new Exception("Problem with setup property: a scenario can be either \"static\" or \"dynamic\"");
 		}
 
 		if (this.pricing == null)
@@ -236,27 +248,60 @@ public abstract class Simulation {
 	private void dynamicSetup(Vector<Installation> instTypes, boolean jump) throws Exception {		
 
 		int numOfInstallations = this.demographics.getNumEntities();
-		HashMap<String,Double> instGen = this.demographics.getInst_probs();
-		HashMap<String,Double> applGen = this.demographics.getApp_probs();
-		HashMap<String,Double> personGen = this.demographics.getPerson_probs();
-
-		instTypes.get(0).setName("Collection");
+		TreeMap<String,Double> instGen = this.demographics.getInst_probs();
+		double sum=0; boolean wrongValueDetected = false;
+		for (String key: instGen.keySet())
+		{
+			sum += instGen.get(key);
+			if (instGen.get(key) < 0 || instGen.get(key) > 1)
+				wrongValueDetected = true;
+		}
+		if (sum!=1)
+			throw new Exception("Problem with scenario demographics: Installation probabilities should sum up to 1.");
+		if (wrongValueDetected)
+			throw new Exception("Problem with scenario demographics: Installation probabilities should have a value >=0 and <=1.");
+		TreeMap<String,Double> applGen = this.demographics.getApp_probs();
+		sum=0; wrongValueDetected = false;
+		TreeMap<String,Double> personGen = this.demographics.getPerson_probs();
+		for (String key: personGen.keySet())
+		{
+			sum += personGen.get(key);
+			if (personGen.get(key) < 0 || personGen.get(key) > 1)
+				wrongValueDetected = true;
+		}
+		if (sum!=1)
+			throw new Exception("Problem with scenario demographics: Person probabilities should sum up to 1.");
+		if (wrongValueDetected)
+			throw new Exception("Problem with scenario demographics: Person probabilities should have a value >=0 and <=1.");
+		
+		boolean collectionFound = false;
+		for (Installation temp: instTypes)
+		{
+			if (temp.getName().trim().equals("Collection"))
+				collectionFound = true;
+		}
+		if (!collectionFound)
+		{
+			System.out.println("No \"Collection\" installation found in the current dynamic scenario. Renaming installation " + instTypes.get(0).getName() + " to \"Collection\".");
+			instTypes.get(0).setName("Collection");
+		}
+		
 		// number of installation types defined (including collection)
 		int maxInsts = instTypes.size();  					
 		queue = new PriorityBlockingQueue<Event>(2 * numOfInstallations);
 
 		for (int i = 1; i <= numOfInstallations; i++) {
-			int instIndex = getInstId(maxInsts, instGen)-1;
-			Installation instDoc = instTypes.get(instIndex);
+			String instIndex = getInstId(maxInsts, instGen);
+			Installation instDoc = instTypes.get(installationIdToIndex(instTypes, instIndex));
 			String instName = instDoc.getName();
-			System.out.println(instName);
+//			System.out.println(instName);
 
 			if (instName.equalsIgnoreCase("Collection")) {
 				String id = instDoc.getId();
 				String name = instDoc.getName() + i;
 				String description = instDoc.getDescription();
 				String type = instDoc.getType();
-				Installation inst = new Installation.Builder(id, name, description, type, null, pricing, baseline_pricing).build();
+				Installation inst = new Installation.Builder(id, name, description, type, pricing, baseline_pricing).build();
 				//				inst.setParentId(scenario_id);
 				String inst_id = id + i;
 				inst.setId(inst_id);
@@ -287,7 +332,7 @@ public abstract class Simulation {
 						double probValue = prob.doubleValue();
 						if(orng.nextDouble() < probValue) {
 							Appliance selectedApp = existing.get(key);
-							selectedApp.setParentId(inst.getId());
+//							selectedApp.setParentId(inst.getId());
 							String app_id =  inst_id + "_" + selectedApp.getId();
 							selectedApp.setId(app_id);
 							inst.addAppliance(selectedApp);
@@ -356,20 +401,20 @@ public abstract class Simulation {
 				}
 
 				double roulette = orng.nextDouble();
-				double sum = 0;
+				sum = 0;
 				for( String entityId : personGen.keySet() ) {
 					if(existingPersons.containsKey(entityId)) {
 						double prob = personGen.get(entityId);
 						sum += prob;
 						if(roulette < sum) {
 							Person selectedPerson = existingPersons.get(entityId);
-							selectedPerson.setParentId(inst.getId());
+//							selectedPerson.setParentId(inst.getId());
 							String person_id = inst_id + "_" + selectedPerson.getId();
 							selectedPerson.setId(person_id);
 							inst.addPerson(selectedPerson);
 							Vector<Activity> activities = selectedPerson.getActivities();
 							for(Activity a : activities) {
-								a.setParentId(person_id);
+//								a.setParentId(person_id);
 								String act_id = person_id + a.getId();
 								a.setId(act_id);
 								//								Vector<DBObject> models = a.getModels();
@@ -408,8 +453,7 @@ public abstract class Simulation {
 				//				String clustername = instDoc.getClu
 				PricingPolicy instPricing = pricing;
 				PricingPolicy instBaseline_pricing = baseline_pricing;
-				Installation inst = new Installation.Builder(
-						id, name, description, type, "", instPricing, instBaseline_pricing).build();
+				Installation inst = new Installation.Builder(id, name, description, type, instPricing, instBaseline_pricing).build();
 				//				inst.setParentId(scenario_id);
 				String inst_id = id + i;
 				inst.setId(inst_id);
@@ -428,10 +472,10 @@ public abstract class Simulation {
 					ConsumptionModel pconsmod = new ConsumptionModel(applianceDoc.getPConsumptionModel().toDBObject().get("model").toString(), "p");
 					ConsumptionModel qconsmod = new ConsumptionModel(applianceDoc.getQConsumptionModel().toDBObject().get("model").toString(), "q");
 					Appliance app = new Appliance.Builder( appid, appname, appdescription, apptype, inst, pconsmod, qconsmod, standy, base).build(orng);
-					app.setParentId(inst.getId());
+//					app.setParentId(inst.getId());
 					String app_id =  inst_id + "_" + appid;
 					app.setId(app_id);
-					existing.put(appid, app);
+					existing.put(app_id, app);
 					inst.addAppliance(app);
 					//					ConsumptionModel cm = app.getPConsumptionModel();
 					//					cm.setParentId(app_id);
@@ -447,7 +491,7 @@ public abstract class Simulation {
 				double awareness = personDoc.getAwareness();
 				double sensitivity = personDoc.getSensitivity();
 				Person person = new Person.Builder(personid, personName, personDescription, personType, inst, awareness, sensitivity).build();
-				person.setParentId(inst.getId());
+//				person.setParentId(inst.getId());
 				String person_id =  inst_id + "_" + personid;
 				person.setId(person_id);
 				inst.addPerson(person);
@@ -459,12 +503,12 @@ public abstract class Simulation {
 					String activityType = activityDoc.getType();
 					String actid = activityDoc.getId();
 					Activity act = new Activity.Builder(actid, activityName, "", activityType, simulationWorld).build();
-					HashMap<String, Vector<Appliance>> actModApps = act.getAppliances();
-					HashMap<String, Boolean> shiftables = act.getShiftable();
-					HashMap<String, Boolean> exclusives = act.getConfig();
-					HashMap<String, ProbabilityDistribution> probStartTime = act.getProbStartTime();
-					HashMap<String, ProbabilityDistribution> probDuration = act.getProbDuration();
-					HashMap<String, ProbabilityDistribution> probeTimes = act.getnTimesGivenDay();
+					HashMap<String, Vector<Appliance>> actModApps = activityDoc.getAppliances();
+					HashMap<String, Boolean> shiftables = activityDoc.getShiftable();
+					HashMap<String, Boolean> exclusives = activityDoc.getConfig();
+					HashMap<String, ProbabilityDistribution> probStartTime = activityDoc.getProbStartTime();
+					HashMap<String, ProbabilityDistribution> probDuration = activityDoc.getProbDuration();
+					HashMap<String, ProbabilityDistribution> probeTimes = activityDoc.getnTimesGivenDay();
 
 					ProbabilityDistribution startDist;
 					ProbabilityDistribution durDist;
@@ -490,7 +534,7 @@ public abstract class Simulation {
 						}
 					}
 					person.addActivity(act);
-					act.setParentId(person_id);
+//					act.setParentId(person_id);
 					String act_id = person_id + actid;
 					act.setId(act_id);
 				}
@@ -951,23 +995,23 @@ public abstract class Simulation {
 		return cost;
 	}
 
-	private int getInstId(int maxInsts, HashMap<String,Double> instGen) {
-		if(maxInsts == 1) {
-			return 1;
-		} else {
+	private String getInstId(int maxInsts, TreeMap<String,Double> instGen) {
+		ArrayList<String> temp = new ArrayList(instGen.keySet());
+		if (maxInsts == 1) {
+			return temp.get(0);
+		} 
+		else {
 			double prob = orng.nextFloat();
 			Set<String> keys = instGen.keySet();
 			double sum = 0;
-			int counter = 1;
 			for(String s : keys) {
 				sum += instGen.get(s).doubleValue();
 				if(prob < sum) {
-					break;
+					return s;
 				}
-				counter++;
 			}
-			return counter;
 		}
+		return temp.get(temp.size());
 	}
 	
 	private ProbabilityDistribution copyProbabilityDistribution(ProbabilityDistribution source, String flag) throws Exception
@@ -984,6 +1028,17 @@ public abstract class Simulation {
 		default:
 			throw new Exception("Non existing distribution type. Problem in setting up the simulation.");
 		}
+	}
+	
+	private int installationIdToIndex(Vector<Installation> instTypes, String instID)
+	{
+		for (int i=0; i < instTypes.size(); i++)
+		{
+			Installation temp = instTypes.get(i);
+			if (temp.getId().equals(instID))
+				return i;
+		}
+		return -1;
 	}
 	
 }

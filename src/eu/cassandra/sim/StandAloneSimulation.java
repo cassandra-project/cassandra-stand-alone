@@ -35,6 +35,7 @@ limitations under the License.
 */
 import java.util.Hashtable;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.Vector;
 
 import eu.cassandra.sim.entities.appliances.Appliance;
@@ -167,7 +168,7 @@ public class StandAloneSimulation extends Simulation {
 			String instID= prop.getProperty("id").trim();
 			String instDescription = prop.getProperty("description") != null ? prop.getProperty("description") : "";
 			String instType = prop.getProperty("type") != null ? prop.getProperty("type") : "";
-			Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, pricPolicy, pricPolicyB).build();
+			Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, pricPolicy, pricPolicyB).build();
 			installations.add(inst);
 			instIndexes.put(instID, index);
 			index++;
@@ -404,8 +405,7 @@ public class StandAloneSimulation extends Simulation {
 				mean = Double.parseDouble(paramsN[1].replace("mean", "").replace(":", "").trim());
 				std = Double.parseDouble(paramsN[0].replace("std", "").replace(":", "").trim());
 			}		
-			Gaussian normal = new Gaussian(mean, std);
-			normal.precompute(0, 1439, 1440);
+			Gaussian normal = new Gaussian(mean, std, true);
 			return normal;
 		case ("Uniform Distribution"):
 			String tempU = prop.getProperty(caseD + "_parameters").replace("{", "").replace("}", "").replace("[", "").replace("]", "").replace("\"", "");
@@ -434,7 +434,7 @@ public class StandAloneSimulation extends Simulation {
 		case ("Gaussian Mixture Models"):
 			String tempM = prop.getProperty(caseD + "_parameters").replace("[", "").replace("]", "").replace("\"", "");
 			String[] paramsM = tempM.split("}");
-			int length = paramsM.length-1;
+			int length = paramsM.length;//-1;
 			double[] means = new double[length];
 			double[] stds = new double[length];
 			double[] w = new double[length];
@@ -465,8 +465,7 @@ public class StandAloneSimulation extends Simulation {
 			}
 			if (sumW != 1)
 				throw new Exception("ERROR: Gaussian Mixture Models require for tuple weights to sum up to 1");
-			GaussianMixtureModels gmm = new GaussianMixtureModels(length, w, means, stds);
-			gmm.precompute(0, 1439, 1440);
+			GaussianMixtureModels gmm = new GaussianMixtureModels(length, w, means, stds, true);
 			return gmm;
 		case ("Histogram"):
 			String tempH = prop.getProperty(caseD + "_values").replace("[", "").replace("]", "").replace("\"", "").trim();
@@ -488,9 +487,9 @@ public class StandAloneSimulation extends Simulation {
 		}
 	}
 	
-	private HashMap<String, Double> parseProbabilities(String probsText)
+	private TreeMap<String, Double> parseProbabilities(String probsText)
 	{
-		HashMap<String, Double> results = new HashMap<String, Double>();
+		TreeMap<String, Double> results = new TreeMap<String, Double>();
 		String tempN = probsText.replace("[", "").replace("]", "").replace("\"", "");
 		String[] pairs = tempN.split(",");
 		for (String pair : pairs)
@@ -511,7 +510,7 @@ public class StandAloneSimulation extends Simulation {
 	 */
 	public static void main(String[] args)
 	{	
-		String filename = "SimpleStaticScenario.txt";
+		String filename = "SimpleDynamicScenario.txt";
 //		String filename = "properties.txt";
 		String outputPath = "./";
 		if (args.length >= 2)

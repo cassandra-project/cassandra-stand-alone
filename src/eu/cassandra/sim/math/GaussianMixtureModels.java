@@ -16,6 +16,8 @@
 
 package eu.cassandra.sim.math;
 
+import eu.cassandra.sim.utilities.Constants;
+
 
 /**
  * @author Antonios Chrysopoulos
@@ -60,17 +62,19 @@ public class GaussianMixtureModels implements ProbabilityDistribution
    * @param s
    *          Standard deviation of the Gaussian distribution.
    */
-  public GaussianMixtureModels (int n, double[] pi, double[] mu, double[] s)
+  public GaussianMixtureModels (int n, double[] pi, double[] mu, double[] s, boolean precomputed)
   {
     gaussians = new Gaussian[n];
     this.pi = new double[n];
+    this.precomputed = precomputed;
     for (int i = 0; i < n; i++) {
       this.pi[i] = pi[i];
-      gaussians[i] = new Gaussian(mu[i], s[i]);
+      gaussians[i] = new Gaussian(mu[i], s[i], false);
     }
-    precomputed = false;
+    if (precomputed)
+    		precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);   
   }
-  
+ 
   public GaussianMixtureModels (GaussianMixtureModels source)
   {
 	int n = source.gaussians.length;

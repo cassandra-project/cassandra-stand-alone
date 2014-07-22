@@ -16,6 +16,7 @@
 package eu.cassandra.sim;
 
 import java.util.HashMap; 
+import java.util.TreeMap;
 import java.util.Vector;
 
 import com.mongodb.BasicDBList;
@@ -81,19 +82,19 @@ public class MyStandaloneSimulation extends Simulation{
 		
 		// set up demographic data
 		int numOfInstallations = 2;		
-		HashMap<String,Double>instGen = new HashMap<String,Double>();			
+		TreeMap<String,Double>instGen = new TreeMap<String,Double>();			
 		instGen.put("inst1", 1.0);
-		HashMap<String,Double> applGen = new HashMap<String,Double>();				
+		TreeMap<String,Double> applGen = new TreeMap<String,Double>();				
 		applGen.put("appl21", 1.0);
 		applGen.put("appl3", 1.0);
 		applGen.put("appl5", 1.0);
 		applGen.put("appl4", 1.0);
 		applGen.put("appl2", 1.0);
 		applGen.put("appl1", 1.0);
-		HashMap<String,Double> personGen = new HashMap<String,Double>();				
+		TreeMap<String,Double> personGen = new TreeMap<String,Double>();				
 		personGen.put("person1", 0.7);
 		personGen.put("person2", 0.3);
-		this.demographics = new DemographicData("lala", "description", "type", numOfInstallations, instGen, personGen, personGen);
+		this.demographics = new DemographicData("lala", "description", "type", numOfInstallations, instGen, personGen, applGen);
 		
 		return null;
 		
@@ -132,7 +133,7 @@ public class MyStandaloneSimulation extends Simulation{
 		String instName = "Fani's house";			
 		String instID= "inst1";								
 		String instDescription = "Sample installation";	
-		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, this.pricing, this.baseline_pricing).build();
+		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		//Create the appliances
 		HashMap<String, Appliance> appliances = new HashMap<String,Appliance>();
@@ -181,8 +182,8 @@ public class MyStandaloneSimulation extends Simulation{
 		
 		String actmodDayType = "any";   
 		
-		ProbabilityDistribution durDist = new Gaussian(1, 1); 			
-		durDist.precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);
+		ProbabilityDistribution durDist = new Gaussian(1, 1, true); 			
+//		durDist.precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);
 		act1.addDuration(actmodDayType, durDist);
 		
 		ProbabilityDistribution startDist = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
@@ -219,7 +220,7 @@ public class MyStandaloneSimulation extends Simulation{
 		String instDescription = "Milioudis Base";	// installation descriptions
 		String instType = "lala1";							// installation types
 		
-		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, this.pricing, this.baseline_pricing).build();
+		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		// Create the appliances
 		HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
@@ -321,8 +322,8 @@ public class MyStandaloneSimulation extends Simulation{
 		
 		String actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
 		
-		ProbabilityDistribution durDist = new Gaussian(1, 1); 			// Normal Distribution: mean = 1, std = 1
-		durDist.precompute(0, 1439, 1440);
+		ProbabilityDistribution durDist = new Gaussian(1, 1, true); 			// Normal Distribution: mean = 1, std = 1
+//		durDist.precompute(0, 1439, 1440);
 		act1.addDuration(actmodDayType, durDist);
 		
 		ProbabilityDistribution startDist = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
@@ -356,8 +357,8 @@ public class MyStandaloneSimulation extends Simulation{
 		
 		actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
 		
-		ProbabilityDistribution durDist2 = new Gaussian(1, 1); 				
-		durDist2.precompute(0, 1439, 1440);
+		ProbabilityDistribution durDist2 = new Gaussian(1, 1, true); 				
+//		durDist2.precompute(0, 1439, 1440);
 		actBuilder.duration(actmodDayType, durDist2);
 		
 		ProbabilityDistribution startDist2 = new Histogram(DistributionsLibrary.getStartTimeHistForLighting());
@@ -408,8 +409,8 @@ public class MyStandaloneSimulation extends Simulation{
 		double[] w = {0.7, 0.3};
      	double[] means = {480, 1200};
      	double[] stds = {40, 60};
-		ProbabilityDistribution durDist3 = new GaussianMixtureModels(w.length, w, means, stds);
-		durDist3.precompute(0, 1439, 1440);
+		ProbabilityDistribution durDist3 = new GaussianMixtureModels(w.length, w, means, stds, true);
+//		durDist3.precompute(0, 1439, 1440);
 		act21.addDuration(actmodDayType, durDist3);
 		ProbabilityDistribution startDist3 = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
 		act21.addStartTime(actmodDayType, startDist3);
@@ -466,7 +467,7 @@ public class MyStandaloneSimulation extends Simulation{
 		String instDescription = "Milioudis Base";	// installation descriptions
 		String instType = "lala1";							// installation types
 		
-		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, this.pricing, this.baseline_pricing).build();
+		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		// Create the appliances
 		HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
@@ -555,8 +556,8 @@ public class MyStandaloneSimulation extends Simulation{
 		
 		String actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
 		
-		ProbabilityDistribution durDist = new Gaussian(1, 1); 			
-		durDist.precompute(0, 1439, 1440);
+		ProbabilityDistribution durDist = new Gaussian(1, 1, true); 			
+//		durDist.precompute(0, 1439, 1440);
 		act1.addDuration(actmodDayType, durDist);
 		
 		ProbabilityDistribution startDist = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
@@ -590,8 +591,8 @@ public class MyStandaloneSimulation extends Simulation{
 		
 		actmodDayType = "any";  //any | weekdays | weekends | working | nonworking | abbreviations of specific weekdays, i.e. [Mon, Tue, Sat] | specific days formated as 1/12, 31/10 
 		
-		ProbabilityDistribution durDist2 = new Gaussian(1, 1); 				
-		durDist2.precompute(0, 1439, 1440);
+		ProbabilityDistribution durDist2 = new Gaussian(1, 1, true); 				
+//		durDist2.precompute(0, 1439, 1440);
 		actBuilder.duration(actmodDayType, durDist2);
 		
 		ProbabilityDistribution startDist2 = new Histogram(DistributionsLibrary.getStartTimeHistForLighting());
@@ -627,7 +628,7 @@ public class MyStandaloneSimulation extends Simulation{
 		instID= "inst2";								// installation ids
 		instDescription = "Fani's house";	// installation descriptions
 		instType = "lala1";							// installation types
-		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription, null, this.pricing, this.baseline_pricing).build();
+		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		// Create the appliances
 		existing = new HashMap<String,Appliance>();
@@ -667,8 +668,8 @@ public class MyStandaloneSimulation extends Simulation{
 		double[] w = {0.7, 0.3};
      	double[] means = {480, 1200};
      	double[] stds = {40, 60};
-		ProbabilityDistribution durDist3 = new GaussianMixtureModels(w.length, w, means, stds);
-		durDist3.precompute(0, 1439, 1440);
+		ProbabilityDistribution durDist3 = new GaussianMixtureModels(w.length, w, means, stds, true);
+//		durDist3.precompute(0, 1439, 1440);
 		act21.addDuration(actmodDayType, durDist3);
 		ProbabilityDistribution startDist3 = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
 		act21.addStartTime(actmodDayType, startDist3);

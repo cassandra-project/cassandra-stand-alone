@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.Calendar;
 import java.util.HashMap;
+import java.util.TreeMap;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
@@ -40,14 +41,14 @@ public class DemographicData
 	private String description;
 	private String type;
 	private int numEntities;
-	private HashMap<String, Double> inst_probs; 
-	private HashMap<String, Double> person_probs; 
-	private HashMap<String, Double> app_probs; 
+	private TreeMap<String, Double> inst_probs; 
+	private TreeMap<String, Double> person_probs; 
+	private TreeMap<String, Double> app_probs; 
 
 
 
 	public DemographicData(String name, String description, String type, int numEntities, 
-			 HashMap<String, Double> inst_probs, HashMap<String, Double> person_probs, HashMap<String, Double> app_probs)
+			TreeMap<String, Double> inst_probs, TreeMap<String, Double> person_probs, TreeMap<String, Double> app_probs)
 	{
 		this.type = type;
 		this.name = name;
@@ -82,17 +83,17 @@ public class DemographicData
 		return numEntities;
 	}
 
-	public HashMap<String, Double> getInst_probs() {
+	public TreeMap<String, Double> getInst_probs() {
 		return inst_probs;
 	}
 
-	public HashMap<String, Double> getPerson_probs() {
+	public TreeMap<String, Double> getPerson_probs() {
 		return person_probs;
 	}
 
 
 
-	public HashMap<String, Double> getApp_probs() {
+	public TreeMap<String, Double> getApp_probs() {
 		return app_probs;
 	}
 
@@ -120,17 +121,17 @@ public class DemographicData
 		this.numEntities = numEntities;
 	}
 
-	public void setInst_probs(HashMap<String, Double> inst_probs) {
+	public void setInst_probs(TreeMap<String, Double> inst_probs) {
 		this.inst_probs = inst_probs;
 	}
 
-	public void setPerson_probs(HashMap<String, Double> person_probs) {
+	public void setPerson_probs(TreeMap<String, Double> person_probs) {
 		this.person_probs = person_probs;
 	}
 
 
 
-	public void setApp_probs(HashMap<String, Double> app_probs) {
+	public void setApp_probs(TreeMap<String, Double> app_probs) {
 		this.app_probs = app_probs;
 	}
 

@@ -16,6 +16,8 @@
 
 package eu.cassandra.sim.math;
 
+import eu.cassandra.sim.utilities.Constants;
+
 /**
  * @author Christos Diou <diou remove this at iti dot gr>
  * @version prelim
@@ -89,11 +91,13 @@ public class Gaussian implements ProbabilityDistribution
    * @param s
    *          Standard deviation of the Gaussian distribution.
    */
-  public Gaussian (double mu, double s)
+  public Gaussian (double mu, double s, boolean precomputed)
   {
     mean = mu;
     sigma = s;
-    precomputed = false;
+    this.precomputed = precomputed;
+    if (precomputed)
+    		precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);
   }
   
   public Gaussian (Gaussian source)

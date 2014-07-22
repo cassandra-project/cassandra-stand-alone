@@ -48,8 +48,7 @@ public class Installation extends Entity {
 	private double energyOffpeak = 0;
 	private double previousEnergyOffpeak = 0;
 	private double cost = 0;
-	private String clustername;
-//	private ThermalModule tm;
+
 	
 	public static class Builder {
 	    	// Required variables
@@ -66,17 +65,14 @@ public class Installation extends Entity {
         private double currentPowerQ = 0.0;
         private PricingPolicy pp;
         private PricingPolicy bpp;
-        private String clustername;
         
-        public Builder(String aid, String aname, String adescription, String atype, String aclustername, PricingPolicy app, PricingPolicy abpp) {
+        public Builder(String aid, String aname, String adescription, String atype, PricingPolicy app, PricingPolicy abpp) {
         		id = aid;
 			name = aname;
 		    description = adescription;
 		    type = atype;
 		    pp = app;
 		    bpp = abpp;
-		    clustername = aclustername;
-
         }
         
 		public Builder locationInfo (LocationInfo aLocationInfo) {
@@ -107,8 +103,6 @@ public class Installation extends Entity {
         locationInfo = builder.locationInfo;
         pp = builder.pp;
         bpp = builder.bpp;
-        clustername = builder.clustername;
-
 	}
     
     public void updateDailySchedule(int tick, PriorityBlockingQueue<Event> queue, String responseType, ORNG orng) {

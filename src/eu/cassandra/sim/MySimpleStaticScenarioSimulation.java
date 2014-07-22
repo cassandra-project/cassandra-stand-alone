@@ -61,7 +61,7 @@ public class MySimpleStaticScenarioSimulation extends Simulation{
 	@Override
 	public Vector<Installation> setupScenario()
 	{
-		//setup simulation parameters
+		//set up the simulation parameters
 		String scenarioName = "Scenario1";
   		String responseType = "None"; 		
   	    String locationInfo ="Thessaloniki";
@@ -76,7 +76,7 @@ public class MySimpleStaticScenarioSimulation extends Simulation{
 	    this.simulationWorld = new SimulationParams(responseType, scenarioName, locationInfo, numOfDays, 
 	    		startDateDay,  startDateMonth, startDateYear, mcruns, co2, setup);
 	    
-		//set up pricing policy
+		//set up the pricing policy
 	    String pricingType = "AllInclusivePricing"; 			
 		int billingCycle = 120;  					
 		double fixedCharge = 15;				
@@ -92,7 +92,7 @@ public class MySimpleStaticScenarioSimulation extends Simulation{
 		String instName = "Fani's house";			
 		String instID= "inst1";								
 		String instDescription = "Sample installation";	
-		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, null, this.pricing, this.baseline_pricing).build();
+		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		//Create the appliances
 		HashMap<String, Appliance> appliances = new HashMap<String,Appliance>();
@@ -141,14 +141,13 @@ public class MySimpleStaticScenarioSimulation extends Simulation{
 		
 		String actmodDayType = "any";   
 		
-		ProbabilityDistribution durDist = new Gaussian(1, 1); 			
-		durDist.precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);
+		ProbabilityDistribution durDist = new Gaussian(1, 1, true); 			
 		act1.addDuration(actmodDayType, durDist);
 		
 		ProbabilityDistribution startDist = new Histogram(DistributionsLibrary.getStartTimeHistForCleaning());
 		act1.addStartTime(actmodDayType, startDist);
 		
-		double[] v4 = {0.25,0.375,0.25,0,0,0,0,0.125};
+		double[] v4 = {0.25, 0.375, 0.25, 0, 0, 0, 0, 0.125};
 		ProbabilityDistribution timesDist = new Histogram(v4);
 		act1.addTimes(actmodDayType, timesDist);
 		
