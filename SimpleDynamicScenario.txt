@@ -9,7 +9,7 @@ description = A simple dynamic scenario (1 "as-is" installation and 1 collection
 setup = dynamic
 
 --> installation
-id = col1name = Collection description = Installation including person types and appliances to be dynamically instantiated
+id = col1name = Collectiondescription = Installation including person types and appliances to be dynamically instantiated
 
 --> appliance
 id = appl1name = Washing Machine 1type = Washingdescription = Description of Washing Machine 1standy_consumption = 0 base = falseinstallation = col1consumption_model = consModel1
@@ -23,8 +23,8 @@ qmodel = { "n" : 0 , "params" : [ { "n" : 1 , "values" : [ { "q" : 107.740000000
 
 --> appliance
 id = appl2
-name = Lighting 
-type = Lighting 
+name = Lighting
+type = Lighting
 description = Description of Lighting 
 standy_consumption = 0 base = falseinstallation = col1consumption_model = consModel2
 
@@ -132,7 +132,7 @@ repetitions_parameters = [ ]
 --> activity
 id = act2
 name = Lighting
-type = Lighting 
+type = Lighting
 description = Person Lighting Activity 
 person = person1 
 
@@ -207,7 +207,7 @@ repetitions_values =  [0.2, 0.3, 0.5, 0.4]
 repetitions_parameters = [ ]
 
 --> installation
-id = inst1name = Odysseas' house description = Installation to be instantiated "as-is"
+id = inst1name = Odysseas' housedescription = Installation to be instantiated "as-is"
 
 --> appliance
 id = appl7name = Odysseas' Washing Machinetype = Washingdescription = Description of Odysseas' Washing Machinestandy_consumption = 0 base = falseinstallation = inst1consumption_model = consModel7
@@ -256,9 +256,9 @@ repetitions_parameters = [ ]
 --> simulation
 name = Sample simulation parameterslocationInfo = Thessalonikimcruns = 1 start_dayOfMonth = 5start_month = 4start_year = 2014numberOfDays = 3response_type = Nonedescription = A simple dynamic scenario in Thessaloniki to be simulated for 3 days, starting on 05/04/2014co2 = 2 
 
---> demographicsname = demographic data type = mixed description = scenario with dynamic and as-is installationsnumber_of_entities = 2participation_probs_installations = [ col1:0.5 , inst1:0.5 ]participation_probs_persons = [ person1:0.7 , person2:0.3 ]
-participation_probs_apps = [ app1:0.75, app2:0.75, app3:0.75, app4:0.75, app5:0.75, app6:0.75]—-> whatever
-participation_probs_apps = [ app1:1.0, app2:1.0, app3:1.0, app4:1.0, app5:1.0, app6:1.0]
+--> demographicsname = demographic data type = mixed description = scenario with dynamic and as-is installationsnumber_of_entities = 10participation_probs_installations = [ col1:0.5 , inst1:0.5 ]participation_probs_persons = [ person1:0.7 , person2:0.3 ]
+participation_probs_apps = [ appl1:0.75, appl2:0.75, appl3:0.75, appl4:0.75, appl5:0.75, appl6:0.75]--> whatever
+participation_probs_apps = [ appl1:1.0, appl2:1.0, appl3:1.0, appl4:1.0, appl5:1.0, appl6:1.0]
 
 --> pricing_policy
 name = TestSEP

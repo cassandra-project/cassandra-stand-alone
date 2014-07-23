@@ -308,7 +308,7 @@ public abstract class Simulation {
 				Vector<Appliance> apps = instDoc.getAppliances();
 				int appcount = apps.size();  
 				// Create the appliances
-				HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
+				TreeMap<String,Appliance> existing = new TreeMap<String,Appliance>();
 				for (int j = 0; j < appcount; j++) {
 					Appliance applianceDoc = apps.get(j);
 					String appid = applianceDoc.getId();
@@ -330,7 +330,8 @@ public abstract class Simulation {
 					Double prob = applGen.get(key2);
 					if(prob != null) {
 						double probValue = prob.doubleValue();
-						if(orng.nextDouble() < probValue) {
+						double temp = orng.nextDouble();
+						if( temp < probValue) {
 							Appliance selectedApp = existing.get(key);
 //							selectedApp.setParentId(inst.getId());
 							String app_id =  inst_id + "_" + selectedApp.getId();
@@ -346,7 +347,7 @@ public abstract class Simulation {
 
 				int personcount = instDoc.getPersons().size();
 				// Create the appliances
-				HashMap<String,Person> existingPersons = new HashMap<String,Person>();
+				TreeMap<String,Person> existingPersons = new TreeMap<String,Person>();
 				for (int j = 0; j < personcount; j++) {
 					Person personDoc = instDoc.getPersons().get(j);
 					String personid = personDoc.getId();
@@ -365,12 +366,12 @@ public abstract class Simulation {
 						String activityType = activityDoc.getType();
 						String actid = activityDoc.getId();
 						Activity act = new Activity.Builder(actid, activityName, "", activityType, simulationWorld).build();
-						HashMap<String, Vector<Appliance>> actModApps = activityDoc.getAppliances();
-						HashMap<String, Boolean> shiftables = activityDoc.getShiftable();
-						HashMap<String, Boolean> exclusives = activityDoc.getConfig();
-						HashMap<String, ProbabilityDistribution> probStartTime = activityDoc.getProbStartTime();
-						HashMap<String, ProbabilityDistribution> probDuration = activityDoc.getProbDuration();
-						HashMap<String, ProbabilityDistribution> probeTimes = activityDoc.getnTimesGivenDay();
+						TreeMap<String, Vector<Appliance>> actModApps = activityDoc.getAppliances();
+						TreeMap<String, Boolean> shiftables = activityDoc.getShiftable();
+						TreeMap<String, Boolean> exclusives = activityDoc.getConfig();
+						TreeMap<String, ProbabilityDistribution> probStartTime = activityDoc.getProbStartTime();
+						TreeMap<String, ProbabilityDistribution> probDuration = activityDoc.getProbDuration();
+						TreeMap<String, ProbabilityDistribution> probeTimes = activityDoc.getnTimesGivenDay();
 						ProbabilityDistribution startDist;
 						ProbabilityDistribution durDist;
 						ProbabilityDistribution timesDist;
@@ -458,7 +459,7 @@ public abstract class Simulation {
 				Vector<Appliance> apps = instDoc.getAppliances();
 				int appcount = apps.size();  
 				// Create the appliances
-				HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
+				TreeMap<String,Appliance> existing = new TreeMap<String,Appliance>();
 				for (int j = 0; j < appcount; j++) {
 					Appliance applianceDoc = apps.get(j);
 					String appid = applianceDoc.getId();
@@ -501,12 +502,12 @@ public abstract class Simulation {
 					String activityType = activityDoc.getType();
 					String actid = activityDoc.getId();
 					Activity act = new Activity.Builder(actid, activityName, "", activityType, simulationWorld).build();
-					HashMap<String, Vector<Appliance>> actModApps = activityDoc.getAppliances();
-					HashMap<String, Boolean> shiftables = activityDoc.getShiftable();
-					HashMap<String, Boolean> exclusives = activityDoc.getConfig();
-					HashMap<String, ProbabilityDistribution> probStartTime = activityDoc.getProbStartTime();
-					HashMap<String, ProbabilityDistribution> probDuration = activityDoc.getProbDuration();
-					HashMap<String, ProbabilityDistribution> probeTimes = activityDoc.getnTimesGivenDay();
+					TreeMap<String, Vector<Appliance>> actModApps = activityDoc.getAppliances();
+					TreeMap<String, Boolean> shiftables = activityDoc.getShiftable();
+					TreeMap<String, Boolean> exclusives = activityDoc.getConfig();
+					TreeMap<String, ProbabilityDistribution> probStartTime = activityDoc.getProbStartTime();
+					TreeMap<String, ProbabilityDistribution> probDuration = activityDoc.getProbDuration();
+					TreeMap<String, ProbabilityDistribution> probeTimes = activityDoc.getnTimesGivenDay();
 
 					ProbabilityDistribution startDist;
 					ProbabilityDistribution durDist;
@@ -539,10 +540,10 @@ public abstract class Simulation {
 			}
 		}
 
-		for (Installation inst: installations)
-		{
-			inst.printInstallationInfo();
-		}
+//		for (Installation inst: installations)
+//		{
+//			inst.printInstallationInfo();
+//		}
 
 	}
 

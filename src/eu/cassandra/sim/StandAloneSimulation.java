@@ -17,7 +17,6 @@ package eu.cassandra.sim;
 
 import java.io.File;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Properties;
 import java.util.TreeMap;
@@ -178,7 +177,7 @@ public class StandAloneSimulation extends Simulation {
   		}
 		
 		// Create the appliances
-		HashMap<String, Appliance> appliances = new HashMap<String, Appliance>();
+  		TreeMap<String, Appliance> appliances = new TreeMap<String, Appliance>();
   		for(Properties prop : sfp.propAppliances) 
   		{
 			String applName = prop.getProperty("name");
@@ -197,7 +196,7 @@ public class StandAloneSimulation extends Simulation {
   		}
 		
 		// Create the people
-  		HashMap<String, Person> people = new HashMap<String, Person>();
+  		TreeMap<String, Person> people = new TreeMap<String, Person>();
   		for(Properties prop : sfp.propPeople) 
   		{
 			String personName = prop.getProperty("name");
@@ -213,7 +212,7 @@ public class StandAloneSimulation extends Simulation {
   		}
   		
   		// Create the activities
-  		HashMap<String, Activity> activities = new HashMap<String, Activity>();
+  		TreeMap<String, Activity> activities = new TreeMap<String, Activity>();
   		for(Properties prop : sfp.propActivities) 
   		{
 			String activityName = prop.getProperty("name");

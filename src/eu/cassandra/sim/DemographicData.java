@@ -16,17 +16,7 @@
 
 package eu.cassandra.sim;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Calendar;
-import java.util.HashMap;
 import java.util.TreeMap;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
-
-import eu.cassandra.sim.utilities.Utils;
 
 /**
  * 

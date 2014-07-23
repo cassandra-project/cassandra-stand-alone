@@ -15,12 +15,8 @@
 */
 package eu.cassandra.sim;
 
-import java.util.HashMap; 
 import java.util.TreeMap;
 import java.util.Vector;
-
-import com.mongodb.BasicDBList;
-import com.mongodb.DBObject;
 
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
@@ -34,8 +30,6 @@ import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.Uniform;
 import eu.cassandra.sim.model_library.ConsumptionModelsLibrary;
 import eu.cassandra.sim.model_library.DistributionsLibrary;
-import eu.cassandra.sim.model_library.PricingPoliciesLibrary;
-import eu.cassandra.sim.utilities.Constants;
 
 /**
  * 
@@ -89,7 +83,7 @@ public class MySimpleDynamicScenarioSimulation extends Simulation{
 		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		// Create the appliances
-		HashMap<String,Appliance> appliances = new HashMap<String,Appliance>();
+		TreeMap<String,Appliance> appliances = new TreeMap<String,Appliance>();
 		
 		String applName ="Washing Machine 1";
 		String appliID = "appl1";
@@ -303,7 +297,7 @@ public class MySimpleDynamicScenarioSimulation extends Simulation{
 		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		//Create the appliances
-		HashMap<String, Appliance> appliances2 = new HashMap<String,Appliance>();
+		TreeMap<String, Appliance> appliances2 = new TreeMap<String,Appliance>();
 		
 		applName ="Odysseas' Washing Machine";
 		appliID = "appl7";
@@ -356,12 +350,12 @@ public class MySimpleDynamicScenarioSimulation extends Simulation{
 		
 		
 		// set up demographic data
-		int numOfInstallations = 2;		
+		int numOfInstallations = 10;		
 		TreeMap<String,Double>instGen = new TreeMap<String,Double>();			
 		instGen.put("col1", 0.5);
 		instGen.put("inst1", 0.5);
 		TreeMap<String,Double> applGen = new TreeMap<String,Double>();		
-		double applianceProb = 1.0;
+		double applianceProb = 0.75;
 		applGen.put("appl1", applianceProb);
 		applGen.put("appl2", applianceProb);
 		applGen.put("appl3", applianceProb);

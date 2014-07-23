@@ -15,9 +15,10 @@
 */
 package eu.cassandra.sim.entities.people;
 
-import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.Iterator;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.Vector;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -43,15 +44,15 @@ public class Activity extends Entity {
 	private final static String WORKING = "working";
 	private final static String ANY = "any";
 
-	private final HashMap<String, ProbabilityDistribution> nTimesGivenDay;
-	private final HashMap<String, ProbabilityDistribution> probStartTime;
-	private final HashMap<String, ProbabilityDistribution> probDuration;
-	private final HashMap<String, ProbabilityDistribution> responsenTimesGivenDay;
-	private final HashMap<String, ProbabilityDistribution> responseprobStartTime;
-	private final HashMap<String, Boolean> shiftable;
-	private final HashMap<String, Boolean> config;
-	private HashMap<String, Vector<Appliance>> appliances;
-	private HashMap<String, Vector<Double>> probApplianceUsed;
+	private final TreeMap<String, ProbabilityDistribution> nTimesGivenDay;
+	private final TreeMap<String, ProbabilityDistribution> probStartTime;
+	private final TreeMap<String, ProbabilityDistribution> probDuration;
+	private final TreeMap<String, ProbabilityDistribution> responsenTimesGivenDay;
+	private final TreeMap<String, ProbabilityDistribution> responseprobStartTime;
+	private final TreeMap<String, Boolean> shiftable;
+	private final TreeMap<String, Boolean> config;
+	private TreeMap<String, Vector<Appliance>> appliances;
+	private TreeMap<String, Vector<Double>> probApplianceUsed;
 	private SimulationParams simulationWorld;
 	
 	private Vector<DBObject> activityModels;
@@ -74,16 +75,16 @@ public class Activity extends Entity {
 		private final String name;
 		private final String description;
 		private final String type;
-		private final HashMap<String, ProbabilityDistribution> nTimesGivenDay;
-		private final HashMap<String, ProbabilityDistribution> probStartTime;
-		private final HashMap<String, ProbabilityDistribution> probDuration;
-		private final HashMap<String, ProbabilityDistribution> responsenTimesGivenDay;
-		private final HashMap<String, ProbabilityDistribution> responseprobStartTime;
-		private final HashMap<String, Boolean> shiftable;
-		private final HashMap<String, Boolean> config;
+		private final TreeMap<String, ProbabilityDistribution> nTimesGivenDay;
+		private final TreeMap<String, ProbabilityDistribution> probStartTime;
+		private final TreeMap<String, ProbabilityDistribution> probDuration;
+		private final TreeMap<String, ProbabilityDistribution> responsenTimesGivenDay;
+		private final TreeMap<String, ProbabilityDistribution> responseprobStartTime;
+		private final TreeMap<String, Boolean> shiftable;
+		private final TreeMap<String, Boolean> config;
 		// Optional parameters: not available
-		private HashMap<String, Vector<Appliance>> appliances;
-		private HashMap<String, Vector<Double>> probApplianceUsed;
+		private TreeMap<String, Vector<Appliance>> appliances;
+		private TreeMap<String, Vector<Double>> probApplianceUsed;
 		private Vector<DBObject> activityModels;
 		private Vector<DBObject> starts;
 		private Vector<DBObject> durations;
@@ -95,15 +96,15 @@ public class Activity extends Entity {
 			name = aname;
 			description = adesc;
 			type = atype;
-			appliances = new HashMap<String, Vector<Appliance>>();
-			probApplianceUsed = new HashMap<String, Vector<Double>>();
-			nTimesGivenDay = new HashMap<String, ProbabilityDistribution>();
-			probStartTime = new HashMap<String, ProbabilityDistribution>();
-			probDuration = new HashMap<String, ProbabilityDistribution>();
-			responsenTimesGivenDay = new HashMap<String, ProbabilityDistribution>();
-			responseprobStartTime = new HashMap<String, ProbabilityDistribution>();
-			shiftable = new HashMap<String, Boolean>();
-			config = new HashMap<String, Boolean>();
+			appliances = new TreeMap<String, Vector<Appliance>>();
+			probApplianceUsed = new TreeMap<String, Vector<Double>>();
+			nTimesGivenDay = new TreeMap<String, ProbabilityDistribution>();
+			probStartTime = new TreeMap<String, ProbabilityDistribution>();
+			probDuration = new TreeMap<String, ProbabilityDistribution>();
+			responsenTimesGivenDay = new TreeMap<String, ProbabilityDistribution>();
+			responseprobStartTime = new TreeMap<String, ProbabilityDistribution>();
+			shiftable = new TreeMap<String, Boolean>();
+			config = new TreeMap<String, Boolean>();
 			activityModels = new Vector<DBObject>();
 			starts = new Vector<DBObject>();
 			durations = new Vector<DBObject>();
@@ -617,35 +618,35 @@ public class Activity extends Entity {
     	return cost;
     }
 
-	public HashMap<String, ProbabilityDistribution> getProbStartTime() {
+	public TreeMap<String, ProbabilityDistribution> getProbStartTime() {
 		return probStartTime;
 	}
 
-	public HashMap<String, ProbabilityDistribution> getProbDuration() {
+	public TreeMap<String, ProbabilityDistribution> getProbDuration() {
 		return probDuration;
 	}
 
-	public HashMap<String, Boolean> getShiftable() {
+	public TreeMap<String, Boolean> getShiftable() {
 		return shiftable;
 	}
 
-	public HashMap<String, Boolean> getConfig() {
+	public TreeMap<String, Boolean> getConfig() {
 		return config;
 	}
 
-	public HashMap<String, Vector<Appliance>> getAppliances() {
+	public TreeMap<String, Vector<Appliance>> getAppliances() {
 		return appliances;
 	}
 	
-	public HashMap<String, ProbabilityDistribution> getnTimesGivenDay() {
+	public TreeMap<String, ProbabilityDistribution> getnTimesGivenDay() {
 		return nTimesGivenDay;
 	}
 
-	public void setAppliances(HashMap<String, Vector<Appliance>> appliances) {
+	public void setAppliances(TreeMap<String, Vector<Appliance>> appliances) {
 		this.appliances = appliances;
 	}
 	
-	public void addAppliances(String[] applianceIds, HashMap<String, Appliance> appliances, String actmodDayType)
+	public void addAppliances(String[] applianceIds, TreeMap<String, Appliance> appliances, String actmodDayType)
 	{
 		for(int m = 0; m < applianceIds.length; m++) {
 			String containAppId = applianceIds[m].trim();

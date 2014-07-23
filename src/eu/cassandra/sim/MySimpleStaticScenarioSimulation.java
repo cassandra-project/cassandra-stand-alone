@@ -15,7 +15,7 @@
 */
 package eu.cassandra.sim;
 
-import java.util.HashMap; 
+import java.util.TreeMap;
 import java.util.Vector;
 
 import eu.cassandra.sim.entities.appliances.Appliance;
@@ -28,7 +28,6 @@ import eu.cassandra.sim.math.Histogram;
 import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.model_library.ConsumptionModelsLibrary;
 import eu.cassandra.sim.model_library.DistributionsLibrary;
-import eu.cassandra.sim.utilities.Constants;
 
 /**
  * Class MySimpleStaticScenarioSimulation provides an example implementation of the setupScenario() method that
@@ -95,7 +94,7 @@ public class MySimpleStaticScenarioSimulation extends Simulation{
 		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		//Create the appliances
-		HashMap<String, Appliance> appliances = new HashMap<String,Appliance>();
+		TreeMap<String, Appliance> appliances = new TreeMap<String,Appliance>();
 		
 		String applName ="Cleaning Washing Machine";
 		String appliID = "appl1";

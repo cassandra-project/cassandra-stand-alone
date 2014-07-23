@@ -15,12 +15,8 @@
 */
 package eu.cassandra.sim;
 
-import java.util.HashMap; 
 import java.util.TreeMap;
 import java.util.Vector;
-
-import com.mongodb.BasicDBList;
-import com.mongodb.DBObject;
 
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
@@ -34,8 +30,6 @@ import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.math.Uniform;
 import eu.cassandra.sim.model_library.ConsumptionModelsLibrary;
 import eu.cassandra.sim.model_library.DistributionsLibrary;
-import eu.cassandra.sim.model_library.PricingPoliciesLibrary;
-import eu.cassandra.sim.utilities.Constants;
 
 /**
  * 
@@ -136,7 +130,7 @@ public class MyStandaloneSimulation extends Simulation{
 		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		//Create the appliances
-		HashMap<String, Appliance> appliances = new HashMap<String,Appliance>();
+		TreeMap<String, Appliance> appliances = new TreeMap<String,Appliance>();
 		
 		String applName ="Cleaning Washing Machine";
 		String appliID = "appl1";
@@ -223,7 +217,7 @@ public class MyStandaloneSimulation extends Simulation{
 		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		// Create the appliances
-		HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
+		TreeMap<String,Appliance> existing = new TreeMap<String,Appliance>();
 		
 		String applName ="Cleaning Washing Machine";
 		String appliID = "appl1";
@@ -451,7 +445,7 @@ public class MyStandaloneSimulation extends Simulation{
 		Installation inst = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		// Create the appliances
-		HashMap<String,Appliance> existing = new HashMap<String,Appliance>();
+		TreeMap<String,Appliance> existing = new TreeMap<String,Appliance>();
 		
 		String applName ="Cleaning Washing Machine";
 		String appliID = "appl1";
@@ -604,7 +598,7 @@ public class MyStandaloneSimulation extends Simulation{
 		Installation inst2 = new Installation.Builder(instID, instName, instDescription, instDescription, this.pricing, this.baseline_pricing).build();
 		
 		// Create the appliances
-		existing = new HashMap<String,Appliance>();
+		existing = new TreeMap<String,Appliance>();
 		
 		applName ="Cleaning Washing Machine";
 		appliID = "appl21";
