@@ -17,14 +17,11 @@ package eu.cassandra.sim.model_library;
 
 import java.util.ArrayList;
 
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
-
 import eu.cassandra.sim.entities.appliances.ConsumptionModel;
 import eu.cassandra.sim.entities.appliances.Tripplet;
 
 /**
- * 
+ * Class with various ready-to-use consumption models.
  * 
  *  @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  * 
@@ -111,7 +108,6 @@ public class ConsumptionModelsLibrary {
 			try {
 				return new ConsumptionModel(message, "p");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}	
@@ -121,7 +117,6 @@ public class ConsumptionModelsLibrary {
 			try {
 				return new ConsumptionModel(message, "q");
 			} catch (Exception e) {
-				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
 		}
@@ -315,7 +310,7 @@ public class ConsumptionModelsLibrary {
 		}	
 	}
 	
-	public static boolean compareConsumptionModels(ConsumptionModel test, ConsumptionModel test2)
+	private static boolean compareConsumptionModels(ConsumptionModel test, ConsumptionModel test2)
 	{
 		boolean theSame = true;
 		if (test.getOuterN() !=  test2.getOuterN())

@@ -1,3 +1,19 @@
+/*   
+   Copyright 2011-2013 The Cassandra Consortium (cassandra-fp7.eu)
+
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
 package eu.cassandra.sim.utilities;
 
 import java.util.HashMap;
@@ -5,17 +21,31 @@ import java.util.HashMap;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 
-
+/**
+ * The wrapper class for storing simulation output results in an MongoDB database.
+ *
+ * @author Kyriakos C. Chatzidimitriou (kyrcha [at] iti [dot] gr)
+ * @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
+ */
 public class MongoResults implements DBResults{	
 	
+	/** The database name. */
 	private String dbname;
 	
+	/**
+	 * Instantiates a new MongoResults object.
+	 *
+	 * @param adbname the target database name
+	 */
 	public MongoResults(String adbname) {
  		dbname = adbname;
 	}
 	
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#createTablesAndIndexes()
+	 */
 	@Override
-	public void createIndexes() {
+	public void createTablesAndIndexes() {
 		DBObject index = new BasicDBObject("tick", 1);
 		DBConn.getConn(dbname).getCollection(COL_AGGRRESULTS).createIndex(index);
 		index = new BasicDBObject("tick", 1);
@@ -28,11 +58,8 @@ public class MongoResults implements DBResults{
 		DBConn.getConn(dbname).getCollection(COL_INSTRESULTS_HOURLY).createIndex(index);
 	}
 	
-	/**
-	 * @param inst_id
-	 * @param maxPower
-	 * @param avgPower
-	 * @param energy
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addKPIs(java.lang.String, double, double, double, double, double)
 	 */
 	@Override
 	public void addKPIs(String inst_id, double maxPower, double avgPower, double energy, double cost, double co2) {
@@ -93,6 +120,9 @@ public class MongoResults implements DBResults{
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#getKPIs(java.lang.String)
+	 */
 	@Override
 	public HashMap<String, Double> getKPIs(String inst_id) {
 		HashMap<String, Double> temp =  new  HashMap<String, Double>();
@@ -123,6 +153,9 @@ public class MongoResults implements DBResults{
 		return temp;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addAppKPIs(java.lang.String, double, double, double, double, double)
+	 */
 	@Override
 	public void addAppKPIs(String app_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		boolean first = false;
@@ -160,6 +193,9 @@ public class MongoResults implements DBResults{
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#getAppKPIs(java.lang.String)
+	 */
 	@Override
 	public HashMap<String, Double> getAppKPIs(String app_id) {
 		HashMap<String, Double> temp =  new  HashMap<String, Double>();
@@ -181,6 +217,9 @@ public class MongoResults implements DBResults{
 		return temp;
 	}
 	
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addActKPIs(java.lang.String, double, double, double, double, double)
+	 */
 	@Override
 	public void addActKPIs(String app_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		boolean first = false;
@@ -218,6 +257,9 @@ public class MongoResults implements DBResults{
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#getActKPIs(java.lang.String)
+	 */
 	@Override
 	public HashMap<String, Double> getActKPIs(String act_id) {
 		HashMap<String, Double> temp =  new  HashMap<String, Double>();
@@ -239,12 +281,8 @@ public class MongoResults implements DBResults{
 		return temp;
 	}
 	
-	/**
-	 * 
-	 * @param tick
-	 * @param inst_id
-	 * @param p
-	 * @param q
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addTickResultForInstallation(int, java.lang.String, double, double, java.lang.String)
 	 */
 	@Override
 	public void addTickResultForInstallation(int tick,
@@ -274,16 +312,27 @@ public class MongoResults implements DBResults{
 		}
 	}
 	
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addExpectedPowerTick(int, java.lang.String, double, java.lang.String)
+	 */
 	@Override
-	public void addExpectedPowerTick(int tick, String id, double p, double q, String collection) {
+	public void addExpectedPowerTick(int tick, String id, double p, String collection) {
 		DBObject data = new BasicDBObject();
 		data.put("id", id);
 		data.put("tick", tick);
 		data.put("p", p);
-		data.put("q", q);
+		data.put("q", 0);
 		DBConn.getConn(dbname).getCollection(collection).insert(data);
 	}
 	
+	/**
+	 * Get a tick result for the specified installation.
+	 *
+	  * @param tick the tick
+	 * @param inst_id the installation id
+	 * @param collection the name of the collection where the values are stored
+	 * @return the tick result for the specified installation
+	 */
 	public DBObject getTickResultForInstallation(int tick,
 			String inst_id, String collection) {
 		DBObject query = new BasicDBObject();
@@ -292,6 +341,14 @@ public class MongoResults implements DBResults{
 		return DBConn.getConn(dbname).getCollection(collection).findOne(query);
 	}
 	
+	/**
+	 * Gets an expected power tick result for the specified installation.
+	 *
+	 * @param tick the tick
+	 * @param inst_id the installation id
+	 * @param collection the name of the collection where the values are stored
+	 * @return the expected power tick result for the specified installation
+	 */
 	public DBObject getExpectedPowerTickResultForInstallation(int tick,
 			String inst_id, String collection) {
 		DBObject query = new BasicDBObject();
@@ -300,11 +357,8 @@ public class MongoResults implements DBResults{
 		return DBConn.getConn(dbname).getCollection(collection).findOne(query);
 	}
 	
-	/**
-	 * 
-	 * @param tick
-	 * @param p
-	 * @param q
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addAggregatedTickResult(int, double, double, java.lang.String)
 	 */
 	@Override
 	public void addAggregatedTickResult(int tick, double p, double q, String collection) {

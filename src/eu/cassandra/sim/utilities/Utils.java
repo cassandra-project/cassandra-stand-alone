@@ -23,13 +23,10 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-//import javax.ws.rs.core.HttpHeaders;
-//import javax.ws.rs.core.MediaType;
-//import javax.ws.rs.core.Response;
-
-
+/**
+ * Class containing utility methods.
+ */
 public class Utils {
-
 	public static String stackTraceToString(StackTraceElement[] s) {
 		String returnMessage = new String();
 		for(int i = 0; i < s.length; i++) {
@@ -37,7 +34,6 @@ public class Utils {
 		}
 		return returnMessage;
 	}
-
 
 	public static String hashcode (String message)
 	{
@@ -57,7 +53,6 @@ public class Utils {
 		return hash;
 	}
 
-
 	public static String readFile (String file) throws IOException
 	{
 		BufferedReader reader = new BufferedReader(new FileReader(file));
@@ -71,8 +66,5 @@ public class Utils {
 		reader.close();
 		return stringBuilder.toString();
 	}
-
-
-
 
 }

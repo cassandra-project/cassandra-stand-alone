@@ -17,9 +17,9 @@
 package eu.cassandra.sim.model_library;
 
 /**
+ * Class with various ready-to-use tables of values, for constructing Histogram distributions.
  * 
- * 
- * @author Fani A. Tzima (fani [at] iti [dot] gr)
+ *  @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  * 
  */
 public class DistributionsLibrary {

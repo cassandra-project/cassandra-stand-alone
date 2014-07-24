@@ -16,119 +16,94 @@
 */
 package eu.cassandra.sim.entities;
 
-import com.mongodb.BasicDBObject;
-
-// TODO: Auto-generated Javadoc
 /**
- * The Class Entity.
+ * An Entity used in the simulation.
  */
 public abstract class Entity {
 	
-	/** The id. */
+	/** The entity's id. */
 	protected String id;
 	
-	/** The name. */
+	/** The entity's name. */
 	protected String name;
 	
-	/** The description. */
+	/** The entity's description. */
 	protected String description;
 	
-	/** The type. */
+	/** The entity's type. */
 	protected String type;
 	
-	/** The parent id. */
+	/** The entity's parent id. */
 	protected String parentId;
 	
-	/**
-	 * To db object.
-	 *
-	 * @return the basic db object
-	 */
-	public abstract BasicDBObject toDBObject();
 	
 	/**
-	 * Gets the collection.
+	 * Sets the entity's id.
 	 *
-	 * @return the collection
-	 */
-	public abstract String getCollection();
-	
-	/**
-	 * Sets the parent id.
-	 *
-	 * @param aparent the new parent id
-	 */
-	public void setParentId(String aparent) {
-		parentId = aparent;
-	}
-	
-	/**
-	 * Sets the id.
-	 *
-	 * @param aid the new id
+	 * @param aid the new entity's id
 	 */
 	public void setId(String aid) {
 		id = aid;
 	}
 	
 	/**
-	 * Gets the id.
+	 * Gets the entity's id.
 	 *
-	 * @return the id
+	 * @return the entity's id
 	 */
 	public String getId() {
 		return id;
 	}
 	
 	/**
-	 * Sets the name.
+	 * Sets the entity's name.
 	 *
-	 * @param aname the new name
+	 * @param aname the new entity's name
 	 */
 	public void setName(String aname) {
 		name = aname;
 	}
 	
 	/**
-	 * Gets the name.
+	 * Gets the entity's name.
 	 *
-	 * @return the name
+	 * @return the entity's name
 	 */
 	public String getName() {
 		return name;
 	}
 	
 	/**
-	 * Sets the type.
+	 * Sets the entity's type.
 	 *
-	 * @param atype the new type
+	 * @param atype the new entity's type
 	 */
 	public void setType(String atype) {
 		type = atype;
 	}
 	
 	/**
-	 * Gets the type.
+	 * Gets the entity's type.
 	 *
-	 * @return the type
+	 * @return the entity's type
 	 */
 	public String getType() {
 		return type;
 	}
 	
 	/**
-	 * Sets the description.
+	 * Sets the entity's description.
 	 *
-	 * @param adescription the new description
+	 * @param adescription the new entity's description
 	 */
 	public void setDescription(String adescription) {
 		description = adescription;
 	}
 	
 	/**
-	 * Gets the description.
+	 * Gets the entity's description.
 	 *
-	 * @return the description
+	 * @return the entity's description
 	 */
 	public String getDescription() {
 		return description;

@@ -107,12 +107,6 @@ public class SetupFileParser {
 		
 	}
 	
-	public void parseFileForProperties()
-	{
-		String filename = "properties.txt";
-		parseFileForProperties(filename);	
-	}
-	
 	public void parseFileForProperties(String filename)
 	{
 		try 

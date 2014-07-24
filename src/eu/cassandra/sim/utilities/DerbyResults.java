@@ -24,23 +24,34 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.HashMap;
 
+// TODO: Auto-generated Javadoc
 /**
- * 
- * 
- *  @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
- * 
+ * The wrapper class for storing simulation output results in an Apache Derby database.
+ *
+ * @author Fani A. Tzima (fani [dot] tzima [at] iti [dot] gr)
  */
 public class DerbyResults implements DBResults{
 	
-	
+	/** The database name. */
 	private String dbname;
+	
+	/** The database connection. */
 	private Connection conn;
 	
+	/**
+	 * Instantiates a new DerbyResults wrapper object.
+	 *
+	 * @param adbname the target database name
+	 */
 	public DerbyResults(String adbname) {
  		dbname = adbname;
 	}
 	
-	public void createIndexes() {
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#createTablesAndIndexes()
+	 */
+	@Override
+	public void createTablesAndIndexes() {
 		conn = getConnection();
 		createTableAndIndex(COL_AGGRRESULTS, null, true);
 		createTableAndIndex(COL_AGGRRESULTS_HOURLY, null, true);
@@ -61,12 +72,10 @@ public class DerbyResults implements DBResults{
 	
 	}
 
-	/**
-	 * @param inst_id
-	 * @param maxPower
-	 * @param avgPower
-	 * @param energy
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addKPIs(java.lang.String, double, double, double, double, double)
 	 */
+	@Override
 	public void addKPIs(String inst_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		boolean first = false;
 		
@@ -126,6 +135,10 @@ public class DerbyResults implements DBResults{
 	
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addAppKPIs(java.lang.String, double, double, double, double, double)
+	 */
+	@Override
 	public void addAppKPIs(String app_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		String psQuery = "";
 		String tableName = COL_APPKPIS;
@@ -151,6 +164,10 @@ public class DerbyResults implements DBResults{
 		executeUpdateQuery(psQuery);
 	}
 	
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addActKPIs(java.lang.String, double, double, double, double, double)
+	 */
+	@Override
 	public void addActKPIs(String act_id, double maxPower, double avgPower, double energy, double cost, double co2) {
 		String psQuery = "";
 		String tableName = COL_ACTKPIS;
@@ -176,13 +193,10 @@ public class DerbyResults implements DBResults{
 		executeUpdateQuery(psQuery);
 	}
 	
-	/**
-	 * 
-	 * @param tick
-	 * @param inst_id
-	 * @param p
-	 * @param q
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addTickResultForInstallation(int, java.lang.String, double, double, java.lang.String)
 	 */
+	@Override
 	public void addTickResultForInstallation(int tick, String inst_id, double p, double q, String tableName) {
 		
 		double[] data = getData(tableName, tick, "inst_id", inst_id);
@@ -201,27 +215,45 @@ public class DerbyResults implements DBResults{
 		executeUpdateQuery(psQuery);
 	}
 	
-	public void addExpectedPowerTick(int tick, String id, double p, double q, String tableName) {
-		String psQuery = "insert into " + tableName + " values ('" + id + "', " + tick + ", " + p + ", " + q + ")";
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addExpectedPowerTick(int, java.lang.String, double, java.lang.String)
+	 */
+	@Override
+	public void addExpectedPowerTick(int tick, String id, double p, String tableName) {
+		String psQuery = "insert into " + tableName + " values ('" + id + "', " + tick + ", " + p + ", " + 0 + ")";
 		executeUpdateQuery(psQuery);		
 	}
 	
+	/**
+	 * Get a tick result for the specified installation.
+	 *
+	  * @param tick the tick
+	 * @param inst_id the installation id
+	 * @param tableName the name of the table where the values are stored
+	 * @return the tick result for the specified installation
+	 */
 	public ResultSet getTickResultForInstallation(int tick, String inst_id, String tableName) {
 		String query = "SELECT * FROM " + tableName + " WHERE inst_id='" + inst_id + "' AND tick=" + tick;
 		return executeSelectQuery(query);
 	}
 	
+	/**
+	 * Gets an expected power tick result for the specified installation.
+	 *
+	 * @param tick the tick
+	 * @param inst_id the installation id
+	 * @param tableName the name of the table where the values are stored
+	 * @return the expected power tick result for the specified installation
+	 */
 	public ResultSet getExpectedPowerTickResultForInstallation(int tick, String inst_id, String tableName) {
 		String query = "SELECT * FROM " + tableName + " WHERE inst_id='" + inst_id + "' AND tick=" + tick;
 		return executeSelectQuery(query);
 	}
 
-	/**
-	 * 
-	 * @param tick
-	 * @param p
-	 * @param q
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#addAggregatedTickResult(int, double, double, java.lang.String)
 	 */
+	@Override
 	public void addAggregatedTickResult(int tick, double p, double q, String tableName) {
 		double[] data = getData(tableName, tick, null, null);
 		
@@ -373,7 +405,7 @@ public class DerbyResults implements DBResults{
 			sqle = sqle.getNextException();
 		}
 	} 
-	
+
 	private void executeUpdateQuery(String query)
 	{	
 		PreparedStatement ps;
@@ -449,6 +481,9 @@ public class DerbyResults implements DBResults{
 		return pqData;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#getKPIs(java.lang.String)
+	 */
 	@Override
 	public HashMap<String, Double> getKPIs(String inst_id) {
 		HashMap<String, Double> result =  new  HashMap<String, Double>();
@@ -480,6 +515,9 @@ public class DerbyResults implements DBResults{
 		
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#getAppKPIs(java.lang.String)
+	 */
 	@Override
 	public HashMap<String, Double> getAppKPIs(String app_id) {
 		HashMap<String, Double> result =  new  HashMap<String, Double>();
@@ -501,6 +539,9 @@ public class DerbyResults implements DBResults{
 		return result;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.utilities.DBResults#getActKPIs(java.lang.String)
+	 */
 	@Override
 	public HashMap<String, Double> getActKPIs(String act_id) {
 		HashMap<String, Double> result =  new  HashMap<String, Double>();

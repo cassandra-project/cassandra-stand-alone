@@ -156,7 +156,7 @@ public abstract class Simulation {
 			m = new DerbyResults(dbname);
 		else
 			m = new MongoResults(dbname);
-		m.createIndexes();
+		m.createTablesAndIndexes();
 
 	}
 
@@ -905,7 +905,7 @@ public abstract class Simulation {
 				double[] act_exp = activity.calcExpPower();
 				for(int i = 0; i < act_exp.length; i++) {
 					inst_exp[i] += act_exp[i];
-					m.addExpectedPowerTick(i, activity.getId(), act_exp[i], 0, DBResults.COL_ACTRESULTS_EXP);
+					m.addExpectedPowerTick(i, activity.getId(), act_exp[i], DBResults.COL_ACTRESULTS_EXP);
 				}
 			}
 			// For every appliance that is a base load find mean value and add
@@ -925,11 +925,11 @@ public abstract class Simulation {
 
 			for(int i = 0; i < inst_exp.length; i++) {
 				aggr_exp[i] += inst_exp[i];
-				m.addExpectedPowerTick(i, installation.getId(), inst_exp[i], 0, DBResults.COL_INSTRESULTS_EXP);
+				m.addExpectedPowerTick(i, installation.getId(), inst_exp[i], DBResults.COL_INSTRESULTS_EXP);
 			}
 		}
 		for(int i = 0; i < aggr_exp.length; i++) 
-			m.addExpectedPowerTick(i, "aggr", aggr_exp[i], 0, DBResults.COL_AGGRRESULTS_EXP);
+			m.addExpectedPowerTick(i, "aggr", aggr_exp[i], DBResults.COL_AGGRRESULTS_EXP);
 
 		// Write installation results to csv file
 		if (!resources_path.endsWith("/"))

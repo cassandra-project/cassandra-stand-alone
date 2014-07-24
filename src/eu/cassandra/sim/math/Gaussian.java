@@ -17,7 +17,6 @@ package eu.cassandra.sim.math;
 
 import eu.cassandra.sim.utilities.Constants;
 
-// TODO: Auto-generated Javadoc
 /**
  * A Gaussian distribution.
  * 

@@ -1,5 +1,3 @@
-
-
 /*   
 Copyright 2011-2013 The Cassandra Consortium (cassandra-fp7.eu)
 
@@ -22,44 +20,37 @@ import java.net.UnknownHostException;
 
 import java.util.HashMap;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-
 import com.mongodb.DB;
 import com.mongodb.Mongo;
 import com.mongodb.MongoException;
 
+/**
+ * The connection to the MongoDB database.
+ */
 public class DBConn {
 
+	/** The database name. */
 	private static String DB_NAME = "test";
 
+	/** The database host. */
 	private static String DB_HOST = "localhost";
 
-	private static DBConn dbConn = new DBConn(true);
+	/** The database connection. */
+	private static DBConn dbConn = new DBConn();
 
-	private static HashMap<String,DB> dbRuns = new HashMap<String,DB>();
+	/** The runs. */
+	private static HashMap<String, DB> dbRuns = new HashMap<String,DB>();
 
+	/** The MongoDB instance. */
 	private Mongo m;
 
+	/** The database. */
 	private DB db;
-
-//	private DBConn() {
-//		try {
-//			InitialContext ic = new InitialContext();
-//			DB_NAME = (String) ic.lookup("java:/comp/env/mongo.db");
-//			DB_HOST = (String) ic.lookup("java:/comp/env/mongo.host.address");
-//			m = new Mongo(DB_HOST);
-//		} catch (UnknownHostException e) {
-//			e.printStackTrace();
-//		} catch (MongoException e) {
-//			e.printStackTrace();
-//		} catch (NamingException e) {
-//			e.printStackTrace();
-//		}
-//		db = m.getDB(DB_NAME);
-//	}
 	
-	private DBConn(boolean isStandAlone) {
+	/**
+	 * Instantiates a new database connection.
+	 */
+	private DBConn() {
 		try {
 			m = new Mongo(DB_HOST);
 		} catch (UnknownHostException e) {
@@ -70,10 +61,21 @@ public class DBConn {
 		db = m.getDB(DB_NAME);
 	}
 
+	/**
+	 * Gets the database connection.
+	 *
+	 * @return the database connection
+	 */
 	public static DB getConn() {
 		return dbConn.db;
 	}
-
+	
+	/**
+	 * Gets a connection to the specified database.
+	 *
+	 * @param dbname the database name
+	 * @return the database connection
+	 */
 	public static DB getConn(String dbname) {
 		if(dbname == null)
 			return getConn();

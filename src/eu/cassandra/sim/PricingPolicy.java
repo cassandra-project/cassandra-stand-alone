@@ -20,8 +20,6 @@ import java.util.Iterator;
 
 import eu.cassandra.sim.utilities.Constants;
 
-
-// TODO: Auto-generated Javadoc
 /**
  * A pricing policy to be used in the simulation.
  */

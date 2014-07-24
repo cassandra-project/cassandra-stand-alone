@@ -16,13 +16,11 @@
 
 package eu.cassandra.sim.utilities;
 
-import java.math.BigInteger;
-import java.security.SecureRandom;
 import java.util.Random;
 
 /**
- * Wrapper class around java.util.Random for easier universal handling and 
- * access.
+ * Wrapper class around java.util.Random for easier universal 
+ * handling and access.
  * 
  * @author Cassandra developers
  *
@@ -73,21 +71,6 @@ public class ORNG {
 	
 	public float nextFloat() {
 		return random.nextFloat();
-	}
-	
-	public double nextDoublePlusMinus() {
-		return 2 * random.nextDouble() - 1;
-	}
-	
-	public static void main(String[] args) {
-		ORNG orng = new ORNG();
-		System.out.println(orng.nextLong());
-		System.out.println(orng.nextInt());
-		System.out.println(orng.randomString());
-	}
-	
-	public String randomString() {
-		return new BigInteger(130, random).toString(32);
 	}
 
 }

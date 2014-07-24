@@ -1,7 +1,5 @@
 package eu.cassandra.sim.math.response;
 
-import java.net.UnknownHostException;
-import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -9,25 +7,39 @@ import java.util.Comparator;
 import java.util.Map;
 import java.util.TreeMap;
 
-import org.bson.types.ObjectId;
-
-import com.mongodb.BasicDBObject;
-import com.mongodb.DB;
-import com.mongodb.DBObject;
-import com.mongodb.Mongo;
-import com.mongodb.MongoException;
-
-//import eu.cassandra.server.mongo.MongoPricingPolicy;
 import eu.cassandra.sim.PricingPolicy;
-import eu.cassandra.sim.math.Gaussian;
 import eu.cassandra.sim.math.Histogram;
 import eu.cassandra.sim.math.ProbabilityDistribution;
 import eu.cassandra.sim.utilities.Constants;
 
+
+/**
+ *  Class implementing the "response" functionality for demand-response scenarios.
+ */
 public class Response {
 
 	private static final double SMALL_NUMBER = 0.0000001;
-
+	
+	public static Comparator<Pricing> comp = new Comparator<Pricing>() {
+		@Override
+		public int compare (Pricing poi1, Pricing poi2)
+		{
+			return Double.compare(poi1.getGainRatio(), poi1.getGainRatio());
+		}
+	};
+	
+	/**
+	 * Respond with a modified Probability Distribution, based on an initial Probability Distribution, 
+	 * the actual and baseline pricing policies, the response type and the person's attibutes.
+	 *
+	 * @param pd the initila initial Probability Distribution
+	 * @param policy the pricing policy
+	 * @param baseline the baseline pricing policy
+	 * @param awareness the person's awareness
+	 * @param sensitivity the person's sensitivity
+	 * @param responseType the response type
+	 * @return the modified Probability Distribution
+	 */
 	public static ProbabilityDistribution respond(ProbabilityDistribution pd,
 			PricingPolicy policy,
 			PricingPolicy baseline,
@@ -67,8 +79,7 @@ public class Response {
 		return retPd;
 	}
 
-
-	public static double[] shiftingNormal (double[] values,
+	private static double[] shiftingNormal (double[] values,
 			double[] basicScheme, double[] newScheme,
 			double awareness, double sensitivity) {
 		double[] result = Arrays.copyOf(values, values.length);
@@ -80,8 +91,7 @@ public class Response {
 		return result;
 	}
 
-
-	public static double[] shiftingDiscrete (double[] values,
+	private static double[] shiftingDiscrete (double[] values,
 			double[] basicScheme, double[] newScheme,
 			double awareness, double sensitivity) {
 		double[] result = Arrays.copyOf(values, values.length);
@@ -91,7 +101,7 @@ public class Response {
 		return result;
 	}
 
-	public static double[] shiftingOptimal (double[] values,
+	private static double[] shiftingOptimal (double[] values,
 			double[] basicScheme, double[] newScheme,
 			double awareness, double sensitivity) {
 		double[] result = Arrays.copyOf(values, values.length);
@@ -101,7 +111,7 @@ public class Response {
 		return result;
 	}
 
-	public static double[] movingAverage (double[] values, Incentive incentive,
+	private static double[] movingAverage (double[] values, Incentive incentive,
 			double awareness, double sensitivity)
 	{
 		// Initialize the auxiliary variables.
@@ -328,8 +338,7 @@ public class Response {
 		return values;
 	}
 
-
-	public static double[] discreteOptimal(double[] values, PricingVector pricing,
+	private static double[] discreteOptimal(double[] values, PricingVector pricing,
 			double awareness, double sensitivity)
 	{
 		// Initialize the auxiliary variables.
@@ -456,8 +465,7 @@ public class Response {
 
 	}
 
-
-	public static double[] discreteAverage (double[] values, PricingVector pricing,
+	private static double[] discreteAverage (double[] values, PricingVector pricing,
 			double awareness, double sensitivity)
 	{
 
@@ -523,16 +531,7 @@ public class Response {
 		return values;
 	}
 
-	public static Comparator<Pricing> comp = new Comparator<Pricing>() {
-		@Override
-		public int compare (Pricing poi1, Pricing poi2)
-		{
-			return Double.compare(poi1.getGainRatio(), poi1.getGainRatio());
-		}
-	};
-
-
-	public static double estimateEnergyRatio (double[] basicScheme, double[] newScheme) {
+	private static double estimateEnergyRatio (double[] basicScheme, double[] newScheme) {
 		double baseEnergy = 0;
 		double newEnergy = 0;
 		for (int i = 0; i < basicScheme.length; i++) {
@@ -543,14 +542,13 @@ public class Response {
 		return energyRatio;
 	}
 
-	// Daily times
-	public static double[] shiftingDaily (double values[], double[] basicScheme, double[] newScheme,
+	private static double[] shiftingDaily (double values[], double[] basicScheme, double[] newScheme,
 			double awareness, double sensitivity) {
 		double energyRatio = estimateEnergyRatio(basicScheme, newScheme);
 		return shiftingDailyPreview(values, energyRatio, awareness, sensitivity);
 	}
 
-	public static double[] shiftingDailyPreview (double values[], double energyRatio, double awareness, double sensitivity) {
+	private static double[] shiftingDailyPreview (double values[], double energyRatio, double awareness, double sensitivity) {
 		double[] temp = Arrays.copyOf(values, values.length);
 		double diff = (energyRatio - 1) * (awareness * sensitivity);
 		double[] result;
@@ -667,32 +665,5 @@ public class Response {
 
 		return Arrays.copyOf(result, result.length);
 	}
-
-//	public static void main(String[] args) throws UnknownHostException, MongoException, ParseException {
-//		Gaussian g = new Gaussian(840, 100);
-//		g.precompute(0, 1439, 1440);
-//		System.out.println(Arrays.toString(g.getHistogram()));
-//		String prc_id = "52aa0f7f712edbccc313a1b3";
-//		DBObject query = new BasicDBObject(); // A query
-//		query.put("_id", new ObjectId(prc_id));
-//		Mongo m = new Mongo("cassandra.iti.gr");
-//		DB db = m.getDB("test");
-//		DBObject pricingPolicy = db.getCollection(MongoPricingPolicy.COL_PRICING).findOne(query);
-//		PricingPolicy pp1 = new PricingPolicy(pricingPolicy);
-//		System.out.println(pp1.getTOUArray().length);
-//		System.out.println(Arrays.toString(pp1.getTOUArray()));
-//		prc_id = "52aa161b712edbccc31438f2";
-//		query = new BasicDBObject(); // A query
-//		query.put("_id", new ObjectId(prc_id));
-//		m = new Mongo("cassandra.iti.gr");
-//		db = m.getDB("test");
-//		pricingPolicy = db.getCollection(MongoPricingPolicy.COL_PRICING).findOne(query);
-//		PricingPolicy pp2 = new PricingPolicy(pricingPolicy);
-//		System.out.println(Arrays.toString(pp2.getTOUArray()));
-//		System.out.println(pp2.getTOUArray().length);
-//		System.out.println(Arrays.toString(respond(g, pp2, pp1, 1, 1, "Normal").getHistogram()));
-//	}
-
-
 
 }
