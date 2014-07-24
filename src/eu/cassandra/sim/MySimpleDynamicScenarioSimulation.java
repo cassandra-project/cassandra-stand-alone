@@ -365,7 +365,7 @@ public class MySimpleDynamicScenarioSimulation extends Simulation{
 		TreeMap<String,Double> personGen = new TreeMap<String,Double>();				
 		personGen.put("person1", 0.7);
 		personGen.put("person2", 0.3);
-		this.demographics = new DemographicData("SimpleDynamic_2insts", "Demographics for the simple dynamic scenario.", "Demographics type", numOfInstallations, instGen, personGen, applGen);
+		this.demographics = new DemographicData("SimpleDynamic_10insts", "Demographics for the simple dynamic scenario.", "Demographics type", numOfInstallations, instGen, personGen, applGen);
 		
   		return installations;
 	}
