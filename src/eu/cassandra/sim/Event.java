@@ -13,30 +13,48 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
 package eu.cassandra.sim;
-
 
 import eu.cassandra.sim.entities.appliances.Appliance;
 import eu.cassandra.sim.entities.people.Activity;
 
+/**
+ * A simulation event.
+ */
 public class Event implements Comparable<Event> {
-	
-	
+
+
+	/** The event's hashcode. */
 	public String hashcode;
-	
+
+	/** The Constant SWITCH_OFF. */
 	public final static int SWITCH_OFF = 0;
-	
+
+	/** The Constant SWITCH_ON. */
 	public final static int SWITCH_ON = 1; 
-	
+
+	/** The event's tick. */
 	private int tick;
-	
+
+	/** The event's action. */
 	private int action;
-	
+
+	/** The event's appliance. */
 	private Appliance app;
-	
+
+	/** The event's activity. */
 	private Activity act;
-	
+
+	/**
+	 * Instantiates a new event.
+	 *
+	 * @param atick the event's tick
+	 * @param aaction the event's action
+	 * @param aapp the event's appliance
+	 * @param ahashcode the event's hashcode
+	 * @param aact the event's activity
+	 */
 	public Event(int atick, int aaction, Appliance aapp, String ahashcode, Activity aact) {
 		tick = atick;
 		action = aaction;
@@ -44,48 +62,76 @@ public class Event implements Comparable<Event> {
 		hashcode = ahashcode;
 		act = aact;
 	}
-	
+
+	/**
+	 * Gets the event's appliance.
+	 *
+	 * @return the event's appliance
+	 */
 	public Appliance getAppliance() {
 		return app;
 	}
-	
+
+	/**
+	 * Gets the event's activity.
+	 *
+	 * @return the event's activity
+	 */
 	public Activity getActivity() {
 		return act;
 	}
-	
+
+	/**
+	 * Gets the event's action.
+	 *
+	 * @return the event's action
+	 */
 	public int getAction() {
 		return action;
 	}
-	
+
+	/**
+	 * Gets the event's tick.
+	 *
+	 * @return the event's tick
+	 */
 	public int getTick() {
 		return tick;
 	}
-	
+
+	/**
+	 * Apply the event.
+	 *
+	 * @return true, if successful
+	 */
 	public boolean apply() {
 		switch(action) {
-			case SWITCH_ON:
-				if(!app.isInUse()) {
-					app.turnOn(tick, hashcode, act);
-					return true;
-				} else {
-					System.out.println("WARNING: Tried to switch on appliance while on.");
-					return false;
-				}
-			case SWITCH_OFF:
-//				System.out.println(app.getId() + " " + app.getName() + " " + app.getWho());
-				if(app.isInUse() && app.getWho().equalsIgnoreCase(hashcode)) {
-					app.turnOff();
-					return true;
-				} else if(!app.getWho().equalsIgnoreCase(hashcode)){
-					System.out.println("WARNING: Someone else tried to switch off " +
-							"appliance while off.");
-					return false;
-				}
-			default:
+		case SWITCH_ON:
+			if(!app.isInUse()) {
+				app.turnOn(tick, hashcode, act);
+				return true;
+			} else {
+				System.out.println("WARNING: Tried to switch on appliance while on.");
 				return false;
+			}
+		case SWITCH_OFF:
+			//				System.out.println(app.getId() + " " + app.getName() + " " + app.getWho());
+			if(app.isInUse() && app.getWho().equalsIgnoreCase(hashcode)) {
+				app.turnOff();
+				return true;
+			} else if(!app.getWho().equalsIgnoreCase(hashcode)){
+				System.out.println("WARNING: Someone else tried to switch off " +
+						"appliance while off.");
+				return false;
+			}
+		default:
+			return false;
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 */
 	@Override
 	public int compareTo(Event o) {
 		if(tick < o.getTick()) {

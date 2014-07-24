@@ -17,35 +17,50 @@ package eu.cassandra.sim.math;
 
 import eu.cassandra.sim.utilities.Constants;
 
-
 /**
+ * A Mixture of Gaussian Distributions.
+ *
  * @author Antonios Chrysopoulos
  */
 public class GaussianMixtureModels implements ProbabilityDistribution
 {
+	/** The weights of the Gaussian distributions. */
 	protected double[] pi;
+	/** The Gaussian distributions. */
 	protected Gaussian[] gaussians;
 
-	// For precomputation
-	protected boolean precomputed;
+	/** The number of bins. */
 	protected int numberOfBins;
+	
+	/** The starting point of the bins for the precomputed values. */
 	protected double precomputeFrom;
+	
+	/** The ending point of the bins for the precomputed values. */
 	protected double precomputeTo;
+	
+	/** The histogram values. */
 	protected double[] histogram;
+	
+	/** A boolean variable that shows if the values of the distribution histogram has been precomputed or not. */
+	protected boolean precomputed;
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getType()
+	 */
 	@Override
 	public String getType()
 	{
 		return "GMM";
 	}
 
-
 	/**
-	 * Constructor 
-	 * @param mu
-	 *          Mean value of the Gaussian distribution.
-	 * @param s
-	 *          Standard deviation of the Gaussian distribution.
+	 * Instantiates a new GaussianMixtureModels distribution.
+	 *
+	 * @param n the number of Gaussian distributions
+	 * @param pi the weights of the Gaussian distributions
+	 * @param mu  the mean values of the Gaussian distributions
+	 * @param s  the standard deviation sof the Gaussian distributions
+	 * @param precomputed whether the values of the distribution histogram will be precomputed or not
 	 */
 	public GaussianMixtureModels (int n, double[] pi, double[] mu, double[] s, boolean precomputed)
 	{
@@ -60,6 +75,11 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 			precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);   
 	}
 
+	/**
+	 * Instantiates a new GaussianMixtureModels distribution, by copying another one of the same type.
+	 *
+	 * @param source the source GaussianMixtureModels distribution
+	 */
 	public GaussianMixtureModels (GaussianMixtureModels source)
 	{
 		int n = source.gaussians.length;
@@ -76,6 +96,9 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 		histogram =source.histogram.clone();
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getDescription()
+	 */
 	@Override
 	public String getDescription ()
 	{
@@ -83,12 +106,9 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 		return description;
 	}
 
-	@Override
-	public int getNumberOfParameters ()
-	{
-		return 3 * pi.length;
-	}
-
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#precompute(double, double, int)
+	 */
 	@Override
 	public void precompute (double startValue, double endValue, int nBins)
 	{
@@ -114,6 +134,9 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 		precomputed = true;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getProbability(double)
+	 */
 	@Override
 	public double getProbability (double x)
 	{
@@ -124,6 +147,9 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 		return sum;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getPrecomputedProbability(double)
+	 */
 	@Override
 	public double getPrecomputedProbability (double x)
 	{
@@ -138,6 +164,9 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 		return histogram[bin];
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getPrecomputedBin(double)
+	 */
 	@Override
 	public int getPrecomputedBin (double rn)
 	{
@@ -157,6 +186,9 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 		return -1;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getHistogram()
+	 */
 	@Override
 	public double[] getHistogram ()
 	{
@@ -168,6 +200,52 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 		return histogram;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getProbabilityGreater(int)
+	 */
+	@Override
+	public double getProbabilityGreater (int x)
+	{
+		double prob = 0;
+
+		int start = x;
+
+		for (int i = start+1; i < histogram.length; i++)
+			prob += histogram[i];
+
+		return prob;
+	}
+
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getParameter(int)
+	 */
+	@Override
+	public double getParameter (int index)
+	{
+		return 0;
+	}
+
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#setParameter(int, double)
+	 */
+	@Override
+	public void setParameter (int index, double value)
+	{
+	}
+
+	
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getNumberOfParameters()
+	 */
+	@Override
+	public int getNumberOfParameters() {
+		return 3 * pi.length;
+	}
+	
+
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#status()
+	 */
 	@Override
 	public void status ()
 	{
@@ -190,28 +268,6 @@ public class GaussianMixtureModels implements ProbabilityDistribution
 		System.out.println();
 	}
 
-	@Override
-	public double getProbabilityGreater (int x)
-	{
-		double prob = 0;
 
-		int start = x;
-
-		for (int i = start+1; i < histogram.length; i++)
-			prob += histogram[i];
-
-		return prob;
-	}
-
-	@Override
-	public double getParameter (int index)
-	{
-		return 0;
-	}
-
-	@Override
-	public void setParameter (int index, double value)
-	{
-	}
 
 }

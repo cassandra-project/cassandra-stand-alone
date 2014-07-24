@@ -17,31 +17,31 @@ package eu.cassandra.sim.math;
 
 import eu.cassandra.sim.utilities.Constants;
 
-
 /**
+ * A uniform probability distribution.
+ * 
  * @author Antonios Chrysopoulos
  */
 public class Uniform implements ProbabilityDistribution {
 	/**
-	 * The name of the Normal distribution.
+	 * The name of the distribution.
 	 */
 	private String name = "";
 
 	/**
-	 * The type of the Normal distribution.
+	 * The type of the distribution.
 	 */
 	private String type = "";
 
 	/**
-	 * A boolean variable that shows if the values of the Normal distribution
-	 * histogram
-	 * has been precomputed or not.
+	 * A boolean variable that shows if the values of the distribution
+	 * histogram has been precomputed or not.
 	 */
 	protected boolean precomputed;
 
 	/**
 	 * A variable presenting the number of bins that are created for the histogram
-	 * containing the values of the Normal distribution.
+	 * containing the values of the distribution.
 	 */
 	protected int numberOfBins;
 
@@ -56,8 +56,7 @@ public class Uniform implements ProbabilityDistribution {
 	protected double precomputeTo;
 
 	/**
-	 * An array containing the probabilities of each bin precomputed for the
-	 * Normal distribution.
+	 * An array containing the probabilities of each bin precomputed for the distribution.
 	 */
 	protected double[] histogram;
 
@@ -67,16 +66,13 @@ public class Uniform implements ProbabilityDistribution {
 	 */
 	private double[] greaterProbability;
 
-	/** The id of the distribution as given by the Cassandra server. */
-	private String distributionID = "";
-
+	
 	/**
-	 * @param start
-	 *          Starting value of the Uniform distribution.
-	 * @param end
-	 *          Ending value of the Uniform distribution.
-	 * @param startTime
-	 *          variable that shows if this is a start time distribution or not.
+	 * Instantiates a new uniform distribution.
+	 *
+	 * @param start          Starting value of the Uniform distribution.
+	 * @param end          Ending value of the Uniform distribution.
+	 * @param startTime          variable that shows if this is a start time distribution or not.
 	 */
 	public Uniform (double start, double end, boolean startTime)
 	{
@@ -97,6 +93,11 @@ public class Uniform implements ProbabilityDistribution {
 		estimateGreaterProbability();
 	}
 
+	/**
+	 * Instantiates a new uniform distribution, by copying another one of the same type.
+	 *
+	 * @param source the source uniform distribution
+	 */
 	public Uniform (Uniform source)
 	{
 		name = "Generic";
@@ -109,12 +110,18 @@ public class Uniform implements ProbabilityDistribution {
 		histogram = source.histogram.clone();
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getType()
+	 */
 	@Override
 	public String getType ()
 	{
 		return "Uniform";
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getDescription()
+	 */
 	@Override
 	public String getDescription ()
 	{
@@ -122,12 +129,18 @@ public class Uniform implements ProbabilityDistribution {
 		return description;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getNumberOfParameters()
+	 */
 	@Override
 	public int getNumberOfParameters ()
 	{
 		return 2;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getParameter(int)
+	 */
 	@Override
 	public double getParameter (int index)
 	{
@@ -142,6 +155,9 @@ public class Uniform implements ProbabilityDistribution {
 
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#setParameter(int, double)
+	 */
 	@Override
 	public void setParameter (int index, double value)
 	{
@@ -157,6 +173,9 @@ public class Uniform implements ProbabilityDistribution {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getProbability(double)
+	 */
 	@Override
 	public double getProbability (double x)
 	{
@@ -171,6 +190,9 @@ public class Uniform implements ProbabilityDistribution {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getPrecomputedProbability(double)
+	 */
 	@Override
 	public double getPrecomputedProbability (double x)
 	{
@@ -183,6 +205,9 @@ public class Uniform implements ProbabilityDistribution {
 		return histogram[(int) (x - precomputeFrom)];
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getPrecomputedBin(double)
+	 */
 	@Override
 	public int getPrecomputedBin (double rn)
 	{
@@ -201,11 +226,9 @@ public class Uniform implements ProbabilityDistribution {
 		return -1;
 	}
 
-	public void precompute (int endValue)
-	{
-		precompute(0, endValue, endValue + 1);
-	}
-
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getHistogram()
+	 */
 	@Override
 	public double[] getHistogram ()
 	{
@@ -217,11 +240,19 @@ public class Uniform implements ProbabilityDistribution {
 		return histogram;
 	}
 
+	/**
+	 * Gets an array that contains the probabilities that the distribution has value over a threshold.
+	 *
+	 * @return the array that contains the probabilities that the distribution has value over a threshold
+	 */
 	public double[] getGreaterProbability ()
 	{
 		return greaterProbability;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#status()
+	 */
 	@Override
 	public void status ()
 	{
@@ -236,24 +267,19 @@ public class Uniform implements ProbabilityDistribution {
 
 	}
 
+	/**
+	 * Gets the name of the distribution.
+	 *
+	 * @return the name of the distribution
+	 */
 	public String getName ()
 	{
 		return name;
 	}
 
-	public double getProbability (int x)
-	{
-		if (x < 0)
-			return 0;
-		else
-			return histogram[x];
-	}
-
-	public double getProbabilityLess (int x)
-	{
-		return 1 - getProbabilityGreater(x);
-	}
-
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getProbabilityGreater(int)
+	 */
 	@Override
 	public double getProbabilityGreater (int x)
 	{
@@ -267,6 +293,9 @@ public class Uniform implements ProbabilityDistribution {
 		return prob;
 	}
 
+	/**
+	 * Estimate greater probability.
+	 */
 	private void estimateGreaterProbability ()
 	{
 		greaterProbability = new double[histogram.length];
@@ -276,25 +305,24 @@ public class Uniform implements ProbabilityDistribution {
 
 	}
 
-	public double getPrecomputedProbability (int x)
-	{
-		if (!precomputed)
-			return -1;
-		else
-			return histogram[x];
-
-	}
-
-
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#precompute(double, double, int)
+	 */
 	@Override
 	public void precompute (double startValue, double endValue, int nBins) {
 		precompute((int)startValue, (int) endValue, nBins);
 	}
 
 
+	/**
+	 * Precompute.
+	 *
+	 * @param startValue the start value
+	 * @param endValue the end value
+	 * @param nBins the n bins
+	 */
 	public void precompute (int startValue, int endValue, int nBins)
 	{
-		// TODO Auto-generated method stub
 		numberOfBins = nBins;
 		histogram = new double[nBins];
 

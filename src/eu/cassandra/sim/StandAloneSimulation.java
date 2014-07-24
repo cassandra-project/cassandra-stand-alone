@@ -352,12 +352,6 @@ public class StandAloneSimulation extends Simulation {
   			double powerPricing = Double.parseDouble((sfp.propPricing.getProperty("powerPrice") != null ? sfp.propPricing.getProperty("powerPrice").trim() : "0.0"));
   			builderPP.energyPowerPricing(contractedCapacity, energyPricing, powerPricing);
   			break;
-  		case "MaximumPowerPricing":
-  			double maximumPower = Double.parseDouble((sfp.propPricing.getProperty("maximumPower") != null ? sfp.propPricing.getProperty("maximumPower").trim() : "0.0"));
-  			double energyPricing2 = Double.parseDouble((sfp.propPricing.getProperty("energyPrice") != null ? sfp.propPricing.getProperty("energyPrice").trim() : "0.0"));
-  			double powerPricing2 =Double.parseDouble((sfp.propPricing.getProperty("powerPrice") != null ? sfp.propPricing.getProperty("powerPrice").trim() : "0.0"));
-  			builderPP.maximumPowerPricing(energyPricing2, powerPricing2, maximumPower);
-  			break;
   		case "AllInclusivePricing":
   			int fixedCost = Integer.parseInt((sfp.propPricing.getProperty("fixedCost") != null ? sfp.propPricing.getProperty("fixedCost").trim() : "0"));
   			double additionalCost = Double.parseDouble((sfp.propPricing.getProperty("additionalCost") != null ? sfp.propPricing.getProperty("additionalCost").trim() : "0.0"));

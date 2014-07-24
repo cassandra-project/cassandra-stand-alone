@@ -12,22 +12,47 @@
    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
    See the License for the specific language governing permissions and
    limitations under the License.
-*/
+ */
 package eu.cassandra.sim;
 
+/**
+ * A level-price pair, used in pricing policies.
+ */
 public class Level {
-	
+
+	/** The price. */
 	private double price;
-	
+
+	/** The level. */
 	private double level;
-	
+
+	/**
+	 * Instantiates a new level-price pair.
+	 *
+	 * @param price2 the price
+	 * @param level2 the level
+	 */
 	public Level(double price2, double level2) {
 		price = price2;
 		level = level2;
 	}
-	
-	public double getPrice() { return price; }
-	
-	public double getLevel() { return level; }
+
+	/**
+	 * Gets the price.
+	 *
+	 * @return the price
+	 */
+	public double getPrice() { 
+		return price; 
+	}
+
+	/**
+	 * Gets the level.
+	 *
+	 * @return the level
+	 */
+	public double getLevel() { 
+		return level; 
+	}
 
 }

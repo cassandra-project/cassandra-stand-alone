@@ -16,6 +16,8 @@
 package eu.cassandra.sim.math;
 
 /**
+ * A probability distribution. 
+ * 
  * @author Christos Diou <diou at iti dot gr>
  */
 public interface ProbabilityDistribution

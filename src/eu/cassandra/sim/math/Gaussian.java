@@ -17,34 +17,65 @@ package eu.cassandra.sim.math;
 
 import eu.cassandra.sim.utilities.Constants;
 
+// TODO: Auto-generated Javadoc
 /**
+ * A Gaussian distribution.
+ * 
  * @author Christos Diou <diou at iti dot gr>
  */
 public class Gaussian implements ProbabilityDistribution
 {
+	/** The mean of the normal distribution. */
 	protected double mean;
+	/** The standard deviation of the normal distribution. */
 	protected double sigma;
 
-	// For precomputation
-	protected boolean precomputed;
+	/** The number of bins. */
 	protected int numberOfBins;
+	
+	/** The starting point of the bins for the precomputed values. */
 	protected double precomputeFrom;
+	
+	/** The ending point of the bins for the precomputed values. */
 	protected double precomputeTo;
+	
+	/** The histogram values. */
 	protected double[] histogram;
+	
+	/** A boolean variable that shows if the values of the distribution histogram has been precomputed or not. */
+	protected boolean precomputed;
 
-	// return phi(x) = standard Gaussian pdf
+	
+	/**
+	 * Return phi(x) standard Gaussian pdf.
+	 *
+	 * @param x the x
+	 * @return the phi(x)
+	 */
 	private static double phi (double x)
 	{
 		return Math.exp(-(x * x) / 2) / Math.sqrt(2 * Math.PI);
 	}
 
-	// return phi(x, mu, s) = Gaussian pdf with mean mu and stddev s
+	/**
+	 * Return phi(x, mu, s) for a Gaussian pdf with the given mean and standard deviation.
+	 *
+	 * @param x the x
+	 * @param mu the mean
+	 * @param s the standard deviation
+	 * @return the phi(x, mu, s)
+	 */
 	private static double phi (double x, double mu, double s)
 	{
 		return phi((x - mu) / s) / s;
 	}
 
-	// return Phi(z) = standard Gaussian cdf using Taylor approximation
+	/**
+	 * Return Phi(z) for a standard Gaussian cdf using the Taylor approximation.
+	 *
+	 * @param z the z
+	 * @return the Phi(z)
+	 */
 	private static double bigPhi (double z)
 	{
 		if (z < -8.0) {
@@ -63,7 +94,14 @@ public class Gaussian implements ProbabilityDistribution
 		return 0.5 + sum * phi(z);
 	}
 
-	// return Phi(z, mu, s) = Gaussian cdf with mean mu and stddev s
+	/**
+	 * Return Phi(z, mu, s) for a Gaussian cdf with the given mean and standard deviation, using the Taylor approximation.
+	 *
+	 * @param z the z
+	 * @param mu the mean 
+	 * @param s the standard deviation
+	 * @return the Phi(z, mu, s) 
+	 */
 	protected static double bigPhi (double z, double mu, double s)
 	{
 		return bigPhi((z - mu) / s);
@@ -71,10 +109,11 @@ public class Gaussian implements ProbabilityDistribution
 
 
 	/**
-	 * @param mu
-	 *          Mean value of the Gaussian distribution.
-	 * @param s
-	 *          Standard deviation of the Gaussian distribution.
+	 * Instantiates a new Gaussian distribution.
+	 *
+	 * @param mu       Mean value of the Gaussian distribution.
+	 * @param s          Standard deviation of the Gaussian distribution.
+	 * @param precomputed whether the values of the distribution histogram will be precomputed or not
 	 */
 	public Gaussian (double mu, double s, boolean precomputed)
 	{
@@ -85,6 +124,11 @@ public class Gaussian implements ProbabilityDistribution
 			precompute(0, Constants.MINUTES_PER_DAY-1, Constants.MINUTES_PER_DAY);
 	}
 
+	/**
+	 * Instantiates a new Gaussian distribution, by copying another one of the same type.
+	 *
+	 * @param source the source Gaussian distribution
+	 */
 	public Gaussian (Gaussian source)
 	{
 		mean = source.mean;
@@ -96,6 +140,9 @@ public class Gaussian implements ProbabilityDistribution
 		histogram = source.histogram.clone();
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getDescription()
+	 */
 	@Override
 	public String getDescription()
 	{
@@ -103,18 +150,27 @@ public class Gaussian implements ProbabilityDistribution
 		return description;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getType()
+	 */
 	@Override
 	public String getType()
 	{
 		return "Gaussian";
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getNumberOfParameters()
+	 */
 	@Override
 	public int getNumberOfParameters ()
 	{
 		return 2;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getParameter(int)
+	 */
 	@Override
 	public double getParameter (int index)
 	{
@@ -129,6 +185,9 @@ public class Gaussian implements ProbabilityDistribution
 
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#setParameter(int, double)
+	 */
 	@Override
 	public void setParameter (int index, double value)
 	{
@@ -144,6 +203,9 @@ public class Gaussian implements ProbabilityDistribution
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#precompute(double, double, int)
+	 */
 	@Override
 	public void precompute (double startValue, double endValue, int nBins)
 	{
@@ -172,12 +234,18 @@ public class Gaussian implements ProbabilityDistribution
 		precomputed = true;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getProbability(double)
+	 */
 	@Override
 	public double getProbability (double x)
 	{
 		return phi(x, mean, sigma);
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getPrecomputedProbability(double)
+	 */
 	@Override
 	public double getPrecomputedProbability (double x)
 	{
@@ -192,6 +260,9 @@ public class Gaussian implements ProbabilityDistribution
 		return histogram[bin];
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getPrecomputedBin(double)
+	 */
 	@Override
 	public int getPrecomputedBin (double rn)
 	{
@@ -211,6 +282,9 @@ public class Gaussian implements ProbabilityDistribution
 		return -1;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#status()
+	 */
 	@Override
 	public void status ()
 	{
@@ -227,6 +301,9 @@ public class Gaussian implements ProbabilityDistribution
 
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getHistogram()
+	 */
 	@Override
 	public double[] getHistogram ()
 	{
@@ -238,6 +315,9 @@ public class Gaussian implements ProbabilityDistribution
 		return histogram;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getProbabilityGreater(int)
+	 */
 	@Override
 	public double getProbabilityGreater (int x)
 	{

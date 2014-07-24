@@ -16,15 +16,28 @@
  */
 package eu.cassandra.sim.math;
 
-
 public class Histogram implements ProbabilityDistribution{
 
+	/** The number of bins. */
 	protected int numberOfBins;
+	
+	/** The starting point of the bins for the precomputed values. */
 	protected double precomputeFrom;
+	
+	/** The ending point of the bins for the precomputed values. */
 	protected double precomputeTo;
+	
+	/** The histogram values. */
 	protected double[] histogram;
+	
+	/** A boolean variable that shows if the values of the distribution histogram has been precomputed or not. */
 	protected boolean precomputed;
 
+	/**
+	 * Instantiates a new histogram of the given size.
+	 *
+	 * @param size the size
+	 */
 	public Histogram(int size){
 
 		precomputeFrom = 0;
@@ -34,6 +47,9 @@ public class Histogram implements ProbabilityDistribution{
 		precomputed = false;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getType()
+	 */
 	@Override
 	public String getType()
 	{
@@ -41,7 +57,9 @@ public class Histogram implements ProbabilityDistribution{
 	}
 
 	/**
-	 * Constructor. Takes a set of values and put them in the histogram.
+	 * Instantiates a new histogram, based on the provided set of values.
+	 *
+	 * @param values the set of values
 	 */
 	public Histogram(double[] values){
 
@@ -53,6 +71,11 @@ public class Histogram implements ProbabilityDistribution{
 
 	}
 
+	/**
+	 * Instantiates a new histogram, by copying another one.
+	 *
+	 * @param source the source histogram
+	 */
 	public Histogram(Histogram source) {
 		precomputeFrom = source.precomputeFrom;
 		precomputeTo = source.precomputeTo;
@@ -61,44 +84,62 @@ public class Histogram implements ProbabilityDistribution{
 		precomputed = source.precomputed;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getDescription()
+	 */
 	@Override
 	public String getDescription() {
 		String description = "Histogram Frequency Probability Density function";
 		return description;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getNumberOfParameters()
+	 */
 	@Override
 	public int getNumberOfParameters() {
 		return 1;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getParameter(int)
+	 */
 	@Override
 	public double getParameter(int index) {
 		return numberOfBins;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#setParameter(int, double)
+	 */
 	@Override
-	public void setParameter(int index, double value) {
-		// TODO Auto-generated method stub
+	public void setParameter(int index, double value) {	}
 
-	}
-
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#precompute(double, double, int)
+	 */
 	@Override
-	public void precompute(double startValue, double endValue, int nBins) {
-		// TODO Auto-generated method stub
+	public void precompute(double startValue, double endValue, int nBins) {	}
 
-	}
-
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getProbability(double)
+	 */
 	@Override
 	public double getProbability(double x) {
 		return histogram[(int)x];
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getPrecomputedProbability(double)
+	 */
 	@Override
 	public double getPrecomputedProbability(double x) {
 		return histogram[(int)x];
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getPrecomputedBin(double)
+	 */
 	@Override
 	public int getPrecomputedBin (double rn)
 	{
@@ -117,12 +158,18 @@ public class Histogram implements ProbabilityDistribution{
 		return -1;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getHistogram()
+	 */
 	@Override
 	public double[] getHistogram() {
 
 		return histogram;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#getProbabilityGreater(int)
+	 */
 	@Override
 	public double getProbabilityGreater (int x)
 	{
@@ -136,6 +183,9 @@ public class Histogram implements ProbabilityDistribution{
 		return prob;
 	}
 
+	/* (non-Javadoc)
+	 * @see eu.cassandra.sim.math.ProbabilityDistribution#status()
+	 */
 	@Override
 	public void status() {
 		System.out.print("Histogram");
